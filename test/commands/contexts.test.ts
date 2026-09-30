@@ -288,6 +288,47 @@ describe('setContext', () => {
             'goog:chromeOptions': { debuggerAddress: 'localhost:10900' },
         });
     });
+
+    it('carries the session implicit wait over to the new Chromedriver session', async () => {
+        const { Chromedriver } = await import('appium-chromedriver');
+        const mockCommand = vi.fn().mockResolvedValue(null);
+        (Chromedriver as unknown as ReturnType<typeof vi.fn>).mockImplementationOnce(() => ({
+            start: vi.fn().mockResolvedValue(undefined),
+            stop: vi.fn(),
+            proxyReq: vi.fn(),
+            jwproxy: { command: mockCommand },
+            sessionId: vi.fn().mockReturnValue('mock-session-id'),
+        }));
+
+        mockedCdpRequest
+            .mockResolvedValueOnce(MOCK_VERSION_RESPONSE)
+            .mockResolvedValueOnce(MOCK_PAGES);
+        const driver = createMockDriver();
+        driver.implicitWaitMs = 5000;
+        await contexts.setContext.call(driver, 'WEBVIEW_page1');
+
+        expect(mockCommand).toHaveBeenCalledWith('/timeouts', 'POST', { implicit: 5000 });
+    });
+
+    it('leaves Chromedriver timeouts alone when no implicit wait is set', async () => {
+        const { Chromedriver } = await import('appium-chromedriver');
+        const mockCommand = vi.fn();
+        (Chromedriver as unknown as ReturnType<typeof vi.fn>).mockImplementationOnce(() => ({
+            start: vi.fn().mockResolvedValue(undefined),
+            stop: vi.fn(),
+            proxyReq: vi.fn(),
+            jwproxy: { command: mockCommand },
+            sessionId: vi.fn().mockReturnValue('mock-session-id'),
+        }));
+
+        mockedCdpRequest
+            .mockResolvedValueOnce(MOCK_VERSION_RESPONSE)
+            .mockResolvedValueOnce(MOCK_PAGES);
+        const driver = createMockDriver();
+        await contexts.setContext.call(driver, 'WEBVIEW_page1');
+
+        expect(mockCommand).not.toHaveBeenCalled();
+    });
 });
 
 describe('getDriverExecutable', () => {
