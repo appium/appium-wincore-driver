@@ -85,7 +85,7 @@ jobs:
             exit 1
           }
 
-      - name: Set up WinForm Combo fixture app
+      - name: Set up fixture apps
         shell: powershell
         run: |
           # test/e2e/helpers/session.ts resolves fixture apps from a TEST_APPS_DIR env
@@ -100,6 +100,10 @@ jobs:
           }
 
           dotnet publish (Join-Path $testAppsDir 'winform-combo\WinformCombo.csproj') -c Release -o (Join-Path $testAppsDir 'winform-combo\bin')
+
+          # msaa-legacy-controls: MSAA-only fixture for standard-accessibility-values.e2e.ts.
+          # .NET Framework 4.7.2 WinForms + hosted WPF, no third-party dependency or licence.
+          dotnet build (Join-Path $testAppsDir 'msaa-legacy-controls\MsaaLegacyControls.csproj') -c Debug -p:Platform=x64
 
       - name: Start Appium and run E2E tests
         shell: powershell
@@ -168,7 +172,8 @@ jobs:
             test/e2e/xpath-axes.e2e.ts `
             test/e2e/xpath-boolean-attributes.e2e.ts `
             test/e2e/no-runtimeid-element.e2e.ts `
-            test/e2e/extension-screen-recording.e2e.ts
+            test/e2e/extension-screen-recording.e2e.ts `
+            test/e2e/standard-accessibility-values.e2e.ts
 
       - name: Publish E2E test report
         if: always()

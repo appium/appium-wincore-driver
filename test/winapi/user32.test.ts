@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isExtendedKeyVk } from '../../lib/winapi/user32';
+import { isExtendedKeyVk, sendsAsUnicodePacket } from '../../lib/winapi/user32';
 import { VirtualKey } from '../../lib/winapi/types/virtualkey';
 
 describe('isExtendedKeyVk', () => {
@@ -44,5 +44,27 @@ describe('isExtendedKeyVk', () => {
 
     it('returns false for undefined (scan-code-based events have no vk)', () => {
         expect(isExtendedKeyVk(undefined)).toBe(false);
+    });
+});
+
+describe('sendsAsUnicodePacket', () => {
+    // executeKeys pauses after Unicode-packet keystrokes (VK_PACKET): queued packets can turn
+    // into the last character, and keys behind them can be lost, when the target falls behind.
+    it.each(['a', 'z', '0', '9'])('is false for scan-code character %s', (char) => {
+        expect(sendsAsUnicodePacket(char)).toBe(false);
+    });
+
+    it.each([' ', ',', '!', 'A', 'é', '\u{1F600}'])('is true for %j (no scan code)', (char) => {
+        expect(sendsAsUnicodePacket(char)).toBe(true);
+    });
+
+    it('is true for every character with forceUnicode', () => {
+        expect(sendsAsUnicodePacket('a', true)).toBe(true);
+        expect(sendsAsUnicodePacket('5', true)).toBe(true);
+    });
+
+    it('is false for WebDriver special keys (virtual keys)', () => {
+        expect(sendsAsUnicodePacket('')).toBe(false); // Key.BACKSPACE
+        expect(sendsAsUnicodePacket('', true)).toBe(false); // Key.TAB
     });
 });

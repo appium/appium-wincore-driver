@@ -845,6 +845,33 @@ export function keyUp(char: string, forceUnicode: boolean = false): void {
     sendKeyInput(char, false, forceUnicode);
 }
 
+/**
+ * Whether typing this character sends a KEYEVENTF_UNICODE packet (VK_PACKET) rather than a
+ * scan code or virtual key — mirrors {@link charToKeyboardEvents}.
+ * @param char - The character to type.
+ * @param forceUnicode - Whether Unicode input is forced for every character.
+ * @returns True when the character goes out as a Unicode packet.
+ */
+export function sendsAsUnicodePacket(char: string, forceUnicode: boolean = false): boolean {
+    if ((char.charCodeAt(0) & 0xF000) === 0xE000) {
+        return false; // WebDriver special keys map to virtual keys
+    }
+    return forceUnicode || !/[a-z0-9]/.test(char);
+}
+
+/**
+ * Types one character: its key-down and key-up events in a single SendInput call, so the
+ * pair is inserted into the input stream atomically.
+ * @param char - The character to type.
+ * @param forceUnicode - Send it as a KEYEVENTF_UNICODE packet even if it has a scan code.
+ */
+export function typeKey(char: string, forceUnicode: boolean = false): void {
+    const events = [...charToKeyboardEvents(char, true, forceUnicode), ...charToKeyboardEvents(char, false, forceUnicode)];
+    const returnCode = SendInput(events.length, events, sizeof(INPUT));
+
+    assertSuccessSendInputReturnCode(returnCode);
+}
+
 // NumLock is a toggle key — GetKeyState's low-order bit reflects its current
 // on/off state (as opposed to GetAsyncKeyState's high-order "is physically
 // held" bit, which doesn't apply to a toggle).

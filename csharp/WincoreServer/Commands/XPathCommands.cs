@@ -99,7 +99,7 @@ internal sealed class UiaXmlModel
         ("ProcessId", UIA.ProcessIdPropertyId, false),
     };
 
-    private static IUIAutomationCacheRequest BuildCacheRequest(IUIAutomation automation)
+    private static IUIAutomationCacheRequest BuildCacheRequest(IUIAutomation automation, bool includeLegacy)
     {
         var req = automation.CreateCacheRequest();
         foreach (var (_, pid, _) in Attributes)
@@ -109,6 +109,10 @@ internal sealed class UiaXmlModel
         req.AddProperty(UIA.ControlTypePropertyId);
         req.AddProperty(UIA.RuntimeIdPropertyId);
         req.AddProperty(UIA.BoundingRectanglePropertyId);
+        foreach (var pid in includeLegacy ? StandardValues.BasePropertyIds.Concat(StandardValues.LegacyPropertyIds) : StandardValues.BasePropertyIds)
+        {
+            req.AddProperty(pid);
+        }
         req.TreeScope = TreeScope.Element;
         req.TreeFilter = automation.CreateTrueCondition();
         req.AutomationElementMode = UIA.AutomationElementModeFull;
@@ -155,12 +159,13 @@ internal sealed class UiaXmlModel
         try
         {
             if (Environment.GetEnvironmentVariable("UIA_NO_CACHE") == "1") throw new InvalidOperationException("UIA_NO_CACHE"); // perf A/B
-            var req = BuildCacheRequest(state.Automation);
+            var req = BuildCacheRequest(state.Automation, includeLegacy: true);
+            var walk = new StandardValues.WalkRequests(req, BuildCacheRequest(state.Automation, includeLegacy: false));
             var trueCond = state.Automation.CreateTrueCondition();
             // Cache one level at a time via FindAllBuildCache(Children) — see
             // PageSourceCommands for why a full-subtree cache request is avoided.
             var cachedRoot = root.FindFirstBuildCache(TreeScope.Element, trueCond, req);
-            return BuildFromCachedRoot(cachedRoot, perf, req, trueCond);
+            return BuildFromCachedRoot(cachedRoot, perf, req, trueCond, walk);
         }
         catch (Exception ex)
         {
@@ -189,7 +194,8 @@ internal sealed class UiaXmlModel
         IUIAutomationElement? cachedRoot,
         Diagnostics.PerfCounters? perf,
         IUIAutomationCacheRequest req,
-        IUIAutomationCondition trueCond)
+        IUIAutomationCondition trueCond,
+        StandardValues.WalkRequests? walk = null)
     {
         if (cachedRoot == null)
             throw new InvalidOperationException("FindFirstBuildCache(root) returned null.");
@@ -197,7 +203,7 @@ internal sealed class UiaXmlModel
         var doc = new XmlDocument();
         var elements = new Dictionary<string, IUIAutomationElement>();
         int counter = 0;
-        var rootXml = BuildElementCached(doc, cachedRoot, elements, ref counter, perf, req, trueCond)
+        var rootXml = BuildElementCached(doc, cachedRoot, elements, ref counter, perf, walk ?? StandardValues.WalkRequests.Single(req), trueCond)
             ?? doc.CreateElement("DummyRoot");
         doc.AppendChild(rootXml);
         return new UiaXmlModel(doc, elements);
@@ -209,7 +215,7 @@ internal sealed class UiaXmlModel
         Dictionary<string, IUIAutomationElement> elements,
         ref int counter,
         Diagnostics.PerfCounters? perf,
-        IUIAutomationCacheRequest req,
+        StandardValues.WalkRequests walk,
         IUIAutomationCondition trueCond)
     {
         var perfSw = perf != null ? Stopwatch.StartNew() : null;
@@ -227,6 +233,10 @@ internal sealed class UiaXmlModel
                 try { xml.SetAttribute(name, Sanitize(ReadCached(element, pid, isBool))); }
                 catch { /* skip a single unreadable attribute */ }
             }
+
+            StandardValues.Apply(xml, pid => element.GetCachedPropertyValue(pid),
+                StandardValues.IsPassword(() => element.GetCachedPropertyValue(UIA.IsPasswordPropertyId)),
+                ReadCached(element, UIA.FrameworkIdPropertyId, false));
 
             try
             {
@@ -258,7 +268,8 @@ internal sealed class UiaXmlModel
 
         try
         {
-            var children = element.FindAllBuildCache(TreeScope.Children, trueCond, req);
+            var childReq = walk.ForChildrenOf(element);
+            var children = element.FindAllBuildCache(TreeScope.Children, trueCond, childReq);
             var len = children?.Length ?? 0;
 
             if (perfSw != null)
@@ -270,9 +281,9 @@ internal sealed class UiaXmlModel
             for (var i = 0; i < len; i++)
             {
                 IUIAutomationElement child;
-                try { child = children!.GetElement(i); }
+                try { child = walk.Upgrade(children!.GetElement(i), childReq); }
                 catch { continue; }
-                var childXml = BuildElementCached(doc, child, elements, ref counter, perf, req, trueCond);
+                var childXml = BuildElementCached(doc, child, elements, ref counter, perf, walk, trueCond);
                 if (childXml != null) xml.AppendChild(childXml);
             }
         }
@@ -304,6 +315,11 @@ internal sealed class UiaXmlModel
                 try { xml.SetAttribute(name, Sanitize(ReadLive(element, pid, isBool))); }
                 catch { /* skip a single unreadable attribute */ }
             }
+
+            var isPassword = StandardValues.IsPassword(() => element.GetCurrentPropertyValue(UIA.IsPasswordPropertyId));
+            string? frameworkId;
+            try { frameworkId = element.get_CurrentFrameworkId(); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { frameworkId = null; }
+            StandardValues.Apply(xml, element.GetCurrentPropertyValue, isPassword, frameworkId);
 
             try
             {
@@ -414,19 +430,6 @@ internal sealed class UiaXmlModel
         catch { return false; }
     }
 
-    private static string Sanitize(string s)
-    {
-        if (string.IsNullOrEmpty(s)) return s;
-        var sb = new StringBuilder(s.Length);
-        foreach (var ch in s)
-        {
-            if (ch == '\t' || ch == '\n' || ch == '\r' ||
-                (ch >= 0x20 && ch <= 0xD7FF) ||
-                (ch >= 0xE000 && ch <= 0xFFFD))
-            {
-                sb.Append(ch);
-            }
-        }
-        return sb.ToString();
-    }
+    private static string Sanitize(string s) => StandardValues.Sanitize(s);
+
 }

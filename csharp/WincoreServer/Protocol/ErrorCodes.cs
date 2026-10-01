@@ -12,4 +12,5 @@ public static class ErrorCodes
     public const string ProcessError = "ProcessError";
     public const string FileSystemError = "FileSystemError";
     public const string InvalidSelector = "InvalidSelector";
+    public const string InvalidElementState = "InvalidElementState";
 }

@@ -10,6 +10,23 @@ import {
     clearNotepad,
 } from './helpers/session.js';
 
+// Typed input is delivered to the target asynchronously — with forceUnicode each character
+// is its own KEYEVENTF_UNICODE keystroke, so on a busy runner the last few can still be in
+// Notepad's queue when the command returns. Poll for the expected text instead of reading
+// once; returns the last text seen so a timeout still fails with a readable assertion.
+async function waitForText(element: WebdriverIO.Element, expected: string, timeout = 5000): Promise<string> {
+    let text = '';
+    try {
+        await element.waitUntil(async () => {
+            text = await element.getText();
+            return text.includes(expected);
+        }, { timeout, interval: 100 });
+    } catch {
+        // fall through — the caller's expect() reports what was actually there
+    }
+    return text;
+}
+
 // VirtualKeyCode for Delete
 const VK_DELETE = 0x2e;
 // VirtualKeyCode for Shift
@@ -46,8 +63,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
             const textArea = await getNotepadTextArea(notepad);
             await textArea.click();
             await notepad.executeScript('windows: keys', [{ actions: [{ text: 'hello world' }, { pause: 100 }] }]);
-            const text = await textArea.getText();
-            expect(text).toContain('hello world');
+            expect(await waitForText(textArea, 'hello world')).toContain('hello world');
         });
 
         it('types text with forceUnicode: true into Notepad', async () => {
@@ -58,8 +74,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
                 actions: [{ text: 'unicodetest' }, { pause: 100 }],
                 forceUnicode: true,
             }]);
-            const text = await textArea.getText();
-            expect(text).toContain('unicodetest');
+            expect(await waitForText(textArea, 'unicodetest')).toContain('unicodetest');
         });
 
         it('sends virtualKeyCode for Delete key to clear Notepad input', async () => {

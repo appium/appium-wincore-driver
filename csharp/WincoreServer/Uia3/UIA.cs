@@ -138,6 +138,25 @@ public static class UIA
     public const int HeadingLevelPropertyId = 30173;
     public const int IsDialogPropertyId = 30174;
     public const int ExpandCollapseStatePropertyId = 30070;
+    public const int ValueValuePropertyId = 30045;
+    public const int ValueIsReadOnlyPropertyId = 30046;
+    public const int SelectionItemIsSelectedPropertyId = 30079;
+    public const int IsLegacyIAccessiblePatternAvailablePropertyId = 30090;
+    public const int LegacyIAccessibleNamePropertyId = 30092;
+    public const int LegacyIAccessibleValuePropertyId = 30093;
+    public const int LegacyIAccessibleDescriptionPropertyId = 30094;
+    public const int LegacyIAccessibleRolePropertyId = 30095;
+    public const int LegacyIAccessibleStatePropertyId = 30096;
+    public const int LegacyIAccessibleDefaultActionPropertyId = 30100;
+    public const int ProviderDescriptionPropertyId = 30107;
+
+    // MSAA state / selection flags (oleacc.h), read through LegacyIAccessible.State.
+    public const int StateSystemSelected = 0x2;
+    public const int StateSystemExpanded = 0x200;
+    public const int StateSystemCollapsed = 0x400;
+    public const int StateSystemProtected = 0x20000000;
+    public const int SelFlagTakeFocus = 0x1;
+    public const int SelFlagTakeSelection = 0x2;
 
     // IUIAutomationCacheRequest.AutomationElementMode
     public const int AutomationElementModeNone = 0;
@@ -521,27 +540,16 @@ public interface IUIAutomation
     void RemoveFocusChangedEventHandler();
     void RemoveAllEventHandlers();
 
-    [return: MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_I4)]
-    int[] IntSafeArrayToNativeArray([MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_I4)] int[] intArray, out IntPtr array);
-
-    [return: MarshalAs(UnmanagedType.Struct)]
-    object IntNativeArrayToSafeArray(IntPtr array, int arrayCount);
-
-    int CheckNotSupported([MarshalAs(UnmanagedType.Struct)] object value);
-
-    object ReservedNotSupportedValue { [return: MarshalAs(UnmanagedType.Struct)] get; }
-    object ReservedMixedAttributeValue { [return: MarshalAs(UnmanagedType.Struct)] get; }
-
-    [return: MarshalAs(UnmanagedType.Interface)]
-    IUIAutomationElement ElementFromIAccessible([MarshalAs(UnmanagedType.Interface)] object accessible, int childId);
-
-    [return: MarshalAs(UnmanagedType.Interface)]
-    IUIAutomationElement ElementFromIAccessibleBuildCache([MarshalAs(UnmanagedType.Interface)] object accessible, int childId, IUIAutomationCacheRequest cacheRequest);
+    // The header continues with IntNativeArrayToSafeArray, IntSafeArrayToNativeArray,
+    // RectToVariant, … ElementFromIAccessibleBuildCache. None are used, and declaring
+    // them out of order put every one on the wrong vtable slot, so the interface stops
+    // here — a prefix is safe because undeclared slots are never called. Re-add from
+    // UIAutomationClient.h in exact order if needed (UiaInteropTests enforces it).
 }
 
 // ----- Patterns ---------------------------------------------------------
 
-[ComImport, Guid("FB377FBE-8EA6-46D5-9C73-6499CAD4B1A3"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+[ComImport, Guid("FB377FBE-8EA6-46D5-9C73-6499642D3059"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IUIAutomationInvokePattern
 {
     void Invoke();
@@ -550,18 +558,31 @@ public interface IUIAutomationInvokePattern
 [ComImport, Guid("828055AD-355B-4435-86D5-3B51C14A9B1B"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IUIAutomationLegacyIAccessiblePattern
 {
+    // Member order is the vtable order of UIAutomationClient.h — do not reorder.
     void Select(int flagsSelect);
     void DoDefaultAction();
     void SetValue([MarshalAs(UnmanagedType.LPWStr)] string szValue);
-    [return: MarshalAs(UnmanagedType.Interface)] object GetIAccessible();
     int CurrentChildId { get; }
     [return: MarshalAs(UnmanagedType.BStr)] string get_CurrentName();
     [return: MarshalAs(UnmanagedType.BStr)] string get_CurrentValue();
+    [return: MarshalAs(UnmanagedType.BStr)] string get_CurrentDescription();
     int CurrentRole { get; }
     int CurrentState { get; }
     [return: MarshalAs(UnmanagedType.BStr)] string get_CurrentHelp();
     [return: MarshalAs(UnmanagedType.BStr)] string get_CurrentKeyboardShortcut();
+    [return: MarshalAs(UnmanagedType.Interface)] IUIAutomationElementArray GetCurrentSelection();
     [return: MarshalAs(UnmanagedType.BStr)] string get_CurrentDefaultAction();
+    int CachedChildId { get; }
+    [return: MarshalAs(UnmanagedType.BStr)] string get_CachedName();
+    [return: MarshalAs(UnmanagedType.BStr)] string get_CachedValue();
+    [return: MarshalAs(UnmanagedType.BStr)] string get_CachedDescription();
+    int CachedRole { get; }
+    int CachedState { get; }
+    [return: MarshalAs(UnmanagedType.BStr)] string get_CachedHelp();
+    [return: MarshalAs(UnmanagedType.BStr)] string get_CachedKeyboardShortcut();
+    [return: MarshalAs(UnmanagedType.Interface)] IUIAutomationElementArray GetCachedSelection();
+    [return: MarshalAs(UnmanagedType.BStr)] string get_CachedDefaultAction();
+    [return: MarshalAs(UnmanagedType.Interface)] object GetIAccessible();
 }
 
 [ComImport, Guid("94CF8058-9B8D-4AB9-8BFD-4CD0A33C8C70"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -582,7 +603,7 @@ public interface IUIAutomationValuePattern
     int CachedIsReadOnly { get; }
 }
 
-[ComImport, Guid("0E0D7C4C-3F80-11D9-8B6C-00065B84C5EA"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+[ComImport, Guid("59213F4F-7346-49E5-B120-80555987A148"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 public interface IUIAutomationRangeValuePattern
 {
     void SetValue(double val);

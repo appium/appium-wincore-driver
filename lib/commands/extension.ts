@@ -24,7 +24,9 @@ import {
     mouseMoveAbsolute,
     mouseScroll,
     mouseUp,
-    sendKeyboardEvents
+    sendKeyboardEvents,
+    sendsAsUnicodePacket,
+    typeKey,
 } from '../winapi/user32';
 
 const PLATFORM_COMMAND_PREFIX = 'windows:';
@@ -255,6 +257,26 @@ async function waitForCollapsed(this: AppiumWincoreDriver, elementId: string): P
     return true;
 }
 
+// The server raises InvalidElementState when a verified expand/collapse left a reported
+// state unchanged (e.g. an MSAA grid group row that never opens). ALT+Down is a combo-box
+// keyboard trick: sending it to a grid row or tree item does something unrelated and
+// masks the failure, so only a ComboBox still gets the keyboard fallback; anything else
+// surfaces the error. An unreadable control type also surfaces it — never send keys blind.
+// The server only raises InvalidElementState for MSAA-backed elements (real patterns are
+// trusted), so for a ComboBox this means its MSAA default action did not open it within the
+// verification budget; ALT+Down is the remaining lever.
+async function shouldSurfaceStateError(this: AppiumWincoreDriver, err: unknown, elementId: string): Promise<boolean> {
+    if (!(err instanceof errors.InvalidElementStateError)) {
+        return false;
+    }
+    try {
+        const controlType = await this.sendCommand('getProperty', { elementId, property: 'ControlType' });
+        return controlType !== 'ComboBox';
+    } catch {
+        return true;
+    }
+}
+
 /**
  * Expands an element via the UIA ExpandCollapse pattern, verifying the resulting
  * `ExpandCollapseState` and falling back to an ALT+Down keyboard action if the pattern call
@@ -277,6 +299,9 @@ export async function patternExpand(this: AppiumWincoreDriver, element: Element)
         }
         this.log.info('[patternExpand] expandElement reported success but ExpandCollapseState never became Expanded, falling back to ALT+Down.');
     } catch (err: any) {
+        if (await shouldSurfaceStateError.call(this, err, elementId)) {
+            throw err;
+        }
         const msg = String(err?.message ?? err);
         this.log.info(`[patternExpand] expandElement failed (${msg}), falling back to ALT+Down.`);
     }
@@ -303,6 +328,9 @@ export async function patternCollapse(this: AppiumWincoreDriver, element: Elemen
         }
         this.log.info('[patternCollapse] collapseElement reported success but ExpandCollapseState never left Expanded, falling back to ALT+Down.');
     } catch (err: any) {
+        if (await shouldSurfaceStateError.call(this, err, elementId)) {
+            throw err;
+        }
         const msg = String(err?.message ?? err);
         this.log.info(`[patternCollapse] collapseElement failed (${msg}), falling back to ALT+Down.`);
     }
@@ -656,12 +684,23 @@ export async function executeKeys(this: AppiumWincoreDriver, keyActions: { actio
                     keyUp(key, keyActions.forceUnicode);
                 }
             } else {
-                keyDown(key, keyActions.forceUnicode);
-                keyUp(key, keyActions.forceUnicode);
+                typeKey(key, keyActions.forceUnicode);
+                // A KEYEVENTF_UNICODE keystroke (VK_PACKET) does not carry its character in
+                // the queued message: the target looks it up from the most recent packet when
+                // it translates the key. If the app falls behind (new Notepad right after a
+                // space), queued packets all turn into the last character ("hello ddddd") and
+                // keys behind them get lost ("hello orld"). Give the target a moment after
+                // each packet; scan-code keys ([a-z0-9]) never needed it and stay fast.
+                if (sendsAsUnicodePacket(key, keyActions.forceUnicode)) {
+                    await sleep(UNICODE_PACKET_SETTLE_MS);
+                }
             }
         }
     }
 }
+
+/** Pause after each Unicode-packet keystroke. Measured in new Notepad: 5 ms and 15 ms still lost keys, 30 ms lost none in 90 runs. */
+const UNICODE_PACKET_SETTLE_MS = 30;
 
 async function getElementPos(driver: AppiumWincoreDriver, elementId: string, offsetX?: number, offsetY?: number): Promise<[number, number]> {
     const exists = await driver.sendCommand('lookupElement', { elementId }) as boolean;

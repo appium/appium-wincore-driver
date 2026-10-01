@@ -45,6 +45,14 @@ export function propertyCondition(property: string, value: unknown): ConditionDt
         'isdialog': 'IsDialog',
         'sizeofset': 'SizeOfSet',
         'positioninset': 'PositionInSet',
+        'value': 'Value',
+        'legacyvalue': 'LegacyValue',
+        'legacyname': 'LegacyName',
+        'legacydescription': 'LegacyDescription',
+        'legacyrole': 'LegacyRole',
+        'legacystate': 'LegacyState',
+        'legacydefaultaction': 'LegacyDefaultAction',
+        'providerdescription': 'ProviderDescription',
     };
 
     const normalized = propertyMap[property.toLowerCase()] ?? property;

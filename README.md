@@ -10,6 +10,11 @@ Key advantages over WinAppDriver:
 
 - Faster XPath evaluation against the live UIA tree
 - RawView element support (elements hidden from ContentView/ControlView)
+- Standard accessibility values (`Value`, `LegacyValue`, …) on every
+  element, so content that MSAA-based grids (DevExpress, DataGridView,
+  VB6, Delphi) hide behind placeholder names is locatable without a
+  plugin. `windows: select` / `expand` / `collapse` check they took
+  effect. See [API.md](API.md#standard-accessibility-values)
 - Reliable text input independent of the active keyboard layout
 - WebView2, Chrome, and Edge embedded content via CDP
 - Internet Explorer 11 automation via built-in IE DOM Bridge

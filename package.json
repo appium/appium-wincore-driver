@@ -35,7 +35,10 @@
     "postinstall": "node scripts/postinstall.js",
     "pack:dist": "node scripts/pack-dist.js"
   },
-  "author": "Automate The Planet",
+  "author": "verisoft-ai",
+  "contributors": [
+    "Yuri Schwab (https://github.com/y-schwab)"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
