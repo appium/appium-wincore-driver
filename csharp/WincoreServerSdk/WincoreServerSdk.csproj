@@ -16,7 +16,7 @@
     <Version>1.1.0</Version>
     <PackageId>WincoreServerSdk</PackageId>
     <Description>Plugin contract for WincoreServer (appium-wincore-driver): ITreeProvider, IServerPlugin, and the shared locator/xpath types a server plugin compiles against.</Description>
-    <Authors>Automate The Planet</Authors>
+    <Authors>verisoft-ai, Yuri Schwab</Authors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
