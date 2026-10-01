@@ -177,14 +177,23 @@ describe('windows: pattern extension commands', () => {
         it('scrolls an off-screen font list item into view: IsOffscreen flips to false', async () => {
             const comboBox = await charmap.$('~105');
             await charmap.executeScript('windows: expand', [comboBox]);
-            await charmap.pause(200);
 
-            const items = await charmap.$$('//ListItem').getElements();
-            expect(items.length).toBeGreaterThan(20);
+            // Don't assume where the popup's viewport sits: Charmap remembers the last
+            // selected font (the ComboBox test below selects one), so the list can open
+            // scrolled anywhere — the last item is not necessarily off-screen. Wait for the
+            // popup to lay out, then target whichever items it reports off-screen.
+            let offscreen: WebdriverIO.Element[] = [];
+            await charmap.waitUntil(
+                async () => {
+                    const all = await charmap.$$('//ListItem').getElements();
+                    if (all.length <= 20) {return false;}
+                    offscreen = await charmap.$$('//ListItem[@IsOffscreen="true"]').getElements();
+                    return offscreen.length > 0;
+                },
+                { timeout: 10_000, timeoutMsg: 'font list never reported an off-screen item' }
+            );
 
-            // Pick an item far enough down the list that the combo's viewport
-            // doesn't already show it.
-            const target = items[items.length - 1];
+            const target = offscreen[offscreen.length - 1];
             const wasOffscreen = await target.getAttribute('IsOffscreen');
             expect(String(wasOffscreen).toLowerCase()).toBe('true');
 
