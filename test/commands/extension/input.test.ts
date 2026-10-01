@@ -8,11 +8,19 @@ import { createMockDriver } from '../../fixtures/driver';
 vi.mock('../../../lib/winapi/user32', () => ({
     keyDown: vi.fn(),
     keyUp: vi.fn(),
+    typeKey: vi.fn(),
+    // Same rule as the real one: [a-z0-9] go as scan codes unless forceUnicode.
+    sendsAsUnicodePacket: vi.fn((char: string, forceUnicode = false) => forceUnicode || !/[a-z0-9]/.test(char)),
     mouseDown: vi.fn(),
     mouseUp: vi.fn(),
     mouseMoveAbsolute: vi.fn().mockResolvedValue(undefined),
     mouseScroll: vi.fn(),
     sendKeyboardEvents: vi.fn(),
+}));
+
+vi.mock('../../../lib/util', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../../../lib/util')>()),
+    sleep: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('executeKeys', () => {
@@ -40,12 +48,39 @@ describe('executeKeys', () => {
         expect(driver.sendPowerShellCommand).not.toHaveBeenCalled();
     });
 
-    it('handles text action', async () => {
+    it('types each text character as one down+up keystroke', async () => {
         const driver = createMockDriver() as any;
-        const { keyDown, keyUp } = await import('../../../lib/winapi/user32');
-        await executeKeys.call(driver, { actions: { text: 'a' }, forceUnicode: false });
-        expect(keyDown).toHaveBeenCalled();
-        expect(keyUp).toHaveBeenCalled();
+        const { typeKey, keyDown, keyUp } = await import('../../../lib/winapi/user32');
+        await executeKeys.call(driver, { actions: { text: 'ab' }, forceUnicode: false });
+        expect(typeKey).toHaveBeenNthCalledWith(1, 'a', false);
+        expect(typeKey).toHaveBeenNthCalledWith(2, 'b', false);
+        expect(keyDown).not.toHaveBeenCalled();
+        expect(keyUp).not.toHaveBeenCalled();
+    });
+
+    it('sends only key-down for a text action with down: true', async () => {
+        const driver = createMockDriver() as any;
+        const { typeKey, keyDown, keyUp } = await import('../../../lib/winapi/user32');
+        await executeKeys.call(driver, { actions: { text: 'a', down: true }, forceUnicode: false });
+        expect(keyDown).toHaveBeenCalledWith('a', false);
+        expect(keyUp).not.toHaveBeenCalled();
+        expect(typeKey).not.toHaveBeenCalled();
+    });
+
+    it('pauses after Unicode-packet characters only (space, punctuation), not scan-code letters', async () => {
+        const driver = createMockDriver() as any;
+        const { sleep } = await import('../../../lib/util');
+        await executeKeys.call(driver, { actions: { text: 'hello world!' }, forceUnicode: false });
+        // ' ' and '!' are VK_PACKET keystrokes; the ten letters are scan codes.
+        expect(sleep).toHaveBeenCalledTimes(2);
+        expect(sleep).toHaveBeenCalledWith(30);
+    });
+
+    it('pauses after every character with forceUnicode', async () => {
+        const driver = createMockDriver() as any;
+        const { sleep } = await import('../../../lib/util');
+        await executeKeys.call(driver, { actions: { text: 'abc' }, forceUnicode: true });
+        expect(sleep).toHaveBeenCalledTimes(3);
     });
 
     it('handles virtualKeyCode action', async () => {

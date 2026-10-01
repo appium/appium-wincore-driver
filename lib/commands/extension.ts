@@ -24,7 +24,9 @@ import {
     mouseMoveAbsolute,
     mouseScroll,
     mouseUp,
-    sendKeyboardEvents
+    sendKeyboardEvents,
+    sendsAsUnicodePacket,
+    typeKey,
 } from '../winapi/user32';
 
 const PLATFORM_COMMAND_PREFIX = 'windows:';
@@ -682,12 +684,23 @@ export async function executeKeys(this: AppiumWincoreDriver, keyActions: { actio
                     keyUp(key, keyActions.forceUnicode);
                 }
             } else {
-                keyDown(key, keyActions.forceUnicode);
-                keyUp(key, keyActions.forceUnicode);
+                typeKey(key, keyActions.forceUnicode);
+                // A KEYEVENTF_UNICODE keystroke (VK_PACKET) does not carry its character in
+                // the queued message: the target looks it up from the most recent packet when
+                // it translates the key. If the app falls behind (new Notepad right after a
+                // space), queued packets all turn into the last character ("hello ddddd") and
+                // keys behind them get lost ("hello orld"). Give the target a moment after
+                // each packet; scan-code keys ([a-z0-9]) never needed it and stay fast.
+                if (sendsAsUnicodePacket(key, keyActions.forceUnicode)) {
+                    await sleep(UNICODE_PACKET_SETTLE_MS);
+                }
             }
         }
     }
 }
+
+/** Pause after each Unicode-packet keystroke. Measured in new Notepad: 5 ms and 15 ms still lost keys, 30 ms lost none in 90 runs. */
+const UNICODE_PACKET_SETTLE_MS = 30;
 
 async function getElementPos(driver: AppiumWincoreDriver, elementId: string, offsetX?: number, offsetY?: number): Promise<[number, number]> {
     const exists = await driver.sendCommand('lookupElement', { elementId }) as boolean;
