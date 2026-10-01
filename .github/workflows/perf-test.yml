@@ -26,7 +26,7 @@ jobs:
       - name: Checkout test apps
         uses: actions/checkout@v6
         with:
-          repository: verisoft-ai/appium-windows2-test-apps
+          repository: verisoft-ai/appium-wincore-test-apps
           path: appium-wincore-test-apps
 
       - uses: actions/setup-node@v6

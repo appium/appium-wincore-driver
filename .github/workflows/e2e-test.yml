@@ -13,6 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Fixture apps live in their own repo. Only the fixtures the listed e2e files need
+      # are built (see "Build test fixtures").
+      - name: Checkout test apps
+        uses: actions/checkout@v6
+        with:
+          repository: verisoft-ai/appium-wincore-test-apps
+          path: appium-wincore-test-apps
+
       - uses: actions/setup-node@v6
         with:
           node-version: '24.x'
@@ -22,6 +30,12 @@ jobs:
 
       - name: Build driver
         run: npm run build
+
+      # msaa-legacy-controls: MSAA-only fixture for standard-accessibility-values.e2e.ts.
+      # .NET Framework 4.7.2 WinForms + hosted WPF, no third-party dependency or licence.
+      - name: Build test fixtures
+        working-directory: appium-wincore-test-apps
+        run: npm run build:msaa-legacy-controls-test-app
 
       - name: Install Appium
         run: npm install -g appium@3.5.0
@@ -44,6 +58,8 @@ jobs:
 
       - name: Start Appium and run E2E tests
         shell: pwsh
+        env:
+          TEST_APPS_DIR: ${{ github.workspace }}\appium-wincore-test-apps
         run: |
           $appiumPath = (Get-Command appium.cmd).Source
           $proc = Start-Process -FilePath $appiumPath `
@@ -84,7 +100,8 @@ jobs:
             test/e2e/extension-webview.e2e.ts `
             test/e2e/actions.e2e.ts `
             test/e2e/element-commands.e2e.ts `
-            test/e2e/extension-app-lifecycle.e2e.ts
+            test/e2e/extension-app-lifecycle.e2e.ts `
+            test/e2e/standard-accessibility-values.e2e.ts
 
       - name: Upload Appium logs on failure
         if: failure()
