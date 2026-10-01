@@ -255,6 +255,23 @@ async function waitForCollapsed(this: AppiumWincoreDriver, elementId: string): P
     return true;
 }
 
+// The server raises InvalidElementState when a verified expand/collapse left a reported
+// state unchanged (e.g. an MSAA grid group row that never opens). ALT+Down is a combo-box
+// keyboard trick: sending it to a grid row or tree item does something unrelated and
+// masks the failure, so only a ComboBox still gets the keyboard fallback; anything else
+// surfaces the error. An unreadable control type also surfaces it — never send keys blind.
+async function shouldSurfaceStateError(this: AppiumWincoreDriver, err: unknown, elementId: string): Promise<boolean> {
+    if (!(err instanceof errors.InvalidElementStateError)) {
+        return false;
+    }
+    try {
+        const controlType = await this.sendCommand('getProperty', { elementId, property: 'ControlType' });
+        return controlType !== 'ComboBox';
+    } catch {
+        return true;
+    }
+}
+
 /**
  * Expands an element via the UIA ExpandCollapse pattern, verifying the resulting
  * `ExpandCollapseState` and falling back to an ALT+Down keyboard action if the pattern call
@@ -277,6 +294,9 @@ export async function patternExpand(this: AppiumWincoreDriver, element: Element)
         }
         this.log.info('[patternExpand] expandElement reported success but ExpandCollapseState never became Expanded, falling back to ALT+Down.');
     } catch (err: any) {
+        if (await shouldSurfaceStateError.call(this, err, elementId)) {
+            throw err;
+        }
         const msg = String(err?.message ?? err);
         this.log.info(`[patternExpand] expandElement failed (${msg}), falling back to ALT+Down.`);
     }
@@ -303,6 +323,9 @@ export async function patternCollapse(this: AppiumWincoreDriver, element: Elemen
         }
         this.log.info('[patternCollapse] collapseElement reported success but ExpandCollapseState never left Expanded, falling back to ALT+Down.');
     } catch (err: any) {
+        if (await shouldSurfaceStateError.call(this, err, elementId)) {
+            throw err;
+        }
         const msg = String(err?.message ?? err);
         this.log.info(`[patternCollapse] collapseElement failed (${msg}), falling back to ALT+Down.`);
     }

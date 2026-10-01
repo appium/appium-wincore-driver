@@ -154,6 +154,7 @@ public class JsonRpcServer
             var errorCode = ex switch
             {
                 InvalidSelectorException => ErrorCodes.InvalidSelector,
+                InvalidElementStateException => ErrorCodes.InvalidElementState,
                 KeyNotFoundException => ErrorCodes.ElementNotFound,
                 ArgumentException => ErrorCodes.InvalidArgument,
                 NotSupportedException => ErrorCodes.PatternNotSupported,

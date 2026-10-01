@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using WincoreServer.Server;
 using WincoreServer.State;
@@ -65,22 +66,14 @@ public static class ElementCommands
         // client to verify an Expand() call actually opened the control — some legacy
         // Win32 controls report the pattern as available and Expand() succeeds without
         // exception, yet never really open (see patternExpand in extension.ts). Ground
-        // truth is the live pattern state when reachable; fall back to the cached property
-        // for providers that only support property polling, not the full pattern interface.
+        // truth is the live pattern state; MSAA-only elements (no pattern, e.g. DevExpress
+        // group rows) report through LegacyIAccessible.State bits instead. The raw
+        // ExpandCollapseState property is deliberately never read on its own: without the
+        // pattern UIA returns its default, LeafNode, for every element.
         if (propertyName.Equals("ExpandCollapseState", StringComparison.OrdinalIgnoreCase))
         {
-            if (element.GetCurrentPattern(UIA.ExpandCollapsePatternId) is IUIAutomationExpandCollapsePattern pattern)
-            {
-                return pattern.CurrentExpandCollapseState.ToString();
-            }
-
-            var cached = element.GetCurrentPropertyValue(UIA.ExpandCollapseStatePropertyId);
-            if (cached is int cachedState && Enum.IsDefined(typeof(ExpandCollapseState), cachedState))
-            {
-                return ((ExpandCollapseState)cachedState).ToString();
-            }
-
-            throw new InvalidOperationException("Element does not support ExpandCollapsePattern.");
+            return PatternCommands.ReadExpandState(element)?.ToString()
+                ?? throw new InvalidOperationException("Element does not support ExpandCollapsePattern.");
         }
 
         // Special case: BoundingRectangle returns JSON object
@@ -110,7 +103,11 @@ public static class ElementCommands
             int[] ints => string.Join(".", ints),
             bool b => b,
             int i => i,
+            uint u => (long)u,
             double d => double.IsInfinity(d) ? 2147483647.0 : d,
+            string s => s,
+            // UIA's "not supported" sentinel (element lacks the pattern) is a COM object.
+            _ when Marshal.IsComObject(value) => "",
             _ => value.ToString() ?? "",
         };
     }

@@ -6,6 +6,8 @@ for installation, capabilities, and usage examples.
 ## Table of Contents
 
 - [Locator Strategies](#locator-strategies)
+  - [Standard accessibility values](#standard-accessibility-values)
+  - [Element attributes](#element-attributes-getattribute--getproperty)
 - [Extension Commands](#extension-commands)
   - [windows: click](#windows-click)
   - [windows: hover](#windows-hover)
@@ -68,6 +70,73 @@ await driver.$('//Button[starts-with(@Name, "OK")]')
 ```
 
 `PropertyConditionFlags.MatchSubstring` is not supported in the `-windows uiautomation` strategy. Use XPath instead.
+
+### Standard accessibility values
+
+Many controls publish their real content through standard accessibility
+but not in UIA `Name`: DevExpress grids and trees, the .NET Framework
+`DataGridView`, and other MSAA-based controls (VB6, Delphi, older MFC,
+third-party grids). A grid cell's `Name` is a placeholder such as
+`Status row 2`, while the content (`Degraded`) is in the MSAA value.
+Every element in page source and XPath carries these attributes, with no
+plugin or capability needed:
+
+| Attribute | Source |
+| --- | --- |
+| `Value` | `ValuePattern.Value` |
+| `LegacyValue` | `LegacyIAccessible.Value` (MSAA `accValue`) |
+| `LegacyName` | `LegacyIAccessible.Name` |
+| `LegacyDescription` | `LegacyIAccessible.Description` |
+| `LegacyRole` | `LegacyIAccessible.Role` (MSAA role number) |
+| `LegacyState` | `LegacyIAccessible.State` (MSAA state bits) |
+
+```js
+await driver.$('//DataItem[@LegacyValue="Degraded"]')
+await driver.$('//*[starts-with(@LegacyValue, "db-01;")]')   // a whole grid row
+```
+
+`Value` and `LegacyValue` are usually equal on MSAA controls. Some
+elements, such as grid rows, only have `LegacyValue`. An attribute is
+empty when the element doesn't support it.
+
+In page source and XPath, the `Legacy*` attributes are empty on WPF and
+UWP (XAML) elements. Those frameworks have their own UIA provider, so
+there is no MSAA object behind them: UIA would build the legacy values
+from `Name`/`Value` at a high cost for every element. `getAttribute`
+still returns them for any single element.
+
+In page source and XPath, `Value` and `LegacyValue` are always empty on
+password elements (`IsPassword`), even when the control itself would
+return its secret. They are also cut to 4096 characters there.
+`getAttribute` returns the full value.
+
+### Element attributes (getAttribute / getProperty)
+
+`getAttribute` accepts every UIA property name above (`Name`,
+`AutomationId`, `IsEnabled`, …), the standard accessibility names, and
+these pattern-qualified aliases:
+
+| Name | Same as |
+| --- | --- |
+| `Value.Value` | `Value` |
+| `Value.IsReadOnly` | `ValuePattern.IsReadOnly` |
+| `SelectionItem.IsSelected` | `SelectionItemPattern.IsSelected` |
+| `LegacyIAccessible.Value` | `LegacyValue` |
+| `LegacyIAccessible.Name` | `LegacyName` |
+| `LegacyIAccessible.Description` | `LegacyDescription` |
+| `LegacyIAccessible.Role` | `LegacyRole` |
+| `LegacyIAccessible.State` | `LegacyState` |
+| `LegacyIAccessible.DefaultAction` | `LegacyDefaultAction` |
+
+Names are case-insensitive. Two more are `getAttribute`-only:
+
+- `ExpandCollapseState`: `Expanded`, `Collapsed`, `PartiallyExpanded`
+  or `LeafNode`. On MSAA elements without `ExpandCollapsePattern` it is
+  read from the MSAA state bits; it errors when the element reports no
+  state.
+- `ProviderDescription`: which UIA provider serves the element (for
+  example `MSAA Proxy`). Useful to tell why an element behaves the way
+  it does.
 
 ### -windows uiautomation
 
@@ -211,6 +280,20 @@ only argument:
 | `windows: removeFromSelection` | SelectionItemPattern | Remove from selection |
 | `windows: scrollIntoView` | ScrollItemPattern | Scroll into view |
 | `windows: setFocus` | — | Set keyboard focus |
+
+`windows: select`, `windows: expand` and `windows: collapse` check that
+they took effect. If the element still reports the old state, they fail
+with `invalid element state` instead of returning success.
+
+- **select** uses `SelectionItemPattern`, then falls back to
+  `LegacyIAccessible.Select`. That fallback makes MSAA grid cells
+  selectable. It fails if the element never reports itself selected.
+- **expand / collapse** read the current state first and do nothing
+  when the element is already in the requested state. MSAA elements
+  without `ExpandCollapsePattern` (DevExpress group rows, legacy tree
+  grids) use their default action and their MSAA state bits. An element
+  that reports no state at all is acted on without verification.
+  ComboBoxes keep the ALT+Down keyboard fallback.
 
 #### windows: setValue
 

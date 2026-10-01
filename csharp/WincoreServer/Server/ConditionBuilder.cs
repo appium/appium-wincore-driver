@@ -61,6 +61,28 @@ public static class ConditionBuilder
         ["IsTransformPatternAvailable"] = UIA.IsTransformPatternAvailablePropertyId,
         ["IsValuePatternAvailable"] = UIA.IsValuePatternAvailablePropertyId,
         ["IsWindowPatternAvailable"] = UIA.IsWindowPatternAvailablePropertyId,
+        ["IsLegacyIAccessiblePatternAvailable"] = UIA.IsLegacyIAccessiblePatternAvailablePropertyId,
+        // Standard accessibility values. Same spelling as the page source / XPath
+        // attributes (StandardValues.Attributes).
+        ["Value"] = UIA.ValueValuePropertyId,
+        ["LegacyValue"] = UIA.LegacyIAccessibleValuePropertyId,
+        ["LegacyName"] = UIA.LegacyIAccessibleNamePropertyId,
+        ["LegacyDescription"] = UIA.LegacyIAccessibleDescriptionPropertyId,
+        ["LegacyRole"] = UIA.LegacyIAccessibleRolePropertyId,
+        ["LegacyState"] = UIA.LegacyIAccessibleStatePropertyId,
+        ["LegacyDefaultAction"] = UIA.LegacyIAccessibleDefaultActionPropertyId,
+        // getAttribute-only: long, process-specific; never emitted in page source / XPath.
+        ["ProviderDescription"] = UIA.ProviderDescriptionPropertyId,
+        // Pattern-qualified aliases (WinAppDriver / UIA "Pattern.Property" style).
+        ["Value.Value"] = UIA.ValueValuePropertyId,
+        ["Value.IsReadOnly"] = UIA.ValueIsReadOnlyPropertyId,
+        ["SelectionItem.IsSelected"] = UIA.SelectionItemIsSelectedPropertyId,
+        ["LegacyIAccessible.Value"] = UIA.LegacyIAccessibleValuePropertyId,
+        ["LegacyIAccessible.Name"] = UIA.LegacyIAccessibleNamePropertyId,
+        ["LegacyIAccessible.Description"] = UIA.LegacyIAccessibleDescriptionPropertyId,
+        ["LegacyIAccessible.Role"] = UIA.LegacyIAccessibleRolePropertyId,
+        ["LegacyIAccessible.State"] = UIA.LegacyIAccessibleStatePropertyId,
+        ["LegacyIAccessible.DefaultAction"] = UIA.LegacyIAccessibleDefaultActionPropertyId,
     };
 
     // ControlType names map to the UIA3 integer IDs.

@@ -46,7 +46,8 @@ public static class PageSourceCommands
         try
         {
             if (noCache) throw new InvalidOperationException("UIA_NO_CACHE");
-            var req = BuildPageSourceCacheRequest(state.Automation);
+            var req = BuildPageSourceCacheRequest(state.Automation, includeLegacy: true);
+            var walk = new StandardValues.WalkRequests(req, BuildPageSourceCacheRequest(state.Automation, includeLegacy: false));
             var trueCond = state.Automation.CreateTrueCondition();
             // Cache one tree level at a time: FindAllBuildCache(Children) returns each
             // child with every property already cached, so the ~25 property reads per
@@ -55,7 +56,7 @@ public static class PageSourceCommands
             // full-subtree cache request instead made the WinForms provider slow AND
             // incomplete.
             var cachedRoot = root.FindFirstBuildCache(TreeScope.Element, trueCond, req);
-            return BuildCachedPageSourceXml(cachedRoot, state, req, trueCond);
+            return BuildCachedPageSourceXml(cachedRoot, state, req, trueCond, walk);
         }
         catch (Exception ex)
         {
@@ -79,13 +80,14 @@ public static class PageSourceCommands
         IUIAutomationElement? cachedRoot,
         SessionState state,
         IUIAutomationCacheRequest req,
-        IUIAutomationCondition trueCond)
+        IUIAutomationCondition trueCond,
+        StandardValues.WalkRequests? walk = null)
     {
         if (cachedRoot == null)
             throw new InvalidOperationException("FindFirstBuildCache(root) returned null.");
 
         var xmlDoc = new XmlDocument();
-        BuildPageSourceCached(cachedRoot, xmlDoc, null, state, cachedRoot, req, trueCond);
+        BuildPageSourceCached(cachedRoot, xmlDoc, null, state, cachedRoot, walk ?? StandardValues.WalkRequests.Single(req), trueCond);
         return xmlDoc.OuterXml;
     }
 
@@ -101,12 +103,35 @@ public static class PageSourceCommands
         UIA.IsPasswordPropertyId, UIA.IsRequiredForFormPropertyId, UIA.ItemStatusPropertyId,
         UIA.ItemTypePropertyId, UIA.OrientationPropertyId, UIA.ProcessIdPropertyId,
         UIA.RuntimeIdPropertyId, UIA.BoundingRectanglePropertyId,
+        UIA.ValueValuePropertyId,
+        // + StandardValues.LegacyPropertyIds on the full request (see WalkRequests).
     };
 
-    private static IUIAutomationCacheRequest BuildPageSourceCacheRequest(IUIAutomation automation)
+    // Every attribute goes through the sanitiser: control text can carry characters
+    // XML 1.0 cannot represent, which would otherwise produce an unparseable document.
+    private static void Set(XmlElement el, string name, string? value)
+        => el.SetAttribute(name, StandardValues.Sanitize(value));
+
+    // Native-UIA elements (WPF, XAML) skip the LegacyIAccessible reads and emit them as ""
+    // — see StandardValues.IsNativeUia for why.
+    private static void SetStandardValues(XmlElement el, Func<int, object?> read, bool isPassword, string? frameworkId)
+    {
+        var skipLegacy = StandardValues.IsNativeUia(frameworkId);
+        foreach (var (name, pid, content) in StandardValues.Attributes)
+        {
+            object? raw = null;
+            if (!skipLegacy || !StandardValues.LegacyPropertyIds.Contains(pid))
+            {
+                try { raw = read(pid); } catch { raw = null; }
+            }
+            el.SetAttribute(name, StandardValues.Format(raw, content, isPassword));
+        }
+    }
+
+    private static IUIAutomationCacheRequest BuildPageSourceCacheRequest(IUIAutomation automation, bool includeLegacy)
     {
         var req = automation.CreateCacheRequest();
-        foreach (var pid in PageSourcePropertyIds)
+        foreach (var pid in includeLegacy ? PageSourcePropertyIds.Concat(StandardValues.LegacyPropertyIds) : PageSourcePropertyIds)
         {
             req.AddProperty(pid);
         }
@@ -136,7 +161,7 @@ public static class PageSourceCommands
         XmlElement? parentXmlElement,
         SessionState state,
         IUIAutomationElement rootForCoords,
-        IUIAutomationCacheRequest req,
+        StandardValues.WalkRequests walk,
         IUIAutomationCondition trueCond)
     {
         var perfSw = state.PerfMetricsEnabled ? Stopwatch.StartNew() : null;
@@ -170,33 +195,35 @@ public static class PageSourceCommands
             var height = (int)rect[3];
 
             var newXmlElement = xmlDoc.CreateElement(tagName);
-            newXmlElement.SetAttribute("AcceleratorKey", CStr(element, UIA.AcceleratorKeyPropertyId));
-            newXmlElement.SetAttribute("AccessKey", CStr(element, UIA.AccessKeyPropertyId));
-            newXmlElement.SetAttribute("AutomationId", CStr(element, UIA.AutomationIdPropertyId));
-            newXmlElement.SetAttribute("ClassName", CStr(element, UIA.ClassNamePropertyId));
-            newXmlElement.SetAttribute("FrameworkId", CStr(element, UIA.FrameworkIdPropertyId));
-            newXmlElement.SetAttribute("HasKeyboardfocus", CBool(element, UIA.HasKeyboardFocusPropertyId).ToString());
-            newXmlElement.SetAttribute("HelpText", CStr(element, UIA.HelpTextPropertyId));
-            newXmlElement.SetAttribute("IsContentelement", CBool(element, UIA.IsContentElementPropertyId).ToString());
-            newXmlElement.SetAttribute("IsControlelement", CBool(element, UIA.IsControlElementPropertyId).ToString());
-            newXmlElement.SetAttribute("IsEnabled", CBool(element, UIA.IsEnabledPropertyId).ToString());
-            newXmlElement.SetAttribute("IsKeyboardfocusable", CBool(element, UIA.IsKeyboardFocusablePropertyId).ToString());
-            newXmlElement.SetAttribute("IsOffscreen", CBool(element, UIA.IsOffscreenPropertyId).ToString());
-            newXmlElement.SetAttribute("IsPassword", CBool(element, UIA.IsPasswordPropertyId).ToString());
-            newXmlElement.SetAttribute("IsRequiredforform", CBool(element, UIA.IsRequiredForFormPropertyId).ToString());
-            newXmlElement.SetAttribute("ItemStatus", CStr(element, UIA.ItemStatusPropertyId));
-            newXmlElement.SetAttribute("ItemType", CStr(element, UIA.ItemTypePropertyId));
-            newXmlElement.SetAttribute("LocalizedControlType", localizedControlType);
-            newXmlElement.SetAttribute("Name", CStr(element, UIA.NamePropertyId));
-            newXmlElement.SetAttribute("Orientation",
+            Set(newXmlElement, "AcceleratorKey", CStr(element, UIA.AcceleratorKeyPropertyId));
+            Set(newXmlElement, "AccessKey", CStr(element, UIA.AccessKeyPropertyId));
+            Set(newXmlElement, "AutomationId", CStr(element, UIA.AutomationIdPropertyId));
+            Set(newXmlElement, "ClassName", CStr(element, UIA.ClassNamePropertyId));
+            Set(newXmlElement, "FrameworkId", CStr(element, UIA.FrameworkIdPropertyId));
+            Set(newXmlElement, "HasKeyboardfocus", CBool(element, UIA.HasKeyboardFocusPropertyId).ToString());
+            Set(newXmlElement, "HelpText", CStr(element, UIA.HelpTextPropertyId));
+            Set(newXmlElement, "IsContentelement", CBool(element, UIA.IsContentElementPropertyId).ToString());
+            Set(newXmlElement, "IsControlelement", CBool(element, UIA.IsControlElementPropertyId).ToString());
+            Set(newXmlElement, "IsEnabled", CBool(element, UIA.IsEnabledPropertyId).ToString());
+            Set(newXmlElement, "IsKeyboardfocusable", CBool(element, UIA.IsKeyboardFocusablePropertyId).ToString());
+            Set(newXmlElement, "IsOffscreen", CBool(element, UIA.IsOffscreenPropertyId).ToString());
+            Set(newXmlElement, "IsPassword", CBool(element, UIA.IsPasswordPropertyId).ToString());
+            Set(newXmlElement, "IsRequiredforform", CBool(element, UIA.IsRequiredForFormPropertyId).ToString());
+            Set(newXmlElement, "ItemStatus", CStr(element, UIA.ItemStatusPropertyId));
+            Set(newXmlElement, "ItemType", CStr(element, UIA.ItemTypePropertyId));
+            Set(newXmlElement, "LocalizedControlType", localizedControlType);
+            Set(newXmlElement, "Name", CStr(element, UIA.NamePropertyId));
+            Set(newXmlElement, "Orientation",
                 (CVal(element, UIA.OrientationPropertyId) is int o ? o : 0).ToString());
-            newXmlElement.SetAttribute("ProcessId",
+            Set(newXmlElement, "ProcessId",
                 (CVal(element, UIA.ProcessIdPropertyId) is int p ? p : 0).ToString());
-            newXmlElement.SetAttribute("RuntimeId", runtimeIdStr);
-            newXmlElement.SetAttribute("x", x.ToString());
-            newXmlElement.SetAttribute("y", y.ToString());
-            newXmlElement.SetAttribute("width", width.ToString());
-            newXmlElement.SetAttribute("height", height.ToString());
+            Set(newXmlElement, "RuntimeId", runtimeIdStr);
+            Set(newXmlElement, "x", x.ToString());
+            Set(newXmlElement, "y", y.ToString());
+            Set(newXmlElement, "width", width.ToString());
+            Set(newXmlElement, "height", height.ToString());
+            SetStandardValues(newXmlElement, pid => CVal(element, pid),
+                CBool(element, UIA.IsPasswordPropertyId), CStr(element, UIA.FrameworkIdPropertyId));
 
             // GetCachedPattern throws E_INVALIDARG when the element doesn't support the
             // pattern (unlike GetCurrentPattern, which returns null) — guard each.
@@ -204,12 +231,12 @@ public static class PageSourceCommands
             {
                 if (element.GetCachedPattern(UIA.WindowPatternId) is IUIAutomationWindowPattern wp)
                 {
-                    newXmlElement.SetAttribute("CanMaximize", (wp.CachedCanMaximize != 0).ToString());
-                    newXmlElement.SetAttribute("CanMinimize", (wp.CachedCanMinimize != 0).ToString());
-                    newXmlElement.SetAttribute("IsModal", (wp.CachedIsModal != 0).ToString());
-                    newXmlElement.SetAttribute("WindowVisualState", wp.CachedWindowVisualState.ToString());
-                    newXmlElement.SetAttribute("WindowInteractionState", wp.CachedWindowInteractionState.ToString());
-                    newXmlElement.SetAttribute("IsTopmost", (wp.CachedIsTopmost != 0).ToString());
+                    Set(newXmlElement, "CanMaximize", (wp.CachedCanMaximize != 0).ToString());
+                    Set(newXmlElement, "CanMinimize", (wp.CachedCanMinimize != 0).ToString());
+                    Set(newXmlElement, "IsModal", (wp.CachedIsModal != 0).ToString());
+                    Set(newXmlElement, "WindowVisualState", wp.CachedWindowVisualState.ToString());
+                    Set(newXmlElement, "WindowInteractionState", wp.CachedWindowInteractionState.ToString());
+                    Set(newXmlElement, "IsTopmost", (wp.CachedIsTopmost != 0).ToString());
                 }
             }
             catch { }
@@ -218,9 +245,9 @@ public static class PageSourceCommands
             {
                 if (element.GetCachedPattern(UIA.TransformPatternId) is IUIAutomationTransformPattern tp)
                 {
-                    newXmlElement.SetAttribute("CanRotate", (tp.CachedCanRotate != 0).ToString());
-                    newXmlElement.SetAttribute("CanResize", (tp.CachedCanResize != 0).ToString());
-                    newXmlElement.SetAttribute("CanMove", (tp.CachedCanMove != 0).ToString());
+                    Set(newXmlElement, "CanRotate", (tp.CachedCanRotate != 0).ToString());
+                    Set(newXmlElement, "CanResize", (tp.CachedCanResize != 0).ToString());
+                    Set(newXmlElement, "CanMove", (tp.CachedCanMove != 0).ToString());
                 }
             }
             catch { }
@@ -234,7 +261,8 @@ public static class PageSourceCommands
                 parentXmlElement.AppendChild(newXmlElement);
             }
 
-            var children = element.FindAllBuildCache(TreeScope.Children, trueCond, req);
+            var childReq = walk.ForChildrenOf(element);
+            var children = element.FindAllBuildCache(TreeScope.Children, trueCond, childReq);
 
             if (perfSw != null)
             {
@@ -244,7 +272,7 @@ public static class PageSourceCommands
 
             foreach (var child in FindCommands.IterateArray(children))
             {
-                BuildPageSourceCached(child, xmlDoc, newXmlElement, state, rootForCoords, req, trueCond);
+                BuildPageSourceCached(walk.Upgrade(child, childReq), xmlDoc, newXmlElement, state, rootForCoords, walk, trueCond);
             }
         }
         catch (Exception ex)
@@ -294,49 +322,51 @@ public static class PageSourceCommands
             var height = rect.bottom - rect.top;
 
             var newXmlElement = xmlDoc.CreateElement(tagName);
-            newXmlElement.SetAttribute("AcceleratorKey", element.get_CurrentAcceleratorKey() ?? "");
-            newXmlElement.SetAttribute("AccessKey", element.get_CurrentAccessKey() ?? "");
-            newXmlElement.SetAttribute("AutomationId", element.get_CurrentAutomationId() ?? "");
-            newXmlElement.SetAttribute("ClassName", element.get_CurrentClassName() ?? "");
-            newXmlElement.SetAttribute("FrameworkId", element.get_CurrentFrameworkId() ?? "");
-            newXmlElement.SetAttribute("HasKeyboardfocus", (element.CurrentHasKeyboardFocus != 0).ToString());
-            newXmlElement.SetAttribute("HelpText", element.get_CurrentHelpText() ?? "");
-            newXmlElement.SetAttribute("IsContentelement", (element.CurrentIsContentElement != 0).ToString());
-            newXmlElement.SetAttribute("IsControlelement", (element.CurrentIsControlElement != 0).ToString());
-            newXmlElement.SetAttribute("IsEnabled", (element.CurrentIsEnabled != 0).ToString());
-            newXmlElement.SetAttribute("IsKeyboardfocusable", (element.CurrentIsKeyboardFocusable != 0).ToString());
-            newXmlElement.SetAttribute("IsOffscreen", (element.CurrentIsOffscreen != 0).ToString());
-            newXmlElement.SetAttribute("IsPassword", (element.CurrentIsPassword != 0).ToString());
-            newXmlElement.SetAttribute("IsRequiredforform", (element.CurrentIsRequiredForForm != 0).ToString());
-            newXmlElement.SetAttribute("ItemStatus", element.get_CurrentItemStatus() ?? "");
-            newXmlElement.SetAttribute("ItemType", element.get_CurrentItemType() ?? "");
-            newXmlElement.SetAttribute("LocalizedControlType", localizedControlType);
-            newXmlElement.SetAttribute("Name", element.get_CurrentName() ?? "");
-            newXmlElement.SetAttribute("Orientation", element.CurrentOrientation.ToString());
-            newXmlElement.SetAttribute("ProcessId", element.CurrentProcessId.ToString());
-            newXmlElement.SetAttribute("RuntimeId", runtimeIdStr);
-            newXmlElement.SetAttribute("x", x.ToString());
-            newXmlElement.SetAttribute("y", y.ToString());
-            newXmlElement.SetAttribute("width", width.ToString());
-            newXmlElement.SetAttribute("height", height.ToString());
+            Set(newXmlElement, "AcceleratorKey", element.get_CurrentAcceleratorKey() ?? "");
+            Set(newXmlElement, "AccessKey", element.get_CurrentAccessKey() ?? "");
+            Set(newXmlElement, "AutomationId", element.get_CurrentAutomationId() ?? "");
+            Set(newXmlElement, "ClassName", element.get_CurrentClassName() ?? "");
+            Set(newXmlElement, "FrameworkId", element.get_CurrentFrameworkId() ?? "");
+            Set(newXmlElement, "HasKeyboardfocus", (element.CurrentHasKeyboardFocus != 0).ToString());
+            Set(newXmlElement, "HelpText", element.get_CurrentHelpText() ?? "");
+            Set(newXmlElement, "IsContentelement", (element.CurrentIsContentElement != 0).ToString());
+            Set(newXmlElement, "IsControlelement", (element.CurrentIsControlElement != 0).ToString());
+            Set(newXmlElement, "IsEnabled", (element.CurrentIsEnabled != 0).ToString());
+            Set(newXmlElement, "IsKeyboardfocusable", (element.CurrentIsKeyboardFocusable != 0).ToString());
+            Set(newXmlElement, "IsOffscreen", (element.CurrentIsOffscreen != 0).ToString());
+            Set(newXmlElement, "IsPassword", (element.CurrentIsPassword != 0).ToString());
+            Set(newXmlElement, "IsRequiredforform", (element.CurrentIsRequiredForForm != 0).ToString());
+            Set(newXmlElement, "ItemStatus", element.get_CurrentItemStatus() ?? "");
+            Set(newXmlElement, "ItemType", element.get_CurrentItemType() ?? "");
+            Set(newXmlElement, "LocalizedControlType", localizedControlType);
+            Set(newXmlElement, "Name", element.get_CurrentName() ?? "");
+            Set(newXmlElement, "Orientation", element.CurrentOrientation.ToString());
+            Set(newXmlElement, "ProcessId", element.CurrentProcessId.ToString());
+            Set(newXmlElement, "RuntimeId", runtimeIdStr);
+            Set(newXmlElement, "x", x.ToString());
+            Set(newXmlElement, "y", y.ToString());
+            Set(newXmlElement, "width", width.ToString());
+            Set(newXmlElement, "height", height.ToString());
+            SetStandardValues(newXmlElement, element.GetCurrentPropertyValue,
+                element.CurrentIsPassword != 0, element.get_CurrentFrameworkId());
 
             // WindowPattern attributes (for top-level windows)
             if (element.GetCurrentPattern(UIA.WindowPatternId) is IUIAutomationWindowPattern wp)
             {
-                newXmlElement.SetAttribute("CanMaximize", (wp.CurrentCanMaximize != 0).ToString());
-                newXmlElement.SetAttribute("CanMinimize", (wp.CurrentCanMinimize != 0).ToString());
-                newXmlElement.SetAttribute("IsModal", (wp.CurrentIsModal != 0).ToString());
-                newXmlElement.SetAttribute("WindowVisualState", wp.CurrentWindowVisualState.ToString());
-                newXmlElement.SetAttribute("WindowInteractionState", wp.CurrentWindowInteractionState.ToString());
-                newXmlElement.SetAttribute("IsTopmost", (wp.CurrentIsTopmost != 0).ToString());
+                Set(newXmlElement, "CanMaximize", (wp.CurrentCanMaximize != 0).ToString());
+                Set(newXmlElement, "CanMinimize", (wp.CurrentCanMinimize != 0).ToString());
+                Set(newXmlElement, "IsModal", (wp.CurrentIsModal != 0).ToString());
+                Set(newXmlElement, "WindowVisualState", wp.CurrentWindowVisualState.ToString());
+                Set(newXmlElement, "WindowInteractionState", wp.CurrentWindowInteractionState.ToString());
+                Set(newXmlElement, "IsTopmost", (wp.CurrentIsTopmost != 0).ToString());
             }
 
             // TransformPattern attributes
             if (element.GetCurrentPattern(UIA.TransformPatternId) is IUIAutomationTransformPattern tp)
             {
-                newXmlElement.SetAttribute("CanRotate", (tp.CurrentCanRotate != 0).ToString());
-                newXmlElement.SetAttribute("CanResize", (tp.CurrentCanResize != 0).ToString());
-                newXmlElement.SetAttribute("CanMove", (tp.CurrentCanMove != 0).ToString());
+                Set(newXmlElement, "CanRotate", (tp.CurrentCanRotate != 0).ToString());
+                Set(newXmlElement, "CanResize", (tp.CurrentCanResize != 0).ToString());
+                Set(newXmlElement, "CanMove", (tp.CurrentCanMove != 0).ToString());
             }
 
             if (parentXmlElement == null)

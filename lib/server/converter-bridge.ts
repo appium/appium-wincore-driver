@@ -87,6 +87,14 @@ export function registerPropertyCondition(condition: Condition, property: string
         'sizeofset': 'SizeOfSet',
         'positioninset': 'PositionInSet',
         'labeledby': 'LabeledBy',
+        'value': 'Value',
+        'legacyvalue': 'LegacyValue',
+        'legacyname': 'LegacyName',
+        'legacydescription': 'LegacyDescription',
+        'legacyrole': 'LegacyRole',
+        'legacystate': 'LegacyState',
+        'legacydefaultaction': 'LegacyDefaultAction',
+        'providerdescription': 'ProviderDescription',
     };
 
     const mappedProperty = propertyNameMap[normalizedProperty] ?? property;
@@ -170,6 +178,12 @@ export function registerMatchPropertyCondition(
         frameworkid: 'FrameworkId',
         javaclass: 'JavaClass',
         javasimpleclass: 'JavaSimpleClass',
+        value: 'Value',
+        legacyvalue: 'LegacyValue',
+        legacyname: 'LegacyName',
+        legacydescription: 'LegacyDescription',
+        legacydefaultaction: 'LegacyDefaultAction',
+        providerdescription: 'ProviderDescription',
     };
 
     conditionDtoMap.set(condition, {

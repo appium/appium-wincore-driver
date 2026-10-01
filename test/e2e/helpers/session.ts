@@ -254,6 +254,19 @@ export const WPF_LARGE_APP_PATH = resolve(
 );
 
 /**
+ * MSAA-only correctness fixture: every control reaches UIA through UIAutomationCore's MSAA
+ * Proxy (stock .NET Framework DataGridView + IAccessible-only controls), so real content lives
+ * in LegacyIAccessible.Value while UIA Name is a placeholder. No licence needed.
+ */
+export const MSAA_LEGACY_CONTROLS_APP_PATH = resolve(
+    TEST_APPS_DIR, 'msaa-legacy-controls', 'bin', 'x64', 'Debug', 'net472', 'MsaaLegacyControls.exe',
+);
+
+export async function createMsaaLegacyControlsSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
+    return createSimpleAppSession(MSAA_LEGACY_CONTROLS_APP_PATH, extraCaps);
+}
+
+/**
  * Launches the wpf-large performance fixture via Appium (native-UIA — WPF has its own
  * AutomationPeer provider, so this measures the plain-UIA walk without the MSAA->UIA
  * bridge tax WinForms carries). Not a correctness fixture — used only by the `uia` perf

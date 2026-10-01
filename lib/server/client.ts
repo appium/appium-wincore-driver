@@ -151,6 +151,9 @@ export class WincoreServerClient {
                         case 'PatternNotSupported':
                             pending.reject(new errors.UnknownError(errorMessage));
                             break;
+                        case 'InvalidElementState':
+                            pending.reject(new errors.InvalidElementStateError(errorMessage));
+                            break;
                         default:
                             pending.reject(new errors.UnknownError(errorMessage));
                     }

@@ -22,7 +22,7 @@ import {
     patternGetValue,
     focusElement,
 } from '../../../lib/commands/extension';
-import { W3C_ELEMENT_KEY } from 'appium/driver';
+import { W3C_ELEMENT_KEY, errors } from 'appium/driver';
 import { createMockDriver, MOCK_ELEMENT } from '../../fixtures/driver';
 
 vi.mock('../../../lib/winapi/user32', () => ({
@@ -184,6 +184,53 @@ describe('pattern commands', () => {
             return null;
         });
         await expect(patternCollapse.call(driver, MOCK_ELEMENT)).resolves.toBeUndefined();
+        expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', { elementId: ELEMENT_ID });
+    });
+
+    // Server-verified expand/collapse failures (InvalidElementState) must reach the caller —
+    // ALT+Down sent to a grid row or tree item would do something unrelated and mask it.
+    const stateError = () => new errors.InvalidElementStateError('InvalidElementState: expand had no effect');
+
+    it.each([
+        { name: 'patternExpand', fn: patternExpand, method: 'expandElement' },
+        { name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement' },
+    ])('$name rethrows InvalidElementState for a non-ComboBox without sending ALT+Down', async ({ fn, method }) => {
+        const driver = createMockDriver() as any;
+        driver.sendCommand.mockImplementation(async (m: string, args: any) => {
+            if (m === method) {throw stateError();}
+            if (m === 'getProperty' && args.property === 'ControlType') {return 'TreeItem';}
+            return null;
+        });
+        await expect(fn.call(driver, MOCK_ELEMENT)).rejects.toBeInstanceOf(errors.InvalidElementStateError);
+        expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
+    });
+
+    it.each([
+        { name: 'patternExpand', fn: patternExpand, method: 'expandElement' },
+        { name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement' },
+    ])('$name rethrows InvalidElementState when the control type is unreadable', async ({ fn, method }) => {
+        const driver = createMockDriver() as any;
+        driver.sendCommand.mockImplementation(async (m: string, args: any) => {
+            if (m === method) {throw stateError();}
+            if (m === 'getProperty' && args.property === 'ControlType') {throw new Error('gone');}
+            return null;
+        });
+        await expect(fn.call(driver, MOCK_ELEMENT)).rejects.toBeInstanceOf(errors.InvalidElementStateError);
+        expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
+    });
+
+    it.each([
+        { name: 'patternExpand', fn: patternExpand, method: 'expandElement' },
+        { name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement' },
+    ])('$name keeps the ALT+Down fallback for a ComboBox on InvalidElementState', async ({ fn, method }) => {
+        const driver = createMockDriver() as any;
+        driver.sendCommand.mockImplementation(async (m: string, args: any) => {
+            if (m === method) {throw stateError();}
+            if (m === 'getProperty' && args.property === 'ControlType') {return 'ComboBox';}
+            if (m === 'getProperty' && args.property === 'HasKeyboardFocus') {return true;}
+            return null;
+        });
+        await fn.call(driver, MOCK_ELEMENT);
         expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', { elementId: ELEMENT_ID });
     });
 

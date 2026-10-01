@@ -37,6 +37,8 @@ export const Int32Property = Object.freeze({
     POSITION_IN_SET: 'positioninset',
     PROCESS_ID: 'processid',
     NATIVE_WINDOW_HANDLE: 'nativewindowhandle',
+    LEGACY_ROLE: 'legacyrole',
+    LEGACY_STATE: 'legacystate',
 } as const);
 
 export const StringProperty = Object.freeze({
@@ -52,6 +54,12 @@ export const StringProperty = Object.freeze({
     ITEM_STATUS: 'itemstatus',
     JAVA_SIMPLE_CLASS: 'javasimpleclass',
     JAVA_CLASS: 'javaclass',
+    VALUE: 'value',
+    LEGACY_VALUE: 'legacyvalue',
+    LEGACY_NAME: 'legacyname',
+    LEGACY_DESCRIPTION: 'legacydescription',
+    LEGACY_DEFAULT_ACTION: 'legacydefaultaction',
+    PROVIDER_DESCRIPTION: 'providerdescription',
 } as const);
 
 export const BooleanProperty = Object.freeze({

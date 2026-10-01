@@ -138,6 +138,25 @@ public static class UIA
     public const int HeadingLevelPropertyId = 30173;
     public const int IsDialogPropertyId = 30174;
     public const int ExpandCollapseStatePropertyId = 30070;
+    public const int ValueValuePropertyId = 30045;
+    public const int ValueIsReadOnlyPropertyId = 30046;
+    public const int SelectionItemIsSelectedPropertyId = 30079;
+    public const int IsLegacyIAccessiblePatternAvailablePropertyId = 30090;
+    public const int LegacyIAccessibleNamePropertyId = 30092;
+    public const int LegacyIAccessibleValuePropertyId = 30093;
+    public const int LegacyIAccessibleDescriptionPropertyId = 30094;
+    public const int LegacyIAccessibleRolePropertyId = 30095;
+    public const int LegacyIAccessibleStatePropertyId = 30096;
+    public const int LegacyIAccessibleDefaultActionPropertyId = 30100;
+    public const int ProviderDescriptionPropertyId = 30107;
+
+    // MSAA state / selection flags (oleacc.h), read through LegacyIAccessible.State.
+    public const int StateSystemSelected = 0x2;
+    public const int StateSystemExpanded = 0x200;
+    public const int StateSystemCollapsed = 0x400;
+    public const int StateSystemProtected = 0x20000000;
+    public const int SelFlagTakeFocus = 0x1;
+    public const int SelFlagTakeSelection = 0x2;
 
     // IUIAutomationCacheRequest.AutomationElementMode
     public const int AutomationElementModeNone = 0;
