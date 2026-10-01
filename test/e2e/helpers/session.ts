@@ -1,13 +1,14 @@
 import { execSync, spawn } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { ChildProcess } from 'node:child_process';
 import type { Browser } from 'webdriverio';
 import { remote } from 'webdriverio';
 
 export const APPIUM_SERVER = {
     hostname: '127.0.0.1',
-    port: 4723,
+    port: Number(process.env.APPIUM_PORT ?? 4723),
     path: '/',
     logLevel: 'warn' as const,
 };
@@ -23,6 +24,8 @@ export const NOTEPAD_APP_PATH = 'C:\\Windows\\notepad.exe';
 export const TODO_APP_ID = 'Microsoft.Todos_8wekyb3d8bbwe!App';
 export const CHROME_APP_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 export const CHROME_DEBUG_PORT = 9222;
+/** Local page the Chrome webview tests load — a live site can change its markup under the tests. */
+export const WEBVIEW_FIXTURE_URL = pathToFileURL(resolve(process.cwd(), 'test', 'e2e', 'fixtures', 'webview.html')).href;
 export const EDGE_APP_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 
 type Caps = WebdriverIO.Capabilities;
@@ -110,7 +113,7 @@ export async function createChromeWebviewSession(extraCaps?: Record<string, unkn
             platformName: 'Windows',
             'appium:automationName': 'Wincore',
             'appium:app': CHROME_APP_PATH,
-            'appium:appArguments': `--remote-debugging-port=${port} --user-data-dir=${userDataDir} --no-first-run --no-default-browser-check https://example.com`,
+            'appium:appArguments': `--remote-debugging-port=${port} --user-data-dir=${userDataDir} --no-first-run --no-default-browser-check ${WEBVIEW_FIXTURE_URL}`,
             'appium:webviewEnabled': true,
             'appium:webviewDevtoolsPort': port,
             'appium:shouldCloseApp': true,

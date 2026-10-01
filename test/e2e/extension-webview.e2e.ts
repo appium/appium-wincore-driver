@@ -51,7 +51,7 @@ describe('Chrome WebView context support', () => {
         expect(webview).toBeDefined();
         expect(typeof webview!.title).toBe('string');
         expect(typeof webview!.url).toBe('string');
-        expect(webview!.url).toContain('example.com');
+        expect(webview!.url).toContain('webview.html');
     });
 
     it('switches to Chrome webview context and executes JavaScript', async () => {
@@ -66,7 +66,7 @@ describe('Chrome WebView context support', () => {
         expect(title.length).toBeGreaterThan(0);
 
         const url = await driver.execute('return window.location.href') as string;
-        expect(url).toContain('example.com');
+        expect(url).toContain('webview.html');
     });
 
     it('finds element by CSS selector inside Chrome webview', async () => {
@@ -77,8 +77,7 @@ describe('Chrome WebView context support', () => {
 
         const h1 = await driver.$('h1');
         expect(await h1.isExisting()).toBe(true);
-        const text = await h1.getText();
-        expect(text.length).toBeGreaterThan(0);
+        expect(await h1.getText()).toBe('Wincore WebView Fixture');
     });
 
     it('finds element by XPath inside Chrome webview', async () => {
@@ -89,8 +88,7 @@ describe('Chrome WebView context support', () => {
 
         const h1 = await driver.$('//h1');
         expect(await h1.isExisting()).toBe(true);
-        const text = await h1.getText();
-        expect(text.length).toBeGreaterThan(0);
+        expect(await h1.getText()).toBe('Wincore WebView Fixture');
     });
 
     it('can interact with elements inside Chrome webview', async () => {

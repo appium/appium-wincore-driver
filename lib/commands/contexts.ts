@@ -90,6 +90,13 @@ export async function setContext(this: AppiumWincoreDriver, name?: string | null
     await this.chromedriver.start(caps);
     this.log.debug('Chromedriver started. Session ID:', cd.sessionId());
 
+    // WebDriver timeouts belong to the session, not the context: the fresh Chromedriver
+    // session starts with implicit wait 0, so carry over whatever the client already set.
+    // Without this, finds in the webview fail instantly while the page is still loading.
+    if (this.implicitWaitMs) {
+        await this.chromedriver.jwproxy.command('/timeouts', 'POST', { implicit: this.implicitWaitMs });
+    }
+
     this.proxyReqRes = this.chromedriver.proxyReq.bind(this.chromedriver);
     this.proxyCommand = this.chromedriver.jwproxy.command.bind(this.chromedriver.jwproxy);
     this.jwpProxyActive = true;
