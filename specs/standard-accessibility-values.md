@@ -498,6 +498,41 @@ Add:
 1. A `client.ts` case that rejects with
    `errors.InvalidElementStateError`.
 
+#### Revision after review: verify MSAA actions only
+
+The first implementation verified every action afterwards, including
+real UIA pattern calls. Review showed that this caused more problems
+than it solved:
+
+- an element re-created on expand (DevExpress) or a closed popup was
+  reported as a failure;
+- a provider that updates its state slowly timed out, then the default
+  action ran and could toggle the control back;
+- a failed command paid the polling budget twice (~1.1 s).
+
+Every silent no-op found while building this came from MSAA (the MSAA
+Proxy's synthesised patterns and `DoDefaultAction` report success
+whether or not anything happened), never from a native provider's
+pattern. A native pattern's contract is to throw when it cannot act.
+
+What ships:
+
+- The state is read before acting, as specified below; this is what
+  fixes the toggle bug.
+- On native-UIA elements a pattern call that does not throw is
+  success: no check afterwards, no fallback.
+- On MSAA-backed elements (`ProviderDescription` contains
+  `MSAA Proxy`) the action is checked once, within one 600 ms budget
+  per command. Only `UIA_E_ELEMENTNOTAVAILABLE` counts as "the element
+  is gone, so done"; a timeout or access error does not.
+- The `LegacyIAccessible.Select` and `DoDefaultAction` fallbacks run on
+  MSAA-backed elements only. UIA core synthesises LegacyIAccessible
+  (and a "Press" default action) for native elements too, so `collapse`
+  on a WPF Button must not click it and `select` on it must stay
+  "not supported".
+
+The steps below describe the MSAA path.
+
 #### Select
 
 1. If `SelectionItemPattern` is available, call `Select()`, then re-read

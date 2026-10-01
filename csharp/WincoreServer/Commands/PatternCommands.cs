@@ -45,69 +45,77 @@ public static class PatternCommands
         => SetExpanded(element, parameters, expand: false);
 
     /// <summary>
-    /// Verified expand / collapse. MSAA-only elements (DevExpress group rows, legacy
-    /// tree grids) have no ExpandCollapsePattern — their default action toggles and their
-    /// state lives in LegacyIAccessible.State — so a blind call can toggle the wrong way
-    /// or do nothing while reporting success. Read the state first, act only when needed,
-    /// and fail with InvalidElementState when a reported state does not change.
+    /// Expand / collapse that does not toggle the wrong way and does not report a no-op as
+    /// success. The rules:
+    /// <list type="bullet">
+    /// <item>Read the state first and do nothing when the element is already there (MSAA
+    /// default actions toggle, so expanding an expanded group used to collapse it).</item>
+    /// <item>Trust a real ExpandCollapsePattern: if Expand() / Collapse() returns without
+    /// throwing, that is success. Its contract is to throw when it cannot act.</item>
+    /// <item>Verify only actions that go through MSAA (the MSAA Proxy's synthesised pattern,
+    /// or LegacyIAccessible.DoDefaultAction): MSAA reports success whether or not anything
+    /// happened. One check afterwards; an element that is gone counts as done.</item>
+    /// <item>The default-action fallback is MSAA-only. UIA core synthesises a default action
+    /// for native-UIA elements too (e.g. "Press" on a WPF Button), and collapse must not
+    /// click it.</item>
+    /// </list>
     /// </summary>
     private static object? SetExpanded(IUIAutomationElement element, JsonElement parameters, bool expand)
     {
         var verb = expand ? "expand" : "collapse";
         var pattern = TryPattern<IUIAutomationExpandCollapsePattern>(element, UIA.ExpandCollapsePatternId);
-        var legacy = TryPattern<IUIAutomationLegacyIAccessiblePattern>(element, UIA.LegacyIAccessiblePatternId);
+        var msaa = IsMsaaBacked(element);
+        var legacy = msaa ? TryPattern<IUIAutomationLegacyIAccessiblePattern>(element, UIA.LegacyIAccessiblePatternId) : null;
         if (pattern == null && legacy == null)
         {
             throw new InvalidOperationException("Element does not support ExpandCollapsePattern.");
         }
 
         var before = ReadExpandState(element);
-
-        // No pattern, no state and no default action (e.g. a legacy combo box that only
-        // opens from the keyboard): there is nothing the server can do or verify. Report
-        // "not supported" so the client's ALT+Down fallback runs — running an empty default
-        // action and returning success would skip that fallback and open nothing.
-        if (pattern == null && before == null && !HasDefaultAction(element))
-        {
-            throw new InvalidOperationException("Element does not support ExpandCollapsePattern.");
-        }
-
         if (before == ExpandCollapseState.LeafNode)
         {
             throw new InvalidElementStateException($"{verb} had no effect: element is a leaf node.");
         }
         if (before != null && IsExpanded(before.Value) == expand)
         {
-            return null; // already there — acting would toggle a default-action control back
+            return null; // already there - acting would toggle a default-action control back
         }
 
+        var deadline = new Deadline();
         if (pattern != null)
         {
             if (expand) pattern.Expand(); else pattern.Collapse();
-            if (Reached(element, expand)) return null;
+            if (!msaa || Reached(element, expand, deadline)) return null;
+            throw NoEffect(verb, element);
         }
 
-        // No pattern, or the pattern call left the state unchanged: one default action.
-        if (legacy != null && (pattern == null || ReadExpandStateOrNull(element) is { } s && IsExpanded(s) != expand))
+        // MSAA element without the pattern: the default action is the only lever.
+        // No state and no default action (e.g. a legacy combo box that only opens from the
+        // keyboard): nothing the server can do or verify. Report "not supported" so the
+        // client's ALT+Down fallback runs - an empty default action would open nothing.
+        if (before == null && !HasDefaultAction(element))
         {
-            legacy.DoDefaultAction();
-            if (before == null)
-            {
-                // The element reports no state (never sets EXPANDED/COLLAPSED). Nothing to
-                // verify against; keep the historical act-and-log behaviour.
-                var elementId = parameters.GetProperty("elementId").GetString();
-                Console.Error.WriteLine(
-                    $"[{verb}] DoDefaultAction fired on '{elementId}', which reports no expand state " +
-                    "(not verifiable — not treated as a failure).");
-                Thread.Sleep(50);
-                return null;
-            }
-            if (Reached(element, expand)) return null;
+            throw new InvalidOperationException("Element does not support ExpandCollapsePattern.");
         }
 
-        throw new InvalidElementStateException(
-            $"{verb} had no effect on this element (state stayed {ReadExpandStateOrNull(element)?.ToString() ?? "unknown"}).");
+        legacy!.DoDefaultAction();
+        if (before == null)
+        {
+            // The element reports no state (never sets EXPANDED/COLLAPSED). Nothing to
+            // verify against; keep the historical act-and-log behaviour.
+            var elementId = parameters.GetProperty("elementId").GetString();
+            Console.Error.WriteLine(
+                $"[{verb}] DoDefaultAction fired on '{elementId}', which reports no expand state " +
+                "(not verifiable - not treated as a failure).");
+            Thread.Sleep(50);
+            return null;
+        }
+        if (Reached(element, expand, deadline)) return null;
+        throw NoEffect(verb, element);
     }
+
+    private static InvalidElementStateException NoEffect(string verb, IUIAutomationElement element)
+        => new($"{verb} had no effect on this element (state stayed {ReadExpandState(element)?.ToString() ?? "unknown"}).");
 
     /// <summary>
     /// Expand state from the pattern when the element has it, else from the MSAA
@@ -119,7 +127,8 @@ public static class PatternCommands
     {
         if (TryPattern<IUIAutomationExpandCollapsePattern>(element, UIA.ExpandCollapsePatternId) is { } pattern)
         {
-            return pattern.CurrentExpandCollapseState;
+            try { return pattern.CurrentExpandCollapseState; }
+            catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return null; }
         }
         if (ReadLegacyState(element) is int state)
         {
@@ -127,6 +136,23 @@ public static class PatternCommands
             if ((state & UIA.StateSystemCollapsed) != 0) return ExpandCollapseState.Collapsed;
         }
         return null;
+    }
+
+    /// <summary>
+    /// True when UIA serves the element through the MSAA Proxy - DevExpress, the .NET
+    /// Framework DataGridView, VB6 / Delphi / MFC controls, WinForms custom accessible
+    /// objects. Their patterns and default actions map to MSAA calls that report success
+    /// whether or not anything happened, so actions on them are verified afterwards.
+    /// Native providers (WPF, UWP, UIA's own Win32 proxies) are trusted.
+    /// </summary>
+    internal static bool IsMsaaBacked(IUIAutomationElement element)
+    {
+        try
+        {
+            return element.GetCurrentPropertyValue(UIA.ProviderDescriptionPropertyId) is string d
+                   && d.Contains("MSAA Proxy", StringComparison.Ordinal);
+        }
+        catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return false; }
     }
 
     private static bool HasDefaultAction(IUIAutomationElement element)
@@ -139,23 +165,16 @@ public static class PatternCommands
         catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return false; }
     }
 
-    private static ExpandCollapseState? ReadExpandStateOrNull(IUIAutomationElement element)
-    {
-        try { return ReadExpandState(element); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return null; }
-    }
-
     private static bool IsExpanded(ExpandCollapseState s)
         => s is ExpandCollapseState.Expanded or ExpandCollapseState.PartiallyExpanded;
 
-    // True once the element reaches the requested state. An element that vanished after
-    // the action (a popup that closed, a row that re-rendered) counts as done: the action
-    // ran and there is nothing left to verify.
-    private static bool Reached(IUIAutomationElement element, bool expand)
-        => SettleUntil(() =>
-        {
-            try { return ReadExpandState(element) is { } s && IsExpanded(s) == expand; }
-            catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return true; }
-        });
+    // True once the element reaches the requested state. An element that is gone after the
+    // action (a popup that closed, a row re-created on expand) counts as done: the action ran
+    // and there is nothing left to verify. "Gone" means UIA_E_ELEMENTNOTAVAILABLE only - a
+    // timeout or access error is not proof of success.
+    private static bool Reached(IUIAutomationElement element, bool expand, Deadline deadline)
+        => deadline.Until(() =>
+            ReadExpandState(element) is { } s ? IsExpanded(s) == expand : UiaErrors.IsGone(element));
 
     private static int? ReadLegacyState(IUIAutomationElement element)
     {
@@ -176,15 +195,25 @@ public static class PatternCommands
         try { return element.GetCurrentPattern(patternId) as T; } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return null; }
     }
 
-    // Providers update state asynchronously after an action; poll briefly.
-    private static bool SettleUntil(Func<bool> condition)
+    /// <summary>
+    /// One verification budget per command. Providers update state asynchronously after an
+    /// action, so a check polls briefly; a command that verifies twice (select: pattern, then
+    /// legacy fallback) shares the budget instead of paying it twice.
+    /// </summary>
+    internal sealed class Deadline
     {
-        for (var i = 0; i < 10; i++)
+        internal static TimeSpan Budget = TimeSpan.FromMilliseconds(600);
+        private readonly System.Diagnostics.Stopwatch _sw = System.Diagnostics.Stopwatch.StartNew();
+
+        public bool Until(Func<bool> condition)
         {
-            if (condition()) return true;
-            Thread.Sleep(50);
+            while (true)
+            {
+                if (condition()) return true;
+                if (_sw.Elapsed >= Budget) return false;
+                Thread.Sleep(50);
+            }
         }
-        return condition();
     }
 
     public static object? Toggle(SessionState state, IUIAutomationElement element, JsonElement parameters)
@@ -213,31 +242,35 @@ public static class PatternCommands
     }
 
     /// <summary>
-    /// Verified select. The MSAA Proxy hands SelectionItemPattern to rows and outline
-    /// items whether or not they are selectable, so Select() can succeed and change
-    /// nothing; conversely DataGridView cells have no SelectionItemPattern yet select fine
-    /// through LegacyIAccessible.Select. Try both, then require the element to report
-    /// itself selected.
+    /// Select. A real SelectionItemPattern is trusted when Select() does not throw. MSAA-backed
+    /// elements are verified: the MSAA Proxy hands SelectionItemPattern to rows and outline
+    /// items whether or not they are selectable (Select() succeeds and changes nothing), and
+    /// DataGridView cells have no SelectionItemPattern yet select fine through
+    /// LegacyIAccessible.Select. The legacy fallback is MSAA-only - UIA core synthesises
+    /// LegacyIAccessible on native elements too, and selecting a Button must stay "not
+    /// supported", not move focus.
     /// </summary>
     public static object? Select(SessionState state, IUIAutomationElement element, JsonElement parameters)
     {
         var selection = TryPattern<IUIAutomationSelectionItemPattern>(element, UIA.SelectionItemPatternId);
-        var legacy = TryPattern<IUIAutomationLegacyIAccessiblePattern>(element, UIA.LegacyIAccessiblePatternId);
+        var msaa = IsMsaaBacked(element);
+        var legacy = msaa ? TryPattern<IUIAutomationLegacyIAccessiblePattern>(element, UIA.LegacyIAccessiblePatternId) : null;
         if (selection == null && legacy == null)
         {
             throw new InvalidOperationException("Element does not support SelectionItemPattern.");
         }
 
+        var deadline = new Deadline();
         if (selection != null)
         {
             selection.Select();
-            if (SettleUntil(() => IsSelectedOrGone(element))) return null;
+            if (!msaa || deadline.Until(() => IsSelectedOrGone(element))) return null;
         }
 
         if (legacy != null)
         {
             legacy.Select(UIA.SelFlagTakeFocus | UIA.SelFlagTakeSelection);
-            if (SettleUntil(() => IsSelectedOrGone(element))) return null;
+            if (deadline.Until(() => IsSelectedOrGone(element))) return null;
         }
 
         throw new InvalidElementStateException("select had no effect on this element.");
@@ -245,23 +278,19 @@ public static class PatternCommands
 
     // Selected per SelectionItem.IsSelected or the MSAA SELECTED bit. An element that is
     // gone after the action (a dropdown item whose popup closed on selection) counts as
-    // selected: the action ran and there is nothing left to verify.
+    // selected - gone meaning UIA_E_ELEMENTNOTAVAILABLE, not any error.
     private static bool IsSelectedOrGone(IUIAutomationElement element)
     {
-        try
+        if (TryPattern<IUIAutomationSelectionItemPattern>(element, UIA.SelectionItemPatternId) is { } p)
         {
-            if (TryPattern<IUIAutomationSelectionItemPattern>(element, UIA.SelectionItemPatternId) is { } p
-                && p.CurrentIsSelected != 0)
+            try
             {
-                return true;
+                if (p.CurrentIsSelected != 0) return true;
             }
-            _ = element.CurrentProcessId; // throws once the element is gone
-            return ReadLegacyState(element) is int state && (state & UIA.StateSystemSelected) != 0;
+            catch (Exception ex) when (UiaErrors.IsExpected(ex)) { }
         }
-        catch (Exception ex) when (UiaErrors.IsExpected(ex))
-        {
-            return true;
-        }
+        if (ReadLegacyState(element) is int state && (state & UIA.StateSystemSelected) != 0) return true;
+        return UiaErrors.IsGone(element);
     }
 
     public static object? AddToSelection(SessionState state, IUIAutomationElement element, JsonElement parameters)

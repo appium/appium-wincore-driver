@@ -112,22 +112,6 @@ public static class PageSourceCommands
     private static void Set(XmlElement el, string name, string? value)
         => el.SetAttribute(name, StandardValues.Sanitize(value));
 
-    // Native-UIA elements (WPF, XAML) skip the LegacyIAccessible reads and emit them as ""
-    // — see StandardValues.IsNativeUia for why.
-    private static void SetStandardValues(XmlElement el, Func<int, object?> read, bool isPassword, string? frameworkId)
-    {
-        var skipLegacy = StandardValues.IsNativeUia(frameworkId);
-        foreach (var (name, pid, content) in StandardValues.Attributes)
-        {
-            object? raw = null;
-            if (!skipLegacy || !StandardValues.LegacyPropertyIds.Contains(pid))
-            {
-                try { raw = read(pid); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { raw = null; }
-            }
-            el.SetAttribute(name, StandardValues.Format(raw, content, isPassword));
-        }
-    }
-
     private static IUIAutomationCacheRequest BuildPageSourceCacheRequest(IUIAutomation automation, bool includeLegacy)
     {
         var req = automation.CreateCacheRequest();
@@ -222,8 +206,9 @@ public static class PageSourceCommands
             Set(newXmlElement, "y", y.ToString());
             Set(newXmlElement, "width", width.ToString());
             Set(newXmlElement, "height", height.ToString());
-            SetStandardValues(newXmlElement, pid => CVal(element, pid),
-                CBool(element, UIA.IsPasswordPropertyId), CStr(element, UIA.FrameworkIdPropertyId));
+            StandardValues.Apply(newXmlElement, pid => CVal(element, pid),
+                StandardValues.IsPassword(() => element.GetCachedPropertyValue(UIA.IsPasswordPropertyId)),
+                CStr(element, UIA.FrameworkIdPropertyId));
 
             // GetCachedPattern throws E_INVALIDARG when the element doesn't support the
             // pattern (unlike GetCurrentPattern, which returns null) — guard each.
@@ -347,8 +332,9 @@ public static class PageSourceCommands
             Set(newXmlElement, "y", y.ToString());
             Set(newXmlElement, "width", width.ToString());
             Set(newXmlElement, "height", height.ToString());
-            SetStandardValues(newXmlElement, element.GetCurrentPropertyValue,
-                element.CurrentIsPassword != 0, element.get_CurrentFrameworkId());
+            StandardValues.Apply(newXmlElement, element.GetCurrentPropertyValue,
+                StandardValues.IsPassword(() => element.GetCurrentPropertyValue(UIA.IsPasswordPropertyId)),
+                element.get_CurrentFrameworkId());
 
             // WindowPattern attributes (for top-level windows)
             if (element.GetCurrentPattern(UIA.WindowPatternId) is IUIAutomationWindowPattern wp)

@@ -31,7 +31,7 @@ public class StandardValuesTests
     [Fact]
     public void Attributes_ResolveThroughThePropertyMap_ToTheSameId()
     {
-        foreach (var (name, pid, _) in StandardValues.Attributes)
+        foreach (var (name, pid, _, _) in StandardValues.Attributes)
         {
             Assert.Equal(pid, ConditionBuilder.GetPropertyId(name));
         }

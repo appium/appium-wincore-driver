@@ -107,8 +107,18 @@ still returns them for any single element.
 
 In page source and XPath, `Value` and `LegacyValue` are always empty on
 password elements (`IsPassword`), even when the control itself would
-return its secret. They are also cut to 4096 characters there.
-`getAttribute` returns the full value.
+return its secret. If `IsPassword` can't be read, they are treated as a
+password. They are also cut to 4096 characters there, without splitting
+an emoji or other surrogate pair.
+
+`getAttribute` is an explicit read of one element and is not filtered:
+`getAttribute('Value')` / `getAttribute('LegacyValue')` return the full
+value, and **on a password element that can be the secret itself** (as
+`windows: getValue` already does). Don't log those results.
+
+Page source text keeps every character XML allows, including emoji.
+Only characters XML 1.0 cannot carry (control characters, unpaired
+surrogates) are removed.
 
 ### Element attributes (getAttribute / getProperty)
 
@@ -285,15 +295,44 @@ only argument:
 they took effect. If the element still reports the old state, they fail
 with `invalid element state` instead of returning success.
 
-- **select** uses `SelectionItemPattern`, then falls back to
-  `LegacyIAccessible.Select`. That fallback makes MSAA grid cells
-  selectable. It fails if the element never reports itself selected.
-- **expand / collapse** read the current state first and do nothing
-  when the element is already in the requested state. MSAA elements
-  without `ExpandCollapsePattern` (DevExpress group rows, legacy tree
-  grids) use their default action and their MSAA state bits. An element
-  that reports no state at all is acted on without verification.
-  ComboBoxes keep the ALT+Down keyboard fallback.
+How the check works:
+
+- **Real UIA patterns are trusted.** On elements with their own UIA
+  provider (WPF, UWP, UIA's built-in Win32 proxies), the command calls
+  the pattern and returns success if it doesn't throw.
+- **MSAA-backed elements are verified.** DevExpress, the .NET Framework
+  `DataGridView`, and VB6 / Delphi / MFC controls reach UIA through the
+  MSAA Proxy, whose calls report success whether or not anything
+  happened. After acting, the command checks the state once (briefly
+  polling). An element that disappears in the meantime (a re-created
+  row, a closed popup) counts as done.
+- **select:** `SelectionItemPattern`, then on MSAA elements
+  `LegacyIAccessible.Select`. The fallback makes `DataGridView` cells
+  selectable.
+- **expand / collapse:** read the current state first and do nothing
+  when the element is already there. MSAA elements without
+  `ExpandCollapsePattern` (group rows, legacy tree grids) use their
+  default action. An MSAA element that reports no state is acted on
+  without verification. One with no state and no default action reports
+  "not supported", so the client's ALT+Down fallback runs.
+- ComboBoxes keep the ALT+Down fallback, also after `invalid element
+  state`.
+
+Behaviour changes from earlier versions:
+
+- `select` / `expand` / `collapse` on MSAA elements fail with
+  `invalid element state` where they used to return success without
+  effect.
+- `expand` on an already expanded MSAA group no longer collapses it.
+- `select` without `SelectionItemPattern` on a non-MSAA element fails
+  with "does not support SelectionItemPattern", as before. `collapse`
+  without `ExpandCollapsePattern` on a non-MSAA element fails the same
+  way and never runs the element's default action.
+- `getAttribute('ExpandCollapseState')` errors on an element that
+  reports no state. It used to return `LeafNode`.
+- `windows: invoke` calls the real `InvokePattern`. On elements that
+  have both Invoke and SelectionItem it now invokes instead of
+  selecting.
 
 #### windows: setValue
 

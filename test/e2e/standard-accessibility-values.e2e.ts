@@ -202,6 +202,13 @@ describe('standard accessibility values (MSAA-only fixture)', () => {
             expect(await statusText(app)).toContain('Grid: db-01/Status');
         });
 
+        it('stays "not supported" on a native element without SelectionItemPattern (no MSAA fallback)', async () => {
+            // A WPF Button: UIA core synthesises LegacyIAccessible for it, but the legacy
+            // select fallback is MSAA-only — it must not move focus or report state errors.
+            await expect(app.executeScript('windows: select', [await app.$('~wpfButton')]))
+                .rejects.toThrow(/does not support SelectionItemPattern/);
+        });
+
         it('fails with InvalidElementState on a group that cannot be selected', async () => {
             const before = await statusText(app);
             await expect(app.executeScript('windows: select', [await app.$(group('EU West'))]))

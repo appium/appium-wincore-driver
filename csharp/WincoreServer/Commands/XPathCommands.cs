@@ -109,9 +109,9 @@ internal sealed class UiaXmlModel
         req.AddProperty(UIA.ControlTypePropertyId);
         req.AddProperty(UIA.RuntimeIdPropertyId);
         req.AddProperty(UIA.BoundingRectanglePropertyId);
-        foreach (var (_, pid, _) in StandardValues.Attributes)
+        foreach (var pid in includeLegacy ? StandardValues.BasePropertyIds.Concat(StandardValues.LegacyPropertyIds) : StandardValues.BasePropertyIds)
         {
-            if (includeLegacy || !StandardValues.LegacyPropertyIds.Contains(pid)) req.AddProperty(pid);
+            req.AddProperty(pid);
         }
         req.TreeScope = TreeScope.Element;
         req.TreeFilter = automation.CreateTrueCondition();
@@ -234,8 +234,8 @@ internal sealed class UiaXmlModel
                 catch { /* skip a single unreadable attribute */ }
             }
 
-            SetStandardValues(xml, pid => element.GetCachedPropertyValue(pid),
-                ReadCached(element, UIA.IsPasswordPropertyId, true) == "true",
+            StandardValues.Apply(xml, pid => element.GetCachedPropertyValue(pid),
+                StandardValues.IsPassword(() => element.GetCachedPropertyValue(UIA.IsPasswordPropertyId)),
                 ReadCached(element, UIA.FrameworkIdPropertyId, false));
 
             try
@@ -316,12 +316,10 @@ internal sealed class UiaXmlModel
                 catch { /* skip a single unreadable attribute */ }
             }
 
-            bool isPassword;
-            try { isPassword = ReadLive(element, UIA.IsPasswordPropertyId, true) == "true"; }
-            catch (Exception ex) when (UiaErrors.IsExpected(ex)) { isPassword = true; } // unreadable → fail closed; anything else skips the node
+            var isPassword = StandardValues.IsPassword(() => element.GetCurrentPropertyValue(UIA.IsPasswordPropertyId));
             string? frameworkId;
             try { frameworkId = element.get_CurrentFrameworkId(); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { frameworkId = null; }
-            SetStandardValues(xml, element.GetCurrentPropertyValue, isPassword, frameworkId);
+            StandardValues.Apply(xml, element.GetCurrentPropertyValue, isPassword, frameworkId);
 
             try
             {
@@ -434,19 +432,4 @@ internal sealed class UiaXmlModel
 
     private static string Sanitize(string s) => StandardValues.Sanitize(s);
 
-    // Native-UIA elements (WPF, XAML) skip the LegacyIAccessible reads and emit them as ""
-    // — see StandardValues.IsNativeUia for why.
-    private static void SetStandardValues(XmlElement xml, Func<int, object?> read, bool isPassword, string? frameworkId)
-    {
-        var skipLegacy = StandardValues.IsNativeUia(frameworkId);
-        foreach (var (name, pid, content) in StandardValues.Attributes)
-        {
-            object? raw = null;
-            if (!skipLegacy || !StandardValues.LegacyPropertyIds.Contains(pid))
-            {
-                try { raw = read(pid); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { raw = null; }
-            }
-            xml.SetAttribute(name, StandardValues.Format(raw, content, isPassword));
-        }
-    }
 }

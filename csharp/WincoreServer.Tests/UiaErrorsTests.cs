@@ -39,7 +39,11 @@ public class UiaErrorsTests
     public void IsNotExpected_ForBugs(Exception ex) => Assert.False(UiaErrors.IsExpected(ex));
 
     [Fact]
-    public void ArgumentNullException_CountsAsArgumentException()
-        // Subclasses ride along with their base; documented so it is a deliberate choice.
-        => Assert.True(UiaErrors.IsExpected(new ArgumentNullException("x")));
+    public void ArgumentNullException_IsABug_NotAnInteropFailure()
+        // Interop never raises it; a null passed by our own code must surface.
+        => Assert.False(UiaErrors.IsExpected(new ArgumentNullException("x")));
+
+    [Fact]
+    public void OtherArgumentExceptionSubclasses_StayExpected()
+        => Assert.True(UiaErrors.IsExpected(new ArgumentOutOfRangeException("x")));
 }

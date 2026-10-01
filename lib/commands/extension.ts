@@ -260,6 +260,9 @@ async function waitForCollapsed(this: AppiumWincoreDriver, elementId: string): P
 // keyboard trick: sending it to a grid row or tree item does something unrelated and
 // masks the failure, so only a ComboBox still gets the keyboard fallback; anything else
 // surfaces the error. An unreadable control type also surfaces it — never send keys blind.
+// The server only raises InvalidElementState for MSAA-backed elements (real patterns are
+// trusted), so for a ComboBox this means its MSAA default action did not open it within the
+// verification budget; ALT+Down is the remaining lever.
 async function shouldSurfaceStateError(this: AppiumWincoreDriver, err: unknown, elementId: string): Promise<boolean> {
     if (!(err instanceof errors.InvalidElementStateError)) {
         return false;

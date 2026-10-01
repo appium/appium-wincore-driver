@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Xml;
 using WincoreServer.Uia3;
 
 namespace WincoreServer.Commands;
@@ -20,24 +21,61 @@ internal static class StandardValues
     /// <summary>
     /// Attribute name → UIA property id. <c>Content</c> attributes carry control content:
     /// they are blanked on password elements and truncated to <see cref="MaxContentLength"/>.
-    /// Same spelling as the ConditionBuilder property map, so a page-source attribute
-    /// works unchanged in getAttribute and find conditions.
+    /// <c>Legacy</c> attributes are LegacyIAccessible properties, skipped for native-UIA
+    /// elements (<see cref="IsNativeUia"/>). Same spelling as the ConditionBuilder property
+    /// map, so a page-source attribute works unchanged in getAttribute and find conditions.
     /// </summary>
-    public static readonly (string Name, int Pid, bool Content)[] Attributes =
+    public static readonly (string Name, int Pid, bool Content, bool Legacy)[] Attributes =
     {
-        ("Value", UIA.ValueValuePropertyId, true),
-        ("LegacyValue", UIA.LegacyIAccessibleValuePropertyId, true),
-        ("LegacyName", UIA.LegacyIAccessibleNamePropertyId, false),
-        ("LegacyDescription", UIA.LegacyIAccessibleDescriptionPropertyId, false),
-        ("LegacyRole", UIA.LegacyIAccessibleRolePropertyId, false),
-        ("LegacyState", UIA.LegacyIAccessibleStatePropertyId, false),
+        ("Value", UIA.ValueValuePropertyId, true, false),
+        ("LegacyValue", UIA.LegacyIAccessibleValuePropertyId, true, true),
+        ("LegacyName", UIA.LegacyIAccessibleNamePropertyId, false, true),
+        ("LegacyDescription", UIA.LegacyIAccessibleDescriptionPropertyId, false, true),
+        ("LegacyRole", UIA.LegacyIAccessibleRolePropertyId, false, true),
+        ("LegacyState", UIA.LegacyIAccessibleStatePropertyId, false, true),
     };
 
-    /// <summary>The LegacyIAccessible subset of <see cref="Attributes"/>.</summary>
-    public static readonly int[] LegacyPropertyIds = Attributes
-        .Where(a => a.Name.StartsWith("Legacy", StringComparison.Ordinal))
-        .Select(a => a.Pid)
-        .ToArray();
+    /// <summary>Property ids of the <c>Legacy</c> attributes (the full cache request adds these).</summary>
+    public static readonly int[] LegacyPropertyIds = Attributes.Where(a => a.Legacy).Select(a => a.Pid).ToArray();
+
+    /// <summary>Property ids every walk caches (the lean request has only these).</summary>
+    public static readonly int[] BasePropertyIds = Attributes.Where(a => !a.Legacy).Select(a => a.Pid).ToArray();
+
+    /// <summary>
+    /// Reads IsPassword for the password rule, failing closed: anything but a readable
+    /// false (missing from the cache, unexpected type, a UIA error) counts as a password,
+    /// so an unreadable flag can never leak a secret into page source.
+    /// </summary>
+    public static bool IsPassword(Func<object?> read)
+    {
+        try
+        {
+            return read() switch { bool b => b, int i => i != 0, _ => true };
+        }
+        catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return true; }
+    }
+
+    /// <summary>
+    /// Sets the standard-value attributes on one page-source / XPath node. Shared by the
+    /// cached and live builders of both, so all four emit identical attributes.
+    /// </summary>
+    /// <param name="read">Reads one property (cached or live); UIA failures become "".</param>
+    /// <param name="isPassword">Blank the content attributes (fail closed when unknown).</param>
+    /// <param name="frameworkId">Skips the Legacy reads for native-UIA frameworks.</param>
+    public static void Apply(XmlElement el, Func<int, object?> read, bool isPassword, string? frameworkId)
+    {
+        var skipLegacy = IsNativeUia(frameworkId);
+        foreach (var (name, pid, content, legacy) in Attributes)
+        {
+            object? raw = null;
+            if (!(legacy && skipLegacy))
+            {
+                try { raw = read(pid); }
+                catch (Exception ex) when (UiaErrors.IsExpected(ex)) { raw = null; }
+            }
+            el.SetAttribute(name, Format(raw, content, isPassword));
+        }
+    }
 
     /// <summary>
     /// Frameworks with their own UIA provider. UIA core has no MSAA object behind these
@@ -76,7 +114,7 @@ internal static class StandardValues
             _ => "",
         };
 
-        if (content && text.Length > MaxContentLength) text = text[..MaxContentLength];
+        if (content) text = Truncate(text, MaxContentLength);
         return Sanitize(text);
     }
 
@@ -118,7 +156,13 @@ internal static class StandardValues
         }
     }
 
-    /// <summary>Drops characters XML 1.0 cannot carry, so a control's text cannot break the document.</summary>
+    /// <summary>
+    /// Drops characters XML 1.0 cannot carry, so a control's text cannot break the document.
+    /// XML allows #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]: the
+    /// last range arrives in UTF-16 as a surrogate pair, which is kept whole (emoji, CJK
+    /// Extension B). Only lone surrogates are dropped — a name that loses its emoji would
+    /// no longer match an accessibility id / name locator built from it.
+    /// </summary>
     public static string Sanitize(string? s)
     {
         if (string.IsNullOrEmpty(s)) return s ?? "";
@@ -126,6 +170,12 @@ internal static class StandardValues
         for (var i = 0; i < s.Length; i++)
         {
             var ch = s[i];
+            if (char.IsHighSurrogate(ch) && i + 1 < s.Length && char.IsLowSurrogate(s[i + 1]))
+            {
+                sb?.Append(ch).Append(s[i + 1]);
+                i++;
+                continue;
+            }
             var ok = ch == '\t' || ch == '\n' || ch == '\r' ||
                      (ch >= 0x20 && ch <= 0xD7FF) ||
                      (ch >= 0xE000 && ch <= 0xFFFD);
@@ -140,5 +190,14 @@ internal static class StandardValues
             }
         }
         return sb?.ToString() ?? s;
+    }
+
+    /// <summary>Cuts to at most <paramref name="max"/> UTF-16 units without splitting a surrogate pair.</summary>
+    internal static string Truncate(string text, int max)
+    {
+        if (text.Length <= max) return text;
+        var cut = max;
+        if (cut > 0 && char.IsHighSurrogate(text[cut - 1]) && char.IsLowSurrogate(text[cut])) cut--;
+        return text[..cut];
     }
 }

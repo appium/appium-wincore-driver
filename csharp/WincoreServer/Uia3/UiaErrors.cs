@@ -14,16 +14,43 @@ namespace WincoreServer.Uia3;
 /// <item>UIA_E_TIMEOUT → <see cref="TimeoutException"/></item>
 /// <item>E_NOTIMPL → <see cref="NotImplementedException"/>; provider quirks → <see cref="NotSupportedException"/> / <see cref="InvalidCastException"/></item>
 /// </list>
-/// Anything else is a bug and should surface. Use as <c>catch (Exception ex) when (UiaErrors.IsExpected(ex))</c>.
+/// Anything else is a bug and should surface — including <see cref="ArgumentNullException"/>:
+/// interop never raises it, so it can only be a null passed by our own code.
+/// Use as <c>catch (Exception ex) when (UiaErrors.IsExpected(ex))</c>.
 /// </summary>
 internal static class UiaErrors
 {
+    /// <summary>UIA_E_ELEMENTNOTAVAILABLE: the element no longer exists in the UI.</summary>
+    public const int ElementNotAvailable = unchecked((int)0x80040201);
+
     public static bool IsExpected(Exception ex) => ex is COMException
-        or ArgumentException
+        or ArgumentException and not ArgumentNullException
         or UnauthorizedAccessException
         or InvalidOperationException
         or TimeoutException
         or NotImplementedException
         or NotSupportedException
         or InvalidCastException;
+
+    /// <summary>
+    /// True only when UIA reports the element as gone (UIA_E_ELEMENTNOTAVAILABLE). Verified
+    /// actions treat a vanished element as done; a timeout or an access error proves nothing
+    /// and must not be read as success.
+    /// </summary>
+    public static bool IsGone(IUIAutomationElement element)
+    {
+        try
+        {
+            _ = element.CurrentProcessId;
+            return false;
+        }
+        catch (COMException ex) when (ex.HResult == ElementNotAvailable)
+        {
+            return true;
+        }
+        catch (Exception ex) when (IsExpected(ex))
+        {
+            return false;
+        }
+    }
 }
