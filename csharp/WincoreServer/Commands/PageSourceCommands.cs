@@ -122,7 +122,7 @@ public static class PageSourceCommands
             object? raw = null;
             if (!skipLegacy || !StandardValues.LegacyPropertyIds.Contains(pid))
             {
-                try { raw = read(pid); } catch { raw = null; }
+                try { raw = read(pid); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { raw = null; }
             }
             el.SetAttribute(name, StandardValues.Format(raw, content, isPassword));
         }

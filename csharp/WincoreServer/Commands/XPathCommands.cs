@@ -318,9 +318,9 @@ internal sealed class UiaXmlModel
 
             bool isPassword;
             try { isPassword = ReadLive(element, UIA.IsPasswordPropertyId, true) == "true"; }
-            catch { isPassword = true; } // unreadable → fail closed, never leak content
+            catch (Exception ex) when (UiaErrors.IsExpected(ex)) { isPassword = true; } // unreadable → fail closed; anything else skips the node
             string? frameworkId;
-            try { frameworkId = element.get_CurrentFrameworkId(); } catch { frameworkId = null; }
+            try { frameworkId = element.get_CurrentFrameworkId(); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { frameworkId = null; }
             SetStandardValues(xml, element.GetCurrentPropertyValue, isPassword, frameworkId);
 
             try
@@ -444,7 +444,7 @@ internal sealed class UiaXmlModel
             object? raw = null;
             if (!skipLegacy || !StandardValues.LegacyPropertyIds.Contains(pid))
             {
-                try { raw = read(pid); } catch { raw = null; }
+                try { raw = read(pid); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { raw = null; }
             }
             xml.SetAttribute(name, StandardValues.Format(raw, content, isPassword));
         }

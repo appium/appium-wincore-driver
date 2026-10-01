@@ -136,12 +136,12 @@ public static class PatternCommands
             return element.GetCurrentPropertyValue(UIA.LegacyIAccessibleDefaultActionPropertyId) is string s
                    && !string.IsNullOrWhiteSpace(s);
         }
-        catch { return false; }
+        catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return false; }
     }
 
     private static ExpandCollapseState? ReadExpandStateOrNull(IUIAutomationElement element)
     {
-        try { return ReadExpandState(element); } catch { return null; }
+        try { return ReadExpandState(element); } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return null; }
     }
 
     private static bool IsExpanded(ExpandCollapseState s)
@@ -154,7 +154,7 @@ public static class PatternCommands
         => SettleUntil(() =>
         {
             try { return ReadExpandState(element) is { } s && IsExpanded(s) == expand; }
-            catch { return true; }
+            catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return true; }
         });
 
     private static int? ReadLegacyState(IUIAutomationElement element)
@@ -168,12 +168,12 @@ public static class PatternCommands
                 _ => null, // not-supported sentinel
             };
         }
-        catch { return null; }
+        catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return null; }
     }
 
     private static T? TryPattern<T>(IUIAutomationElement element, int patternId) where T : class
     {
-        try { return element.GetCurrentPattern(patternId) as T; } catch { return null; }
+        try { return element.GetCurrentPattern(patternId) as T; } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return null; }
     }
 
     // Providers update state asynchronously after an action; poll briefly.
@@ -258,7 +258,7 @@ public static class PatternCommands
             _ = element.CurrentProcessId; // throws once the element is gone
             return ReadLegacyState(element) is int state && (state & UIA.StateSystemSelected) != 0;
         }
-        catch
+        catch (Exception ex) when (UiaErrors.IsExpected(ex))
         {
             return true;
         }

@@ -108,13 +108,13 @@ internal static class StandardValues
         public IUIAutomationElement Upgrade(IUIAutomationElement child, IUIAutomationCacheRequest fetchedWith)
         {
             if (ReferenceEquals(fetchedWith, Full) || IsNativeUia(CachedFrameworkId(child))) return child;
-            try { return child.BuildUpdatedCache(Full) ?? child; } catch { return child; }
+            try { return child.BuildUpdatedCache(Full) ?? child; } catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return child; }
         }
 
         private static string? CachedFrameworkId(IUIAutomationElement el)
         {
             try { return el.GetCachedPropertyValue(UIA.FrameworkIdPropertyId) as string; }
-            catch { return null; }
+            catch (Exception ex) when (UiaErrors.IsExpected(ex)) { return null; }
         }
     }
 
