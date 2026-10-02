@@ -1,3 +1,26 @@
+## [3.1.0](https://github.com/verisoft-ai/appium-wincore-driver/compare/v3.0.1...v3.1.0) (2026-10-02)
+
+### Features
+
+* expose standard accessibility values and verify select/expand/collapse ([0aae39d](https://github.com/verisoft-ai/appium-wincore-driver/commit/0aae39daeaa571f16b118b1622133371d616db50)), closes [#x1](https://github.com/verisoft-ai/appium-wincore-driver/issues/x1)
+* **server:** route element commands to tree providers centrally ([ba5e8e5](https://github.com/verisoft-ai/appium-wincore-driver/commit/ba5e8e5c0850d9c150c6b1a9a3938687b944a7ec))
+
+### Bug Fixes
+
+* **input:** stop windows: keys losing or repeating characters after Unicode keystrokes ([61380b1](https://github.com/verisoft-ai/appium-wincore-driver/commit/61380b1dcdfc6804a8168349b58a4e691fff8022))
+* **sdk:** bump SdkContract.Version to 1.1.0 ([e24b404](https://github.com/verisoft-ai/appium-wincore-driver/commit/e24b404d05f2d81b7ddcd2ea3531ece8cb5cf901))
+* **server:** correct UIA3 COM interop declarations ([7d544f2](https://github.com/verisoft-ai/appium-wincore-driver/commit/7d544f2edc52f5b4967e577bb7e241817cf6b67d))
+* **server:** verify only MSAA actions; keep non-BMP text; review fixes ([cedad8c](https://github.com/verisoft-ai/appium-wincore-driver/commit/cedad8ce226bf5546077347f7532b3c2be95c0f3)), closes [#1](https://github.com/verisoft-ai/appium-wincore-driver/issues/1) [#3](https://github.com/verisoft-ai/appium-wincore-driver/issues/3) [#2](https://github.com/verisoft-ai/appium-wincore-driver/issues/2)
+* **webview:** carry implicit wait into Chromedriver; use local e2e page ([4d432a9](https://github.com/verisoft-ai/appium-wincore-driver/commit/4d432a999e1806234be69408bf91298baab7879f))
+
+### Miscellaneous Chores
+
+* set package author to verisoft-ai ([090d283](https://github.com/verisoft-ai/appium-wincore-driver/commit/090d283236e6d75444020ac97ef96839b2ad9438))
+
+### Code Refactoring
+
+* **server:** catch only expected UIA failures in new tolerant paths ([84845fb](https://github.com/verisoft-ai/appium-wincore-driver/commit/84845fb56f218765a2fa6d6e4d5bfa8306b5e2df))
+
 ## [3.0.1](https://github.com/verisoft-ai/appium-wincore-driver/compare/v3.0.0...v3.0.1) (2026-09-13)
 
 ### Bug Fixes
