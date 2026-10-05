@@ -1,3 +1,10 @@
+## [3.1.1](https://github.com/verisoft-ai/appium-wincore-driver/compare/v3.1.0...v3.1.1) (2026-10-05)
+
+### Bug Fixes
+
+* **app:** attach to the process window with real content, bound the splash wait ([7e4c2fa](https://github.com/verisoft-ai/appium-wincore-driver/commit/7e4c2faff6ef381ee6ea2e88578798a78eb9ed05))
+* **extension:** surface expand/collapse errors unless the element is a ComboBox ([1fcabef](https://github.com/verisoft-ai/appium-wincore-driver/commit/1fcabef77e5804db9f13105ef426e0dcd5056214))
+
 ## [3.1.0](https://github.com/verisoft-ai/appium-wincore-driver/compare/v3.0.1...v3.1.0) (2026-10-02)
 
 ### Features
