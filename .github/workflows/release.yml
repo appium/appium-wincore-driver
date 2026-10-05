@@ -7,6 +7,14 @@ on:
       - main
       - develop
 
+# Runs wait on the Release environment's manual approval, so pushes can pile up
+# behind it. Keep at most one pending run per branch: a newer push cancels the
+# older *pending* run (it would be stale by the time it's approved anyway), while
+# cancel-in-progress: false never kills a run that's already publishing.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
@@ -73,34 +81,45 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.x'
-    - name: Check if this SDK version is already published
+    # Mirrors semantic-release's "local branch is behind the remote" check: if main
+    # moved on while this run waited for approval, publish nothing and let the newer
+    # run handle it. Tagging a stale commit whose workflow files differ from main's
+    # is rejected for GITHUB_TOKEN (no `workflows` permission), which left 1.1.0 on
+    # NuGet without its sdk-v tag.
+    - name: Decide whether to publish this SDK version
       id: sdkver
       shell: bash
       run: |
         VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" csharp/WincoreServerSdk/WincoreServerSdk.csproj)
         echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        git fetch --depth=1 origin main
+        if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
+          echo "::notice::main has moved past $GITHUB_SHA; skipping SDK publish (a newer run will handle it)"
+          echo "publish=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
         STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
           "https://api.nuget.org/v3-flatcontainer/wincoreserversdk/$VERSION/wincoreserversdk.$VERSION.nupkg")
         if [ "$STATUS" = "200" ]; then
-          echo "already_published=true" >> "$GITHUB_OUTPUT"
+          echo "publish=false" >> "$GITHUB_OUTPUT"
         else
-          echo "already_published=false" >> "$GITHUB_OUTPUT"
+          echo "publish=true" >> "$GITHUB_OUTPUT"
         fi
     - name: Pack WincoreServerSdk
-      if: steps.sdkver.outputs.already_published == 'false'
+      if: steps.sdkver.outputs.publish == 'true'
       run: dotnet pack csharp/WincoreServerSdk/WincoreServerSdk.csproj -c Release -o ./nupkg
     # NuGet trusted publishing: exchanges this job's GitHub OIDC token for a
     # short-lived NuGet API key (unlike npm, NuGet has no built-in OIDC support in
     # the CLI itself — the login action is required and its output key must be
     # passed to `dotnet nuget push` explicitly). No secret stored in the repo or org.
     - name: NuGet login (trusted publishing)
-      if: steps.sdkver.outputs.already_published == 'false'
+      if: steps.sdkver.outputs.publish == 'true'
       id: nuget-login
       uses: NuGet/login@v1
       with:
         user: Yuri-Schwab
     - name: Push WincoreServerSdk to NuGet
-      if: steps.sdkver.outputs.already_published == 'false'
+      if: steps.sdkver.outputs.publish == 'true'
       shell: pwsh
       run: |
         $pkg = Get-ChildItem ./nupkg/*.nupkg | Select-Object -First 1
@@ -109,7 +128,7 @@ jobs:
           --source https://api.nuget.org/v3/index.json `
           --skip-duplicate
     - name: Tag the published SDK version
-      if: steps.sdkver.outputs.already_published == 'false'
+      if: steps.sdkver.outputs.publish == 'true'
       run: |
         git tag "sdk-v${{ steps.sdkver.outputs.version }}"
         git push origin "sdk-v${{ steps.sdkver.outputs.version }}"
