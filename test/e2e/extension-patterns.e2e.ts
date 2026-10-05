@@ -116,9 +116,14 @@ describe('windows: pattern extension commands', () => {
             const windowEl = await calc.executeScript('windows: getWindowElement', []);
             await calc.executeScript('windows: minimize', [windowEl]);
             await calc.executeScript('windows: restore', [windowEl]);
-            // Window should be accessible again
+            // Window should be accessible again. Restore returns as soon as the visual
+            // state is set, but a minimized UWP app is suspended and rebuilds its UIA
+            // content tree a beat later — wait for it rather than checking once.
             const display = await calc.$('~CalculatorResults');
-            expect(await display.isExisting()).toBe(true);
+            await display.waitForExist({
+                timeout: 10_000,
+                timeoutMsg: 'Calculator UI did not come back after restore',
+            });
         });
 
         it('restore on an already-normal window is a no-op: rect is unchanged', async () => {
