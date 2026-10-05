@@ -54,7 +54,7 @@ All capabilities use the `appium:` prefix in W3C format
 | `appium:appArguments` | string | CLI arguments for the launched process |
 | `appium:appWorkingDir` | string | Working directory for the process |
 | `appium:appEnvironment` | object | Env vars injected for the session lifetime |
-| `appium:ms:waitForAppLaunch` | number | Seconds (<=120) or ms (>120) to wait for window |
+| `appium:ms:waitForAppLaunch` | number | Seconds (<=120) or ms (>120) to wait for window, including for a splash screen to give way to the main window (that splash wait defaults to 5 s when unset) |
 | `appium:shouldCloseApp` | boolean | Close the window at session end. Default: `true` |
 | `appium:prerun` | object | `{ script }` or `{ command }` — PowerShell before start |
 | `appium:postrun` | object | `{ script }` or `{ command }` — PowerShell after end |

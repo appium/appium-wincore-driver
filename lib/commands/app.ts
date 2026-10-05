@@ -50,6 +50,17 @@ const MAX_POLL_ATTEMPTS = 30;
 const SET_WINDOW_MAX_POLL_ATTEMPTS = 2;
 
 /**
+ * How long to wait for the main window after attaching to a splash screen when
+ * `ms:waitForAppLaunch` isn't set. A decorated window always passes the splash
+ * probe through its native title bar and system menu (that is why a Java Swing
+ * frame qualifies before its bridge is attached), so this only bites undecorated
+ * windows. Kept short because an app whose real main window is undecorated and
+ * has fewer than two keyboard-focusable elements pays it on every launch. Apps
+ * with long splash screens should set `ms:waitForAppLaunch`, which replaces this.
+ */
+const DEFAULT_SPLASH_WAIT_MS = 5_000;
+
+/**
  * Normalizes the `ms:waitForAppLaunch` capability to milliseconds.
  *
  * WinAppDriver's spec says the value is in seconds (max 50), but many users
@@ -408,9 +419,12 @@ export async function changeRootElement(this: AppiumWincoreDriver, pathOrNativeW
 
         try {
             const result = await this.attachToApplicationWindow(launcherPid, { deadline });
-            if (!result.focused && deadline && performance.now() < deadline) {
+            // Without ms:waitForAppLaunch there is no launch deadline, but a splash
+            // still needs a bounded wait — otherwise the session stays on it.
+            const splashDeadline = deadline ?? performance.now() + DEFAULT_SPLASH_WAIT_MS;
+            if (!result.focused && performance.now() < splashDeadline) {
                 this.log.info('Attached to a window that cannot receive focus (likely a splash screen). Waiting for the main window...');
-                await this.waitForMainWindow(result.knownPids, deadline);
+                await this.waitForMainWindow(result.knownPids, splashDeadline);
             }
             return;
         } catch (err) {
@@ -563,9 +577,11 @@ export async function setWindowRect(
  * separate getProcessIds round-trip.
  * @param launcherPid - The PID of the process that was launched.
  * @param timeout - How long, in milliseconds, to poll before giving up.
- * @returns The found window handle and every PID discovered in its process tree.
+ * @returns The found window handle, every visible titled window of the process
+ * tree (in z-order — an app can own more than one, e.g. Notepad's "Command
+ * Palette"), and every PID discovered in its process tree.
  */
-export async function waitForNewWindow(this: AppiumWincoreDriver, launcherPid: number, timeout: number): Promise<{ handle: number, knownPids: number[] }> {
+export async function waitForNewWindow(this: AppiumWincoreDriver, launcherPid: number, timeout: number): Promise<{ handle: number, handles: number[], knownPids: number[] }> {
     const start = performance.now();
     let attempts = 0;
     const knownPids = new Set<number>([launcherPid]);
@@ -578,7 +594,7 @@ export async function waitForNewWindow(this: AppiumWincoreDriver, launcherPid: n
 
         const handles = getWindowAllHandlesForProcessIds([...knownPids]);
         if (handles.length > 0) {
-            return { handle: handles[handles.length - 1], knownPids: [...knownPids] };
+            return { handle: handles[handles.length - 1], handles, knownPids: [...knownPids] };
         }
 
         this.log.debug(`Waiting for the process window to appear... (${++attempts}/${Math.floor(timeout / POLL_INTERVAL_MS)})`);
@@ -595,11 +611,14 @@ export async function waitForNewWindow(this: AppiumWincoreDriver, launcherPid: n
  * session root, and brings it to the foreground.
  *
  * @param handles - Candidate native window handles to try, in order.
+ * @param options.requireFocusable - When true, never fall back to a window that
+ * fails the focusable-descendant probe; return false instead.
  * @returns True if a window was successfully attached, false if none qualified.
  */
 export async function attachToWindowHandles(
     this: AppiumWincoreDriver,
     handles: number[],
+    options: { requireFocusable?: boolean } = {},
 ): Promise<boolean> {
     let fallbackElementId = '';
 
@@ -648,7 +667,7 @@ export async function attachToWindowHandles(
     // No window passed the focusability threshold (e.g. click-only or
     // custom-drawn apps with no keyboard-focusable elements). Attach to
     // the first valid non-CoreWindow handle found.
-    if (fallbackElementId) {
+    if (fallbackElementId && !options.requireFocusable) {
         this.log.info(`No window with focusable descendants found — attaching to fallback element.`);
         await this.sendCommand('setRootElementFromElementId', { elementId: fallbackElementId });
         const isNotNull = await this.sendCommand('checkRootElementNotNull', {}) as boolean;
@@ -689,7 +708,16 @@ export async function attachToApplicationWindow(
         ? Math.min(waitForAppLaunchMs, Math.max(0, deadline - performance.now()))
         : waitForAppLaunchMs;
 
-    const { handle: nativeWindowHandle, knownPids } = await waitForNewWindow.call(this, launcherPid, windowTimeout);
+    const { handle: nativeWindowHandle, handles, knownPids } = await waitForNewWindow.call(this, launcherPid, windowTimeout);
+
+    // The process tree can own several top-level windows (e.g. Notepad also owns a
+    // "Command Palette" window with no focusable content). Which one lands last in
+    // z-order is a race, so first look across all of them for a real app window. If
+    // none qualifies yet (a genuine splash screen), fall through to the single-handle
+    // path below, which flags the splash for waitForMainWindow.
+    if (handles.length > 1 && await this.attachToWindowHandles(handles, { requireFocusable: true })) {
+        return { focused: true, knownPids };
+    }
 
     let elementId = '';
 
@@ -776,9 +804,13 @@ export async function attachToApplicationWindow(
  * Waits for a splash screen to disappear and re-attaches to the app's main window.
  *
  * After `attachToApplicationWindow` attaches to a window that can't receive focus
- * (a splash screen), this function polls until the current root element becomes
- * stale (splash screen closed) or a new, different window handle appears for the
- * same process. It then re-attaches to the new main window.
+ * (a splash screen), this function polls until either the current root element
+ * becomes stale (splash screen closed) — then re-attaches via
+ * {@link attachToApplicationWindow} — or any window of the process tree has real
+ * focusable content: the main window opening alongside the splash, or the attached
+ * window itself finishing loading its UIA tree. A window that is merely auxiliary
+ * (e.g. Notepad's "Command Palette") never closes, so waiting for staleness alone
+ * would burn the whole deadline.
  * @param knownPids - PIDs from the process tree of the splash-screen launch, used to
  * re-attach via {@link attachToApplicationWindow}.
  * @param deadline - A `performance.now()`-based deadline to stop polling at.
@@ -789,16 +821,7 @@ export async function waitForMainWindow(
     knownPids: number[],
     deadline: number,
 ): Promise<void> {
-    // Capture the splash screen's window handle so we can detect when a new window appears
-    let splashHandle: number | null = null;
-    try {
-        const rootId = await this.sendCommand('saveRootElementToTable', {}) as string;
-        splashHandle = Number(await this.sendCommand('getProperty', { elementId: rootId, property: 'NativeWindowHandle' }) as string);
-    } catch (err) {
-        this.log.debug(`[waitForMainWindow] Could not read splash screen handle, will just watch for staleness: ${err instanceof Error ? err.message : err}`);
-    }
-
-    this.log.debug(`Splash screen handle: ${splashHandle != null ? `0x${splashHandle.toString(16).padStart(8, '0')}` : 'unknown'}. Polling for main window...`);
+    this.log.debug('Polling for the main window...');
 
     let attempt = 0;
     while (performance.now() < deadline) {
@@ -836,15 +859,12 @@ export async function waitForMainWindow(
             return;
         }
 
-        // Root is still alive — check if the process now has a different (new) window
-        if (splashHandle != null) {
-            const handles = getWindowAllHandlesForProcessIds(knownPids);
-            const newHandle = handles.find((h) => h !== splashHandle);
-            if (newHandle) {
-                this.log.info(`New window detected (0x${newHandle.toString(16).padStart(8, '0')}) alongside splash screen (attempt ${attempt}). Waiting for splash to close...`);
-                // Don't re-attach yet — let the splash finish naturally.
-                // Once it closes, the root-stale path above will handle re-attach.
-            }
+        // Root is still alive — attach as soon as any window of the process tree has
+        // real content. The splash itself is skipped until it qualifies.
+        const handles = getWindowAllHandlesForProcessIds(knownPids);
+        if (handles.length > 0 && await this.attachToWindowHandles(handles, { requireFocusable: true })) {
+            this.log.info(`Attached to the main application window while the splash screen was still open (attempt ${attempt}).`);
+            return;
         }
 
         if (attempt % 10 === 0) {
