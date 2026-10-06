@@ -9,8 +9,6 @@ import { createMsaaLegacyControlsSession, quitSession } from './helpers/session.
  * UIA Name is a placeholder ("Status Row 1", "Group Row"), the real content is in
  * accValue. The fixture's status label echoes every effect as plain text, so actions are
  * checked against the app, not against accessibility state alone.
- *
- * Spec: specs/standard-accessibility-values.md.
  */
 
 const GRID_CELL = '//Edit[@Name="Status Row 1"]';
