@@ -1,3 +1,10 @@
+## [3.1.2](https://github.com/verisoft-ai/appium-wincore-driver/compare/v3.1.1...v3.1.2) (2026-10-07)
+
+### Miscellaneous Chores
+
+* keep formatter-owned files LF on Windows checkouts ([91b65a4](https://github.com/verisoft-ai/appium-wincore-driver/commit/91b65a458c89d0ce13a63f30a338e040d56a338c))
+* switch to shared oxc and release configs ([5f13f19](https://github.com/verisoft-ai/appium-wincore-driver/commit/5f13f1921c6915d45e9caf77585fb11e08460eb3)), closes [verisoft-ai/appium-wincore-driver#74](https://github.com/verisoft-ai/appium-wincore-driver/issues/74)
+
 ## [3.1.1](https://github.com/verisoft-ai/appium-wincore-driver/compare/v3.1.0...v3.1.1) (2026-10-05)
 
 ### Bug Fixes
