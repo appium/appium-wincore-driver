@@ -1,171 +1,170 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import { existsSync, unlinkSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import {
-    createCalculatorSession,
-    quitSession,
-    CALCULATOR_APP_ID,
-    closeAllTestApps,
-} from './helpers/session.js';
+import {existsSync, unlinkSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+
+import {describe, it, expect, afterEach} from 'vitest';
+
+import {createCalculatorSession, quitSession, CALCULATOR_APP_ID, closeAllTestApps} from './helpers/session.js';
 
 // Each test creates its own session because app lifecycle commands mutate session state.
 
 describe('App lifecycle commands', () => {
-    afterEach(() => {
-        closeAllTestApps;
-    });
-    describe('windows: launchApp and closeApp cycle', () => {
-        it('windows: launchApp launches a new app instance and display shows 0', async () => {
-            const driver = await createCalculatorSession();
-            try {
-                await driver.executeScript('windows: launchApp', []);
-                const display = await driver.$('~CalculatorResults');
-                const text = await display.getText();
-                expect(text).toContain('0');
-            } finally {
-                await quitSession(driver);
-            }
-        });
-
-        it('windows: closeApp closes the active window', async () => {
-            const driver = await createCalculatorSession();
-            try {
-                const handleBefore = await driver.getWindowHandle();
-                await driver.executeScript('windows: closeApp', []);
-                await driver.waitUntil(
-                    async () => {
-                        const handles = await driver.getWindowHandles();
-                        return !handles.includes(handleBefore);
-                    },
-                    { timeoutMsg: `window handle ${handleBefore} still present after closeApp` },
-                );
-            } finally {
-                await quitSession(driver);
-            }
-        });
-
-        it('windows: closeApp then windows: launchApp restores a usable session', async () => {
-            const driver = await createCalculatorSession();
-            try {
-                await driver.executeScript('windows: closeApp', []);
-                await driver.executeScript('windows: launchApp', []);
-                // The close/relaunch transition can transiently throw a UIA COM error
-                // (0x80040201, "event was unable to invoke any of the subscribers") if a
-                // findElement call lands mid-transition — a thrown error, not a "not
-                // found" result, so waitForExist alone doesn't cover it (it only retries
-                // the latter). Retry the lookup itself through the transition window.
-                await driver.waitUntil(
-                    async () => {
-                        try {
-                            const display = await driver.$('~CalculatorResults');
-                            return await display.isExisting();
-                        } catch {
-                            return false;
-                        }
-                    },
-                    { timeout: 10_000, timeoutMsg: 'Calculator display did not become reachable after closeApp/launchApp' }
-                );
-            } finally {
-                await quitSession(driver);
-            }
-        });
-
-        it('multiple windows: closeApp calls do not crash the session', async () => {
-            const driver = await createCalculatorSession({ 'appium:shouldCloseApp': false });
-            try {
-                await driver.executeScript('windows: closeApp', []);
-                // Second close should throw (app already closed)
-                await expect(
-                    driver.executeScript('windows: closeApp', [])
-                ).rejects.toThrow();
-            } finally {
-                await quitSession(driver);
-            }
-        });
+  afterEach(() => {
+    closeAllTestApps;
+  });
+  describe('windows: launchApp and closeApp cycle', () => {
+    it('windows: launchApp launches a new app instance and display shows 0', async () => {
+      const driver = await createCalculatorSession();
+      try {
+        await driver.executeScript('windows: launchApp', []);
+        const display = await driver.$('~CalculatorResults');
+        const text = await display.getText();
+        expect(text).toContain('0');
+      } finally {
+        await quitSession(driver);
+      }
     });
 
-    describe('shouldCloseApp capability', () => {
-        it('shouldCloseApp: true closes Calculator after deleteSession', async () => {
-            const driver = await createCalculatorSession({ 'appium:shouldCloseApp': true });
-            const handle = await driver.getWindowHandle();
-            await driver.deleteSession();
-
-            // Verify via a Root session that the Calculator window is gone
-            const rootDriver = await (await import('./helpers/session.js')).createRootSession();
-            try {
-                const handles = await rootDriver.getWindowHandles();
-                expect(handles).not.toContain(handle);
-            } finally {
-                await quitSession(rootDriver);
-            }
-        });
-
-        it('shouldCloseApp: false leaves Calculator running after deleteSession', async () => {
-            const driver = await createCalculatorSession({
-                'appium:shouldCloseApp': false,
-                'appium:app': CALCULATOR_APP_ID,
-            });
-            const handle = await driver.getWindowHandle();
-            await driver.deleteSession();
-
-            // Verify via a Root session that the Calculator window is still open
-            const rootDriver = await (await import('./helpers/session.js')).createRootSession();
-            try {
-                const handles = await rootDriver.getWindowHandles();
-                expect(handles).toContain(handle);
-            } finally {
-                // Clean up the orphaned window directly by its handle. Launching a fresh
-                // Calculator session here (as this used to do) spawns an unrelated second
-                // window — Calculator supports multiple independent instances — and closes
-                // that one instead, leaving this test's orphan running forever.
-                await rootDriver.switchToWindow(handle);
-                await rootDriver.executeScript('windows: closeApp', []);
-                await quitSession(rootDriver);
-            }
-        });
+    it('windows: closeApp closes the active window', async () => {
+      const driver = await createCalculatorSession();
+      try {
+        const handleBefore = await driver.getWindowHandle();
+        await driver.executeScript('windows: closeApp', []);
+        await driver.waitUntil(
+          async () => {
+            const handles = await driver.getWindowHandles();
+            return !handles.includes(handleBefore);
+          },
+          {timeoutMsg: `window handle ${handleBefore} still present after closeApp`},
+        );
+      } finally {
+        await quitSession(driver);
+      }
     });
 
-    describe('ms:forcequit capability', () => {
-        it('ms:forcequit: true forcefully terminates the Calculator process on quit', async () => {
-            const driver = await createCalculatorSession({
-                'appium:shouldCloseApp': true,
-                'ms:forcequit': true,
-            });
-            // Simply verify session creation and quit succeeds
-            expect(await driver.getWindowHandle()).toBeTruthy();
-            await expect(driver.deleteSession()).resolves.not.toThrow();
-        });
-    });
-
-    describe('prerun / postrun scripts', () => {
-        it('prerun script is executed before app launch (writes a marker file)', async () => {
-            const markerPath = join(tmpdir(), `appiumdesktop-prerun-${Date.now()}.txt`);
-            const driver = await createCalculatorSession({
-                'appium:prerun': {
-                    script: `New-Item -ItemType File -Path "${markerPath.replace(/\\/g, '\\\\')}" -Force | Out-Null`,
-                },
-            });
+    it('windows: closeApp then windows: launchApp restores a usable session', async () => {
+      const driver = await createCalculatorSession();
+      try {
+        await driver.executeScript('windows: closeApp', []);
+        await driver.executeScript('windows: launchApp', []);
+        // The close/relaunch transition can transiently throw a UIA COM error
+        // (0x80040201, "event was unable to invoke any of the subscribers") if a
+        // findElement call lands mid-transition — a thrown error, not a "not
+        // found" result, so waitForExist alone doesn't cover it (it only retries
+        // the latter). Retry the lookup itself through the transition window.
+        await driver.waitUntil(
+          async () => {
             try {
-                expect(existsSync(markerPath)).toBe(true);
-            } finally {
-                await quitSession(driver);
-                if (existsSync(markerPath)) { unlinkSync(markerPath); }
+              const display = await driver.$('~CalculatorResults');
+              return await display.isExisting();
+            } catch {
+              return false;
             }
-        });
-
-        it('postrun script is executed after session deletion (writes a marker file)', async () => {
-            const markerPath = join(tmpdir(), `appiumdesktop-postrun-${Date.now()}.txt`);
-            const driver = await createCalculatorSession({
-                'appium:postrun': {
-                    script: `New-Item -ItemType File -Path "${markerPath.replace(/\\/g, '\\\\')}" -Force | Out-Null`,
-                },
-            });
-            await driver.deleteSession();
-            // Give postrun a moment to execute
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            expect(existsSync(markerPath)).toBe(true);
-            if (existsSync(markerPath)) { unlinkSync(markerPath); }
-        });
+          },
+          {timeout: 10_000, timeoutMsg: 'Calculator display did not become reachable after closeApp/launchApp'},
+        );
+      } finally {
+        await quitSession(driver);
+      }
     });
+
+    it('multiple windows: closeApp calls do not crash the session', async () => {
+      const driver = await createCalculatorSession({'appium:shouldCloseApp': false});
+      try {
+        await driver.executeScript('windows: closeApp', []);
+        // Second close should throw (app already closed)
+        await expect(driver.executeScript('windows: closeApp', [])).rejects.toThrow();
+      } finally {
+        await quitSession(driver);
+      }
+    });
+  });
+
+  describe('shouldCloseApp capability', () => {
+    it('shouldCloseApp: true closes Calculator after deleteSession', async () => {
+      const driver = await createCalculatorSession({'appium:shouldCloseApp': true});
+      const handle = await driver.getWindowHandle();
+      await driver.deleteSession();
+
+      // Verify via a Root session that the Calculator window is gone
+      const rootDriver = await (await import('./helpers/session.js')).createRootSession();
+      try {
+        const handles = await rootDriver.getWindowHandles();
+        expect(handles).not.toContain(handle);
+      } finally {
+        await quitSession(rootDriver);
+      }
+    });
+
+    it('shouldCloseApp: false leaves Calculator running after deleteSession', async () => {
+      const driver = await createCalculatorSession({
+        'appium:shouldCloseApp': false,
+        'appium:app': CALCULATOR_APP_ID,
+      });
+      const handle = await driver.getWindowHandle();
+      await driver.deleteSession();
+
+      // Verify via a Root session that the Calculator window is still open
+      const rootDriver = await (await import('./helpers/session.js')).createRootSession();
+      try {
+        const handles = await rootDriver.getWindowHandles();
+        expect(handles).toContain(handle);
+      } finally {
+        // Clean up the orphaned window directly by its handle. Launching a fresh
+        // Calculator session here (as this used to do) spawns an unrelated second
+        // window — Calculator supports multiple independent instances — and closes
+        // that one instead, leaving this test's orphan running forever.
+        await rootDriver.switchToWindow(handle);
+        await rootDriver.executeScript('windows: closeApp', []);
+        await quitSession(rootDriver);
+      }
+    });
+  });
+
+  describe('ms:forcequit capability', () => {
+    it('ms:forcequit: true forcefully terminates the Calculator process on quit', async () => {
+      const driver = await createCalculatorSession({
+        'appium:shouldCloseApp': true,
+        'ms:forcequit': true,
+      });
+      // Simply verify session creation and quit succeeds
+      expect(await driver.getWindowHandle()).toBeTruthy();
+      await expect(driver.deleteSession()).resolves.not.toThrow();
+    });
+  });
+
+  describe('prerun / postrun scripts', () => {
+    it('prerun script is executed before app launch (writes a marker file)', async () => {
+      const markerPath = join(tmpdir(), `appiumdesktop-prerun-${Date.now()}.txt`);
+      const driver = await createCalculatorSession({
+        'appium:prerun': {
+          script: `New-Item -ItemType File -Path "${markerPath.replace(/\\/g, '\\\\')}" -Force | Out-Null`,
+        },
+      });
+      try {
+        expect(existsSync(markerPath)).toBe(true);
+      } finally {
+        await quitSession(driver);
+        if (existsSync(markerPath)) {
+          unlinkSync(markerPath);
+        }
+      }
+    });
+
+    it('postrun script is executed after session deletion (writes a marker file)', async () => {
+      const markerPath = join(tmpdir(), `appiumdesktop-postrun-${Date.now()}.txt`);
+      const driver = await createCalculatorSession({
+        'appium:postrun': {
+          script: `New-Item -ItemType File -Path "${markerPath.replace(/\\/g, '\\\\')}" -Force | Out-Null`,
+        },
+      });
+      await driver.deleteSession();
+      // Give postrun a moment to execute
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(existsSync(markerPath)).toBe(true);
+      if (existsSync(markerPath)) {
+        unlinkSync(markerPath);
+      }
+    });
+  });
 });

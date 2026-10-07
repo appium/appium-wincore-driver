@@ -4,15 +4,26 @@
   "description": "Appium driver for Windows",
   "keywords": [
     "appium",
-    "wincore",
-    "desktop",
-    "uiautomation",
     "automated testing",
-    "windows",
+    "desktop",
+    "desktop automation",
+    "uiautomation",
     "verisoft",
-    "desktop automation"
+    "wincore",
+    "windows"
   ],
-  "main": "build/lib/driver.js",
+  "bugs": {
+    "url": "https://github.com/verisoft-ai/appium-wincore-driver/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "verisoft-ai",
+  "contributors": [
+    "Yuri Schwab (https://github.com/y-schwab)"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/verisoft-ai/appium-wincore-driver.git"
+  },
   "files": [
     "build/lib/**/*",
     "iebridge/IEBridge.exe",
@@ -22,33 +33,22 @@
     "README.md",
     "CHANGELOG.md"
   ],
+  "main": "build/lib/driver.js",
   "scripts": {
     "build": "tsc -b",
     "build:native": "dotnet publish csharp/WincoreServer/WincoreServer.csproj -c Release -o native/win-x64/",
     "build:iebridge": "dotnet publish csharp/IEBridge/IEBridge.csproj -r win-x86 -c Release -o iebridge/x86 && node -e \"const fs=require('fs');fs.copyFileSync('iebridge/x86/IEBridge.exe','iebridge/IEBridge.exe');\"",
     "build:all": "npm run build:native && npm run build:iebridge && npm run build",
     "watch": "tsc -b --watch",
-    "lint": "eslint .",
+    "lint": "oxlint -c oxlint.config.mjs .",
+    "lint:fix": "oxlint -c oxlint.config.mjs --fix .",
+    "format": "oxfmt -c oxfmt.config.mjs .",
+    "format:check": "oxfmt -c oxfmt.config.mjs --check .",
     "test": "npx vitest run",
-    "test:e2e": "npx vitest run --config vitest.e2e.config.ts",
-    "test:perf": "vitest run --config vitest.perf.config.ts",
+    "test:e2e": "npx vitest run --config vitest.e2e.config.mts",
+    "test:perf": "vitest run --config vitest.perf.config.mts",
     "postinstall": "node scripts/postinstall.js",
     "pack:dist": "node scripts/pack-dist.js"
-  },
-  "author": "verisoft-ai",
-  "contributors": [
-    "Yuri Schwab (https://github.com/y-schwab)"
-  ],
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/verisoft-ai/appium-wincore-driver.git"
-  },
-  "bugs": {
-    "url": "https://github.com/verisoft-ai/appium-wincore-driver/issues"
-  },
-  "peerDependencies": {
-    "appium": "^3.0.0-rc.2"
   },
   "dependencies": {
     "@appium/css-locator-to-native": "^1.0.6",
@@ -58,6 +58,21 @@
     "bezier-easing": "^2.1.0",
     "koffi": "^2.14.1"
   },
+  "devDependencies": {
+    "@appium/oxc-config": "1.1.2",
+    "@appium/semantic-release-config": "^1.2.0",
+    "@appium/tsconfig": "^1.2.1",
+    "@appium/types": "^1.1.0",
+    "@types/node": "^24.8.1",
+    "oxfmt": "0.68.0",
+    "oxlint": "1.83.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.11",
+    "webdriverio": "^9.30.1"
+  },
+  "peerDependencies": {
+    "appium": "^3.0.0-rc.2"
+  },
   "appium": {
     "driverName": "wincore",
     "automationName": "Wincore",
@@ -65,21 +80,5 @@
       "Windows"
     ],
     "mainClass": "AppiumWincoreDriver"
-  },
-  "devDependencies": {
-    "@appium/eslint-config-appium-ts": "^2.0.3",
-    "@appium/tsconfig": "^1.1.0",
-    "@appium/types": "^1.1.0",
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@types/node": "^24.8.1",
-    "conventional-changelog-conventionalcommits": "^9.1.0",
-    "eslint": "^9.38.0",
-    "globals": "^15.15.0",
-    "semantic-release": "^25.0.1",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.1",
-    "vitest": "^2.1.0",
-    "webdriverio": "^9.30.1"
   }
 }

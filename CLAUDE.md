@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run build          # Compile TypeScript to build/
 npm run watch          # Watch mode compilation
-npm run lint           # ESLint validation
+npm run lint           # oxlint validation
+npm run format         # oxfmt formatting (format:check in CI)
 npm run test           # Unit tests (Vitest)
 npm run test:e2e       # E2E tests (requires Windows + Appium setup)
 ```

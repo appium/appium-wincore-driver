@@ -5,10 +5,13 @@ examples/
 
 # Config files
 tsconfig.json
-eslint.config.mjs
-vitest.config.ts
-vitest.e2e.config.ts
-.releaserc
+oxlint.config.mjs
+oxfmt.config.mjs
+vitest.config.mts
+vitest.e2e.config.mts
+vitest.perf.config.mts
+release.config.mjs
+.editorconfig
 .npmrc
 
 # CI/CD
@@ -23,7 +26,7 @@ vitest.e2e.config.ts
 
 # Build artifacts
 build/tsconfig.tsbuildinfo
-build/eslint.config.*
+build/oxlint.config.*
 
 # Misc
 .gitignore

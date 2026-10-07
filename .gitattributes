@@ -1,0 +1,11 @@
+# Files owned by oxfmt must stay LF in the working tree too, otherwise
+# `npm run format:check` fails on Windows checkouts with core.autocrlf=true.
+*.ts    text eol=lf
+*.mts   text eol=lf
+*.cts   text eol=lf
+*.js    text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+*.json  text eol=lf
+*.jsonc text eol=lf
+*.css   text eol=lf

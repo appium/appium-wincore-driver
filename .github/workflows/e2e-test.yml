@@ -151,7 +151,7 @@ jobs:
             exit 1
           }
 
-          npx vitest run --config vitest.e2e.config.ts `
+          npx vitest run --config vitest.e2e.config.mts `
             test/e2e/extension-powershell.e2e.ts `
             test/e2e/extension-webview.e2e.ts `
             test/e2e/actions.e2e.ts `

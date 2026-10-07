@@ -1,16 +1,17 @@
-import { execSync, spawn } from 'node:child_process';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
-import type { ChildProcess } from 'node:child_process';
-import type { Browser } from 'webdriverio';
-import { remote } from 'webdriverio';
+import {execSync, spawn} from 'node:child_process';
+import type {ChildProcess} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join, resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+
+import type {Browser} from 'webdriverio';
+import {remote} from 'webdriverio';
 
 export const APPIUM_SERVER = {
-    hostname: '127.0.0.1',
-    port: Number(process.env.APPIUM_PORT ?? 4723),
-    path: '/',
-    logLevel: 'warn' as const,
+  hostname: '127.0.0.1',
+  port: Number(process.env.APPIUM_PORT ?? 4723),
+  path: '/',
+  logLevel: 'warn' as const,
 };
 
 /**
@@ -25,155 +26,162 @@ export const TODO_APP_ID = 'Microsoft.Todos_8wekyb3d8bbwe!App';
 export const CHROME_APP_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 export const CHROME_DEBUG_PORT = 9222;
 /** Local page the Chrome webview tests load — a live site can change its markup under the tests. */
-export const WEBVIEW_FIXTURE_URL = pathToFileURL(resolve(process.cwd(), 'test', 'e2e', 'fixtures', 'webview.html')).href;
+export const WEBVIEW_FIXTURE_URL = pathToFileURL(
+  resolve(process.cwd(), 'test', 'e2e', 'fixtures', 'webview.html'),
+).href;
 export const EDGE_APP_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 
 type Caps = WebdriverIO.Capabilities;
 
 export async function createCalculatorSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const maxAttempts = 3;
-    let lastError: unknown;
+  const maxAttempts = 3;
+  let lastError: unknown;
 
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        const driver = await remote({
-            ...APPIUM_SERVER,
-            capabilities: {
-                platformName: 'Windows',
-                'appium:automationName': 'Wincore',
-                'appium:app': CALCULATOR_APP_ID,
-                ...extraCaps,
-            } as Caps,
-        });
-        await driver.setTimeout({ implicit: 1500 });
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const driver = await remote({
+      ...APPIUM_SERVER,
+      capabilities: {
+        platformName: 'Windows',
+        'appium:automationName': 'Wincore',
+        'appium:app': CALCULATOR_APP_ID,
+        ...extraCaps,
+      } as Caps,
+    });
+    await driver.setTimeout({implicit: 1500});
 
-        // explorer.exe's `shell:AppsFolder` UWP activation (used by the driver's
-        // launchApp) occasionally misfires and brings a different app (e.g. Settings)
-        // to the foreground instead of Calculator. Detect that here — the shared
-        // entry point every test goes through — and relaunch, rather than let it
-        // surface later as an unrelated "element not found" failure downstream.
-        const attached = await driver.$('~num1Button').waitForExist({ timeout: 5000 }).catch(() => false);
-        if (attached) {
-            return driver;
-        }
-
-        lastError = new Error(`Calculator session attempt ${attempt}/${maxAttempts} did not attach to Calculator — app activation likely misfired`);
-        await quitSession(driver);
+    // explorer.exe's `shell:AppsFolder` UWP activation (used by the driver's
+    // launchApp) occasionally misfires and brings a different app (e.g. Settings)
+    // to the foreground instead of Calculator. Detect that here — the shared
+    // entry point every test goes through — and relaunch, rather than let it
+    // surface later as an unrelated "element not found" failure downstream.
+    const attached = await driver
+      .$('~num1Button')
+      .waitForExist({timeout: 5000})
+      .catch(() => false);
+    if (attached) {
+      return driver;
     }
-    throw lastError;
+
+    lastError = new Error(
+      `Calculator session attempt ${attempt}/${maxAttempts} did not attach to Calculator — app activation likely misfired`,
+    );
+    await quitSession(driver);
+  }
+  throw lastError;
 }
 
 export async function createNotepadSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': NOTEPAD_APP_PATH,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 1500 });
-    return driver;
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': NOTEPAD_APP_PATH,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 1500});
+  return driver;
 }
 
 export async function createTodoSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': TODO_APP_ID,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 1500 });
-    return driver;
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': TODO_APP_ID,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 1500});
+  return driver;
 }
 
 export async function createRootSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': 'Root',
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 1500 });
-    return driver;
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': 'Root',
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 1500});
+  return driver;
 }
 
 export async function createChromeWebviewSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const port = (extraCaps?.['appium:webviewDevtoolsPort'] as number) ?? CHROME_DEBUG_PORT;
-    const userDataDir = join(tmpdir(), `chrome-test-${port}`);
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': CHROME_APP_PATH,
-            'appium:appArguments': `--remote-debugging-port=${port} --user-data-dir=${userDataDir} --no-first-run --no-default-browser-check ${WEBVIEW_FIXTURE_URL}`,
-            'appium:webviewEnabled': true,
-            'appium:webviewDevtoolsPort': port,
-            'appium:shouldCloseApp': true,
-            'appium:ms:waitForAppLaunch': 3,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 5000 });
-    return driver;
+  const port = (extraCaps?.['appium:webviewDevtoolsPort'] as number) ?? CHROME_DEBUG_PORT;
+  const userDataDir = join(tmpdir(), `chrome-test-${port}`);
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': CHROME_APP_PATH,
+      'appium:appArguments': `--remote-debugging-port=${port} --user-data-dir=${userDataDir} --no-first-run --no-default-browser-check ${WEBVIEW_FIXTURE_URL}`,
+      'appium:webviewEnabled': true,
+      'appium:webviewDevtoolsPort': port,
+      'appium:shouldCloseApp': true,
+      'appium:ms:waitForAppLaunch': 3,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 5000});
+  return driver;
 }
 
 export async function createEdgeIEModeSession(url: string, extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const userDataDir = join(tmpdir(), `edge-ie-mode-test-${Date.now()}`);
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': EDGE_APP_PATH,
-            'appium:appArguments': `--no-first-run --no-default-browser-check --no-signin-prompt --disable-sync --user-data-dir=${userDataDir} ${url}`,
-            'appium:ms:waitForAppLaunch': 8,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 3000 });
-    return driver;
+  const userDataDir = join(tmpdir(), `edge-ie-mode-test-${Date.now()}`);
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': EDGE_APP_PATH,
+      'appium:appArguments': `--no-first-run --no-default-browser-check --no-signin-prompt --disable-sync --user-data-dir=${userDataDir} ${url}`,
+      'appium:ms:waitForAppLaunch': 8,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 3000});
+  return driver;
 }
 
 export const IE_APP_PATH = 'C:\\Program Files\\Internet Explorer\\iexplore.exe';
 
 export async function createIEBridgeSession(url: string, extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': IE_APP_PATH,
-            'appium:appArguments': url,
-            'appium:shouldCloseApp': true,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.pause(3000);
-    await driver.setTimeout({ implicit: 5000 });
-    return driver;
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': IE_APP_PATH,
+      'appium:appArguments': url,
+      'appium:shouldCloseApp': true,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.pause(3000);
+  await driver.setTimeout({implicit: 5000});
+  return driver;
 }
 
 export async function createIEBridgeAttachSession(hwnd: string, extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:appTopLevelWindow': hwnd,
-            'appium:shouldCloseApp': false,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 5000 });
-    return driver;
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:appTopLevelWindow': hwnd,
+      'appium:shouldCloseApp': false,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 5000});
+  return driver;
 }
 
 /**
@@ -183,55 +191,60 @@ export async function createIEBridgeAttachSession(hwnd: string, extraCaps?: Reco
  * not the spawned PID, so the driver's PID-based window search fails. We poll
  * all iexplore processes for a non-zero MainWindowHandle instead.
  */
-export async function launchIEExternally(url: string): Promise<{ proc: ChildProcess; hwnd: string }> {
-    const proc = spawn(IE_APP_PATH, [url], { detached: true, stdio: 'ignore' });
-    proc.unref();
+export async function launchIEExternally(url: string): Promise<{proc: ChildProcess; hwnd: string}> {
+  const proc = spawn(IE_APP_PATH, [url], {detached: true, stdio: 'ignore'});
+  proc.unref();
 
-    const deadline = Date.now() + 15_000;
-    let hwnd = '0';
-    while (Date.now() < deadline) {
-        try {
-            // The IEFrame (browser chrome) process is always the oldest iexplore.exe.
-            // Tab/content processes start after it, so sorting ascending picks the frame.
-            const out = execSync(
-                'powershell -Command "$p = Get-Process -Name iexplore -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Sort-Object StartTime | Select-Object -First 1; if ($p) { $p.MainWindowHandle } else { 0 }"',
-                { stdio: ['ignore', 'pipe', 'ignore'] }
-            ).toString().trim();
-            if (out && out !== '0') { hwnd = out; break; }
-        } catch {
-            // not ready yet
-        }
-        await new Promise((resolve) => setTimeout(resolve, 500));
+  const deadline = Date.now() + 15_000;
+  let hwnd = '0';
+  while (Date.now() < deadline) {
+    try {
+      // The IEFrame (browser chrome) process is always the oldest iexplore.exe.
+      // Tab/content processes start after it, so sorting ascending picks the frame.
+      const out = execSync(
+        'powershell -Command "$p = Get-Process -Name iexplore -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 } | Sort-Object StartTime | Select-Object -First 1; if ($p) { $p.MainWindowHandle } else { 0 }"',
+        {stdio: ['ignore', 'pipe', 'ignore']},
+      )
+        .toString()
+        .trim();
+      if (out && out !== '0') {
+        hwnd = out;
+        break;
+      }
+    } catch {
+      // not ready yet
     }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
 
-    if (hwnd === '0') {
-        proc.kill();
-        throw new Error('IE window (IEFrame) did not appear within 15s');
-    }
+  if (hwnd === '0') {
+    proc.kill();
+    throw new Error('IE window (IEFrame) did not appear within 15s');
+  }
 
-    return { proc, hwnd };
+  return {proc, hwnd};
 }
 
 export async function createIEProxySession(url: string, extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const { hwnd } = await launchIEExternally(url);
+  const {hwnd} = await launchIEExternally(url);
 
-    // Attach via appTopLevelWindow — the driver detects IEFrame class and enables
-    // the IE proxy without needing to find the window by the spawned PID.
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:appTopLevelWindow': hwnd,
-            'appium:shouldCloseApp': true,
-            ...extraCaps,
-        } as Caps,
-    });
-    // Proxy is active; navigate to the target URL via the IE bridge
-    await driver.url(url);
-    await driver.pause(3000);
-    await driver.setTimeout({ implicit: 5000 });
-    return driver;
+  // Attach via appTopLevelWindow — the driver detects IEFrame class and enables
+  // the IE proxy without needing to find the window by the spawned PID.
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:appTopLevelWindow': hwnd,
+      'appium:shouldCloseApp': true,
+      ...extraCaps,
+    } as Caps,
+  });
+  // Proxy is active; navigate to the target URL via the IE bridge
+  await driver.url(url);
+  await driver.pause(3000);
+  await driver.setTimeout({implicit: 5000});
+  return driver;
 }
 
 export const EXPLORER_APP_PATH = 'C:\\Windows\\explorer.exe';
@@ -239,38 +252,42 @@ export const CHARMAP_APP_PATH = 'C:\\Windows\\System32\\charmap.exe';
 export const WINFORM_COMBO_APP_PATH = resolve(TEST_APPS_DIR, 'winform-combo', 'bin', 'WinformCombo.exe');
 
 async function createSimpleAppSession(appPath: string, extraCaps?: Record<string, unknown>): Promise<Browser> {
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': appPath,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 3000 });
-    return driver;
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': appPath,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 3000});
+  return driver;
 }
 
 export async function createCharmapSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    return createSimpleAppSession(CHARMAP_APP_PATH, extraCaps);
+  return createSimpleAppSession(CHARMAP_APP_PATH, extraCaps);
 }
 
 export async function createWinformComboSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    return createSimpleAppSession(WINFORM_COMBO_APP_PATH, extraCaps);
+  return createSimpleAppSession(WINFORM_COMBO_APP_PATH, extraCaps);
 }
 
 export async function createExplorerSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    return createSimpleAppSession(EXPLORER_APP_PATH, extraCaps);
+  return createSimpleAppSession(EXPLORER_APP_PATH, extraCaps);
 }
 
 export const WINFORMS_LARGE_APP_PATH = resolve(
-    TEST_APPS_DIR, 'winforms-large', 'bin', 'x64', 'Debug', 'net472', 'WinformsLarge.exe',
+  TEST_APPS_DIR,
+  'winforms-large',
+  'bin',
+  'x64',
+  'Debug',
+  'net472',
+  'WinformsLarge.exe',
 );
 
-export const WPF_LARGE_APP_PATH = resolve(
-    TEST_APPS_DIR, 'wpf-large', 'bin', 'x64', 'Debug', 'net472', 'WpfLarge.exe',
-);
+export const WPF_LARGE_APP_PATH = resolve(TEST_APPS_DIR, 'wpf-large', 'bin', 'x64', 'Debug', 'net472', 'WpfLarge.exe');
 
 /**
  * MSAA-only correctness fixture: every control reaches UIA through UIAutomationCore's MSAA
@@ -278,11 +295,17 @@ export const WPF_LARGE_APP_PATH = resolve(
  * in LegacyIAccessible.Value while UIA Name is a placeholder. No licence needed.
  */
 export const MSAA_LEGACY_CONTROLS_APP_PATH = resolve(
-    TEST_APPS_DIR, 'msaa-legacy-controls', 'bin', 'x64', 'Debug', 'net472', 'MsaaLegacyControls.exe',
+  TEST_APPS_DIR,
+  'msaa-legacy-controls',
+  'bin',
+  'x64',
+  'Debug',
+  'net472',
+  'MsaaLegacyControls.exe',
 );
 
 export async function createMsaaLegacyControlsSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
-    return createSimpleAppSession(MSAA_LEGACY_CONTROLS_APP_PATH, extraCaps);
+  return createSimpleAppSession(MSAA_LEGACY_CONTROLS_APP_PATH, extraCaps);
 }
 
 /**
@@ -293,94 +316,94 @@ export async function createMsaaLegacyControlsSession(extraCaps?: Record<string,
  * own plugin repos (appium-wincore-dotnet-bridge, appium-wincore-java-bridge) — the driver
  * only benchmarks what it's actually aware of.
  */
-export async function createWpfLargeSession(
-    nodeCount = 1500,
-    extraCaps?: Record<string, unknown>,
-): Promise<Browser> {
-    const driver = await remote({
-        ...APPIUM_SERVER,
-        capabilities: {
-            platformName: 'Windows',
-            'appium:automationName': 'Wincore',
-            'appium:app': WPF_LARGE_APP_PATH,
-            'appium:appArguments': `--nodes ${nodeCount}`,
-            ...extraCaps,
-        } as Caps,
-    });
-    await driver.setTimeout({ implicit: 3000 });
-    return driver;
+export async function createWpfLargeSession(nodeCount = 1500, extraCaps?: Record<string, unknown>): Promise<Browser> {
+  const driver = await remote({
+    ...APPIUM_SERVER,
+    capabilities: {
+      platformName: 'Windows',
+      'appium:automationName': 'Wincore',
+      'appium:app': WPF_LARGE_APP_PATH,
+      'appium:appArguments': `--nodes ${nodeCount}`,
+      ...extraCaps,
+    } as Caps,
+  });
+  await driver.setTimeout({implicit: 3000});
+  return driver;
 }
 
 /** Kill any Calculator, Notepad or To-Do processes left open by a previous test. */
 export function closeAllTestApps(): void {
-    for (const name of ['Calculator.exe', 'CalculatorApp.exe', 'notepad.exe', 'Microsoft.Todos.exe']) {
-        try {
-            execSync(`taskkill /F /IM "${name}"`, { stdio: 'ignore' });
-        } catch {
-            // process not running — ok
-        }
+  for (const name of ['Calculator.exe', 'CalculatorApp.exe', 'notepad.exe', 'Microsoft.Todos.exe']) {
+    try {
+      execSync(`taskkill /F /IM "${name}"`, {stdio: 'ignore'});
+    } catch {
+      // process not running — ok
     }
+  }
 }
 
 export async function quitSession(driver: Browser | null): Promise<void> {
-    try {
-        await driver?.deleteSession();
-    } catch {
-        // noop — session may already be terminated
-    }
+  try {
+    await driver?.deleteSession();
+  } catch {
+    // noop — session may already be terminated
+  }
 }
 
 /** Click the Calculator clear button to reset the display to 0 */
 export async function resetCalculator(driver: Browser): Promise<void> {
-    const clearBtn = await driver.$('~clearButton');
-    await clearBtn.click();
+  const clearBtn = await driver.$('~clearButton');
+  await clearBtn.click();
 }
 
 /** Returns the Notepad text area element (modern Win11 uses Document, classic Win10 uses Edit). */
 export async function getNotepadTextArea(driver: Browser) {
-    const el = driver.$('//Document');
-    if (await el.isExisting()) {
-        return el;
-    }
-    return driver.$('//Edit');
+  const el = driver.$('//Document');
+  if (await el.isExisting()) {
+    return el;
+  }
+  return driver.$('//Edit');
 }
 
 /** Clear all text in Notepad via Ctrl+A + Delete */
 export async function clearNotepad(driver: Browser): Promise<void> {
-    const textArea = await getNotepadTextArea(driver);
-    await textArea.click();
-    await driver.keys(['Control', 'a']);
-    await driver.keys(['Delete']);
+  const textArea = await getNotepadTextArea(driver);
+  await textArea.click();
+  await driver.keys(['Control', 'a']);
+  await driver.keys(['Delete']);
 }
 
-
 export async function createTodoTask(driver: Browser, content: string): Promise<void> {
-    const textArea = await driver.$('//Custom/Group/Edit');
-    await textArea.setValue(content);
-    await driver.keys(['Enter']);
-    await driver.pause(500);
+  const textArea = await driver.$('//Custom/Group/Edit');
+  await textArea.setValue(content);
+  await driver.keys(['Enter']);
+  await driver.pause(500);
 }
 
 export async function deleteTasks(driver: Browser): Promise<void> {
-    const MAX_ITERATIONS = 10;
-    for (let i = 0; i < MAX_ITERATIONS; i++) {
-        const tasks = await driver.$$('//Custom/Group/List/ListItem');
-        if (await tasks.length === 0) {break;}
-
-        const elementId: string = await tasks[0].elementId;
-
-        // Right-click the first task to open the context menu
-        await driver.executeScript('windows: click', [{
-            elementId,
-            button: 'right',
-        }]);
-        await driver.pause(500);
-
-        // Navigate context menu with keyboard — avoids UIA traversal dismissing the popup
-        await driver.keys(['Delete']);
-
-        // Confirm the deletion in the popup dialog
-        await driver.$('~PrimaryButton').click();
-        await driver.pause(500);
+  const MAX_ITERATIONS = 10;
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const tasks = await driver.$$('//Custom/Group/List/ListItem');
+    if ((await tasks.length) === 0) {
+      break;
     }
+
+    const elementId: string = await tasks[0].elementId;
+
+    // Right-click the first task to open the context menu
+    await driver.executeScript('windows: click', [
+      {
+        elementId,
+        button: 'right',
+      },
+    ]);
+    await driver.pause(500);
+
+    // Navigate context menu with keyboard — avoids UIA traversal dismissing the popup
+    await driver.keys(['Delete']);
+
+    // Confirm the deletion in the popup dialog
+    await driver.$('~PrimaryButton').click();
+    await driver.pause(500);
+  }
 }
