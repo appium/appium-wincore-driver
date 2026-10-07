@@ -189,8 +189,37 @@ public static class ConditionBuilder
         return automation.CreatePropertyCondition(propertyId, value);
     }
 
-    private static object ConvertValue(int propertyId, JsonElement value)
+    internal static object ConvertValue(int propertyId, JsonElement value)
     {
+        // Point / Rect arrive as {x, y} / {x, y, width, height}; UIA stores them as
+        // double arrays (ClickablePoint = [x, y], BoundingRectangle = [left, top, width, height]).
+        if (propertyId == UIA.ClickablePointPropertyId && value.ValueKind == JsonValueKind.Object)
+        {
+            return new[] { RequireDouble(value, "x"), RequireDouble(value, "y") };
+        }
+
+        if (propertyId == UIA.BoundingRectanglePropertyId && value.ValueKind == JsonValueKind.Object)
+        {
+            return new[]
+            {
+                RequireDouble(value, "x"), RequireDouble(value, "y"),
+                RequireDouble(value, "width"), RequireDouble(value, "height"),
+            };
+        }
+
+        // UIA reports Culture as an LCID; accept a culture name ("en-US") too.
+        if (propertyId == UIA.CulturePropertyId && value.ValueKind == JsonValueKind.String)
+        {
+            try
+            {
+                return new System.Globalization.CultureInfo(value.GetString()!).LCID;
+            }
+            catch (System.Globalization.CultureNotFoundException)
+            {
+                throw new ArgumentException($"Unknown culture: '{value.GetString()}'");
+            }
+        }
+
         if (propertyId == UIA.ControlTypePropertyId)
         {
             var typeName = value.GetString() ?? throw new ArgumentException("ControlType value must be a string.");
@@ -236,6 +265,11 @@ public static class ConditionBuilder
             _ => value.GetString() ?? string.Empty
         };
     }
+
+    private static double RequireDouble(JsonElement obj, string name) =>
+        obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number
+            ? v.GetDouble()
+            : throw new ArgumentException($"Expected numeric '{name}' in {obj.GetRawText()}");
 
     private static IUIAutomationCondition BuildAndCondition(IUIAutomation automation, ConditionDto dto)
     {
