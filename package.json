@@ -1,6 +1,6 @@
 {
   "name": "appium-wincore-driver",
-  "version": "3.1.2",
+  "version": "4.0.0-beta.1",
   "description": "Appium driver for Windows",
   "keywords": [
     "appium",

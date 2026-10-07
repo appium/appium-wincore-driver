@@ -1,3 +1,15 @@
+## [4.0.0-beta.1](https://github.com/appium/appium-wincore-driver/compare/v3.1.2...v4.0.0-beta.1) (2026-10-07)
+
+### ⚠ BREAKING CHANGES
+
+* requires Appium 4 and Node.js ^22.22.2 || ^24.15.0 || >=26.0.0.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+### Features
+
+* target Appium 4 beta ([9968b82](https://github.com/appium/appium-wincore-driver/commit/9968b82868d81427b66746123afa3f495b5cf83f))
+
 ## [3.1.2](https://github.com/verisoft-ai/appium-wincore-driver/compare/v3.1.1...v3.1.2) (2026-10-07)
 
 ### Miscellaneous Chores
