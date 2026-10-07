@@ -13,7 +13,7 @@
     "windows"
   ],
   "bugs": {
-    "url": "https://github.com/verisoft-ai/appium-wincore-driver/issues"
+    "url": "https://github.com/appium/appium-wincore-driver/issues"
   },
   "license": "Apache-2.0",
   "author": "verisoft-ai",
@@ -22,7 +22,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/verisoft-ai/appium-wincore-driver.git"
+    "url": "https://github.com/appium/appium-wincore-driver.git"
   },
   "files": [
     "build/lib/**/*",
