@@ -81,12 +81,6 @@ export class PropertyRegexMatcher extends RegexItem {
   }
 }
 
-export class StringRegexMatcher extends RegexItem {
-  constructor() {
-    super(`('(?:[^']|'')*')`);
-  }
-}
-
 function assertCorrectNamespace(namespace: string): void {
   if (!/^[a-z.()?:|]+$/i.test(namespace)) {
     throw new errors.InvalidArgumentError(

@@ -263,41 +263,6 @@ export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, Math.max(ms, 0)));
 }
 
-export function $(literals: TemplateStringsArray, ...substitutions: number[]) {
-  substitutions.forEach((index) => {
-    if (!Number.isInteger(index) && index < 0) {
-      throw new errors.InvalidArgumentError(`Indices must be positive integers starting from 0. Received: ${index}`);
-    }
-  });
-
-  return new DeferredStringTemplate(literals, substitutions);
-}
-
-export class DeferredStringTemplate {
-  private literals: TemplateStringsArray;
-  private substitutions: number[];
-
-  constructor(literals: TemplateStringsArray, substitutions: number[]) {
-    this.literals = literals;
-    this.substitutions = substitutions;
-
-    substitutions.forEach((index) => {
-      if (!Number.isInteger(index) || index < 0) {
-        throw new errors.InvalidArgumentError(`Indices must be positive integers starting from 0. Received: ${index}`);
-      }
-    });
-  }
-
-  format(...args: any[]): string {
-    const out: string[] = [];
-    for (let i = 0, k = 0; i < this.literals.length; i++, k++) {
-      out[k] = this.literals[i];
-      out[++k] = args[this.substitutions[i]]?.toString();
-    }
-    return out.join('');
-  }
-}
-
 /**
  * Reads PNG image dimensions from a base64-encoded PNG string without any external library.
  * PNG stores width/height as big-endian uint32 at bytes 16–23 of the raw binary

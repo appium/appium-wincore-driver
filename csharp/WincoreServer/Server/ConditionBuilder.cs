@@ -8,7 +8,7 @@ public static class ConditionBuilder
 {
     // UIA3 property IDs. Names here are the public API the TS client sends on
     // the wire ("AutomationId", "Name", "ControlType", …) — do not change them
-    // without updating lib/server/conditions.ts + lib/powershell/types.ts.
+    // without updating lib/server/conditions.ts + lib/uia-selector/types.ts.
     private static readonly Dictionary<string, int> PropertyMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["AcceleratorKey"] = UIA.AcceleratorKeyPropertyId,

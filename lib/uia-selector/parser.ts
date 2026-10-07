@@ -1,7 +1,16 @@
 import {errors} from 'appium/driver';
 import {logger} from 'appium/support';
 
-import {ConstructorRegexMatcher, PropertyRegexMatcher, RegexItem, VarArgsRegexMatcher} from '../powershell/regex';
+import {
+  andCondition,
+  falseCondition,
+  notCondition,
+  orCondition,
+  propertyCondition,
+  trueCondition,
+} from '../server/conditions';
+import type {ConditionDto} from '../server/protocol';
+import {ConstructorRegexMatcher, PropertyRegexMatcher, RegexItem, VarArgsRegexMatcher} from './regex';
 import {
   AutomationElementProperty,
   AutomationHeadingLevel,
@@ -19,16 +28,7 @@ import {
   Property,
   RectProperty,
   StringProperty,
-} from '../powershell/types';
-import {
-  andCondition,
-  falseCondition,
-  notCondition,
-  orCondition,
-  propertyCondition,
-  trueCondition,
-} from '../server/conditions';
-import type {ConditionDto} from '../server/protocol';
+} from './types';
 
 /**
  * Parser for the `-windows uiautomation` locator strategy.
@@ -511,6 +511,8 @@ function replaceStringLiterals(selector: string, onString: (value: string) => st
 function buildPropertyCondition(property: Property, value: SelectorValue | undefined): ConditionDto {
   const expected = PROPERTY_VALUE_KINDS.find(([group]) => Object.values(group).includes(property))?.[1];
 
+  // NB: the raw-Int32 bounds are carried over unchanged from the PowerShell-object converter and
+  // look swapped (OrientationType has 3 members, AutomationHeadingLevel 10).
   if (expected === 'orientation' && value?.kind !== 'orientation') {
     value = coerceEnumValue(property, value, 'orientation', Object.keys(AutomationHeadingLevel).length);
   } else if (expected === 'headingLevel' && value?.kind !== 'headingLevel') {

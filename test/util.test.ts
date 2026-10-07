@@ -3,7 +3,7 @@
  */
 import {describe, it, expect} from 'vitest';
 
-import {assertIntegerCap, assertSupportedEasingFunction, $} from '../lib/util';
+import {assertIntegerCap, assertSupportedEasingFunction} from '../lib/util';
 
 describe('assertIntegerCap', () => {
   it('accepts value equal to min', () => {
@@ -54,40 +54,5 @@ describe('assertSupportedEasingFunction', () => {
     expect(() => assertSupportedEasingFunction('cubic-bezier(abc, 0, 0, 1)')).toThrow(
       'Unsupported or invalid easing function',
     );
-  });
-});
-
-describe('DeferredStringTemplate / $', () => {
-  it('formats a template with a single substitution', () => {
-    const tpl = $`Hello ${0}!`;
-    expect(tpl.format('World')).toBe('Hello World!');
-  });
-
-  it('formats a template with multiple substitutions', () => {
-    const tpl = $`${0} + ${1} = ${2}`;
-    expect(tpl.format('a', 'b', 'c')).toBe('a + b = c');
-  });
-
-  it('formats a template with repeated substitution index', () => {
-    const tpl = $`${0} and ${0} again`;
-    expect(tpl.format('foo')).toBe('foo and foo again');
-  });
-
-  it('throws in constructor for non-integer substitution index', () => {
-    expect(() => $`${1.5 as any}`).toThrow('Indices must be positive integers');
-  });
-
-  it('throws in constructor for negative substitution index', () => {
-    expect(() => $`${-1 as any}`).toThrow('Indices must be positive integers');
-  });
-
-  it('DeferredStringTemplate.format converts args to string via toString()', () => {
-    const tpl = $`value: ${0}`;
-    expect(tpl.format(42)).toBe('value: 42');
-  });
-
-  it('handles template with no substitutions', () => {
-    const tpl = $`no substitutions`;
-    expect(tpl.format()).toBe('no substitutions');
   });
 });

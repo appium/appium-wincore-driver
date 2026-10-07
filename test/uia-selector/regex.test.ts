@@ -1,9 +1,9 @@
 /**
- * Unit tests for lib/powershell/regex.ts
+ * Unit tests for lib/uia-selector/regex.ts
  */
 import {describe, it, expect} from 'vitest';
 
-import {ConstructorRegexMatcher, PropertyRegexMatcher, RegexItem} from '../../lib/powershell/regex';
+import {ConstructorRegexMatcher, PropertyRegexMatcher, RegexItem} from '../../lib/uia-selector/regex';
 
 describe('namespace validation', () => {
   it('rejects namespaces with characters outside the allowed set', () => {
