@@ -13,38 +13,39 @@
  * Target: Windows Calculator's `num1Button`, which is always enabled and always
  * on-screen once the app is open — a stable "known true/false" fixture.
  */
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { Browser } from 'webdriverio';
-import { createCalculatorSession, quitSession } from './helpers/session.js';
+import {afterAll, beforeAll, describe, expect, it} from 'vitest';
+import type {Browser} from 'webdriverio';
+
+import {createCalculatorSession, quitSession} from './helpers/session.js';
 
 describe('boolean UIA attributes (IsEnabled/IsOffscreen) reflect real element state', () => {
-    let driver: Browser;
+  let driver: Browser;
 
-    beforeAll(async () => {
-        driver = await createCalculatorSession();
-        await driver.$('~num1Button').waitForExist({ timeout: 15_000 });
-    });
+  beforeAll(async () => {
+    driver = await createCalculatorSession();
+    await driver.$('~num1Button').waitForExist({timeout: 15_000});
+  });
 
-    afterAll(async () => {
-        await quitSession(driver);
-    });
+  afterAll(async () => {
+    await quitSession(driver);
+  });
 
-    it('getPageSource reports IsEnabled="True" for an enabled, on-screen button', async () => {
-        const source = await driver.getPageSource();
-        const match = source.match(/AutomationId="num1Button"[^>]*/);
-        expect(match).not.toBeNull();
-        const tag = match![0];
-        expect(tag).toMatch(/IsEnabled="True"/);
-        expect(tag).toMatch(/IsOffscreen="False"/);
-    });
+  it('getPageSource reports IsEnabled="True" for an enabled, on-screen button', async () => {
+    const source = await driver.getPageSource();
+    const match = source.match(/AutomationId="num1Button"[^>]*/);
+    expect(match).not.toBeNull();
+    const tag = match![0];
+    expect(tag).toMatch(/IsEnabled="True"/);
+    expect(tag).toMatch(/IsOffscreen="False"/);
+  });
 
-    it('XPath finds an element by a true boolean attribute', async () => {
-        const el = await driver.$('//Button[@AutomationId="num1Button" and @IsEnabled="true"]');
-        expect(await el.isExisting()).toBe(true);
-    });
+  it('XPath finds an element by a true boolean attribute', async () => {
+    const el = await driver.$('//Button[@AutomationId="num1Button" and @IsEnabled="true"]');
+    expect(await el.isExisting()).toBe(true);
+  });
 
-    it('XPath excludes it when the boolean attribute is asserted false', async () => {
-        const els = await driver.$$('//Button[@AutomationId="num1Button" and @IsEnabled="false"]');
-        expect(els.length).toBe(0);
-    });
+  it('XPath excludes it when the boolean attribute is asserted false', async () => {
+    const els = await driver.$$('//Button[@AutomationId="num1Button" and @IsEnabled="false"]');
+    expect(els.length).toBe(0);
+  });
 });

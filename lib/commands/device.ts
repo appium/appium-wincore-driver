@@ -1,4 +1,4 @@
-import { AppiumWincoreDriver } from '../driver';
+import type {AppiumWincoreDriver} from '../driver';
 
 const ISO_8061_FORMAT = 'yyyy-MM-ddTHH:mm:sszzz';
 
@@ -9,8 +9,8 @@ const ISO_8061_FORMAT = 'yyyy-MM-ddTHH:mm:sszzz';
  * @returns The formatted date/time string.
  */
 export async function getDeviceTime(this: AppiumWincoreDriver, _sessionId?: string, format?: string): Promise<string> {
-    const fmt = format ?? ISO_8061_FORMAT;
-    // Use the C# server to get formatted date/time
-    const script = `(Get-Date).ToString('${fmt.replace(/'/g, "''")}')`;
-    return await this.sendCommand('executePowerShellScript', { script }) as string;
+  const fmt = format ?? ISO_8061_FORMAT;
+  // Use the C# server to get formatted date/time
+  const script = `(Get-Date).ToString('${fmt.replace(/'/g, "''")}')`;
+  return (await this.sendCommand('executePowerShellScript', {script})) as string;
 }

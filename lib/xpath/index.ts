@@ -13,8 +13,8 @@
  * driven by `xpath-analyzer`) that walked the remote tree one async round trip
  * per axis step / predicate read has been removed.
  */
-import type { Element } from '@appium/types';
-import { W3C_ELEMENT_KEY, errors } from 'appium/driver';
+import type {Element} from '@appium/types';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver';
 
 export type SendCommandFn = (method: string, params: Record<string, unknown>) => Promise<unknown>;
 
@@ -26,25 +26,25 @@ export type SendCommandFn = (method: string, params: Record<string, unknown>) =>
  *              true  → return every match (possibly empty).
  */
 export async function xpathToElIdOrIds(
-    selector: string,
-    mult: boolean,
-    context: string | undefined,
-    sendCommand: SendCommandFn,
+  selector: string,
+  mult: boolean,
+  context: string | undefined,
+  sendCommand: SendCommandFn,
 ): Promise<Element | Element[]> {
-    const result = await sendCommand('evaluateXPath', {
-        expression: selector,
-        contextElementId: context ?? null,
-        multiple: mult,
-    });
+  const result = await sendCommand('evaluateXPath', {
+    expression: selector,
+    contextElementId: context ?? null,
+    multiple: mult,
+  });
 
-    if (mult) {
-        const ids = (result as string[] | null) ?? [];
-        return ids.map((id) => ({ [W3C_ELEMENT_KEY]: id }));
-    }
+  if (mult) {
+    const ids = (result as string[] | null) ?? [];
+    return ids.map((id) => ({[W3C_ELEMENT_KEY]: id}));
+  }
 
-    const id = result as string | null;
-    if (!id) {
-        throw new errors.NoSuchElementError();
-    }
-    return { [W3C_ELEMENT_KEY]: id };
+  const id = result as string | null;
+  if (!id) {
+    throw new errors.NoSuchElementError();
+  }
+  return {[W3C_ELEMENT_KEY]: id};
 }
