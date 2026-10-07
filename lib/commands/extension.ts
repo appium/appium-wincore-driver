@@ -734,7 +734,7 @@ export async function getClipboardBase64(
   this: AppiumWincoreDriver,
   contentType?: ContentType | {contentType?: ContentType},
 ): Promise<string> {
-  if (!contentType || (contentType && typeof contentType === 'object')) {
+  if (!contentType || typeof contentType === 'object') {
     contentType = contentType?.contentType ?? ContentType.PLAINTEXT;
   }
 

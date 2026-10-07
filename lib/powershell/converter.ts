@@ -36,7 +36,7 @@ const INTEGER_REGEX = /((?<![\d.+-])[+-]?\d+(?![\d.]))/;
 const POSITIVE_INTEGER_REGEX = /((?<![\d.+-])[+]?\d+(?![\d.]))/;
 const FLOATING_POINT_NUMBER_REGEX = /((?<![\d.+-])[+-]?(?:\d*[.])?\d+(?![\d.]))/;
 const POSITIVE_FLOATING_POINT_NUMBER_REGEX = /((?<![\d.+-])[+]?(?:\d*[.])?\d+(?![\d.]))/;
-const DOUBLE_QUOTE_STRINGS_REGEX = /"([^"`]|`.)*(?:[^"]*)*"/g;
+const DOUBLE_QUOTE_STRINGS_REGEX = /"(?:[^"`]|`.)*"/g;
 const PROCESSED_STRING_RESULT_MATCH_REGEX = /^[\uEE00-\uEFFF]{1}$/;
 const PROCESSED_ITEMS_REGEX = /[\uEE00-\uEFFF]/g;
 
@@ -233,7 +233,7 @@ export function convertStringToCondition(selector: string): Condition {
   // it's important to process the strings first as they can contain other tokens that may be matched later
   processedSelector = processedSelector.replaceAll(STRING_REGEX, (match) => {
     const replacementChar = String.fromCharCode(MAGIC_PLACEHOLDER_UNICODE_BEGIN + processedItems.length);
-    processedItems.push(new PSString(match.slice(1, match.length - 1).replace(`''`, `'`)));
+    processedItems.push(new PSString(match.slice(1, match.length - 1).replaceAll(`''`, `'`)));
     return replacementChar;
   });
 
