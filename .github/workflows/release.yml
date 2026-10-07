@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - develop
+      - beta
 
 # Runs wait on the Release environment's manual approval, so pushes can pile up
 # behind it. Keep at most one pending run per branch: a newer push cancels the
