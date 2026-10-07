@@ -1,6 +1,5 @@
 import type {
   DefaultCreateSessionResult,
-  DriverData,
   Element,
   ExternalDriver,
   InitialOpts,
@@ -193,12 +192,7 @@ export class AppiumWincoreDriver extends BaseDriver<WincoreDriverConstraints, St
       : await locateElements(strategy, selector, false, context, this.sendCommand.bind(this));
   }
 
-  override async createSession(
-    jwpCaps: W3CWincoreDriverCaps,
-    reqCaps?: W3CWincoreDriverCaps,
-    w3cCaps?: W3CWincoreDriverCaps,
-    driverData?: DriverData[],
-  ): Promise<DefaultWindowsCreateSessionResult> {
+  override async createSession(w3cCaps: W3CWincoreDriverCaps): Promise<DefaultWindowsCreateSessionResult> {
     if (!system.isWindows()) {
       this.log.errorWithException('Windows UI Automation tests only run on Windows.');
     }
@@ -227,7 +221,7 @@ export class AppiumWincoreDriver extends BaseDriver<WincoreDriverConstraints, St
 
     try {
       this.log.debug('Creating AppiumWincore driver session...');
-      const [sessionId, caps] = await super.createSession(jwpCaps, reqCaps, w3cCaps, driverData);
+      const [sessionId, caps] = await super.createSession(w3cCaps);
       if (caps.logFile !== undefined && caps.logFile !== false) {
         try {
           this._logFileMirror = attachLogFileMirror(this.log as unknown as Record<string, unknown>, caps.logFile);
