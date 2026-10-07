@@ -1,10 +1,10 @@
 /**
- * Unit tests for lib/powershell/regex.ts
+ * Unit tests for lib/uia-selector/regex.ts
  */
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {ConstructorRegexMatcher, PropertyRegexMatcher, RegexItem} from '../../lib/powershell/regex.js';
+import {ConstructorRegexMatcher, PropertyRegexMatcher, RegexItem} from '../../lib/uia-selector/regex.js';
 
 describe('namespace validation', () => {
   it('rejects namespaces with characters outside the allowed set', () => {

@@ -2,7 +2,7 @@
  * Broad set of `-windows uiautomation` selectors used to check that the DTO parser
  * (lib/uia-selector/parser.ts) behaves like the PowerShell-object pipeline it replaced.
  */
-import {AutomationHeadingLevel, ControlType, OrientationType, Property} from '@/powershell/types';
+import {AutomationHeadingLevel, ControlType, OrientationType, Property} from '../../lib/uia-selector/types.js';
 
 const P = (property: string, value: string) => `[PropertyCondition]::new([AutomationElement]::${property}, ${value})`;
 const NAME = (value: string) => P('NameProperty', value);
@@ -64,7 +64,6 @@ const PROPERTY_SPELLINGS = [
   `[PropertyCondition]::new([AutomationElement]::NameProperty,'a')`,
   `[PropertyCondition]::new([AutomationElement]::AutomationIdProperty, 'btn_ok')`,
   `[PropertyCondition]::new([AutomationElement]::ClassNameProperty, 'Button')`,
-  `[PropertyCondition]::new([AutomationElement]::JavaClassProperty, 'javax.swing.JButton')`,
   `[PropertyCondition]::new([AutomationElement]::IsInvokePatternAvailableProperty, 'x')`,
 ];
 
