@@ -1,0 +1,4781 @@
+[
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::cultureProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::cultureProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::cultureProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, [AutomationHeadingLevel]::Level2)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "Level2"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, None)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "None"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::headinglevelProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::headinglevelProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::headinglevelProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::clickablepointProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::clickablepointProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::clickablepointProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, [ControlType]::Button)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "Button"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::controltypeProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::controltypeProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::controltypeProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::labeledbyProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::labeledbyProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::labeledbyProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, [OrientationType]::Horizontal)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "Horizontal"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, None)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "none"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::orientationProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::orientationProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::orientationProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::boundingrectangleProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, 42)",
+    "dto": {
+      "type": "property",
+      "property": "SizeOfSet",
+      "value": 42
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, -7)",
+    "dto": {
+      "type": "property",
+      "property": "SizeOfSet",
+      "value": -7
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::sizeofsetProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, 42)",
+    "dto": {
+      "type": "property",
+      "property": "PositionInSet",
+      "value": 42
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, -7)",
+    "dto": {
+      "type": "property",
+      "property": "PositionInSet",
+      "value": -7
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::positioninsetProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::positioninsetProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::positioninsetProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, 42)",
+    "dto": {
+      "type": "property",
+      "property": "ProcessId",
+      "value": 42
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, -7)",
+    "dto": {
+      "type": "property",
+      "property": "ProcessId",
+      "value": -7
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::processidProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::processidProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::processidProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, 42)",
+    "dto": {
+      "type": "property",
+      "property": "NativeWindowHandle",
+      "value": 42
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, -7)",
+    "dto": {
+      "type": "property",
+      "property": "NativeWindowHandle",
+      "value": -7
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::nativewindowhandleProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, 42)",
+    "dto": {
+      "type": "property",
+      "property": "LegacyRole",
+      "value": 42
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, -7)",
+    "dto": {
+      "type": "property",
+      "property": "LegacyRole",
+      "value": -7
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyroleProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::legacyroleProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::legacyroleProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, 42)",
+    "dto": {
+      "type": "property",
+      "property": "LegacyState",
+      "value": 42
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, -7)",
+    "dto": {
+      "type": "property",
+      "property": "LegacyState",
+      "value": -7
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacystateProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::legacystateProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::legacystateProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, @(1, 2, 3))",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [1, 2, 3]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::runtimeidProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::runtimeidProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::runtimeidProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "AutomationId",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::automationidProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::automationidProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::automationidProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "ItemType",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemtypeProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::itemtypeProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::itemtypeProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "LocalizedControlType",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::localizedcontroltypeProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::nameProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::nameProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::nameProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "AcceleratorKey",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::acceleratorkeyProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "AccessKey",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::accesskeyProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::accesskeyProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::accesskeyProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "ClassName",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::classnameProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::classnameProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::classnameProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "HelpText",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::helptextProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::helptextProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::helptextProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "FrameworkId",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::frameworkidProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::frameworkidProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::frameworkidProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "ItemStatus",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "javasimpleclass",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "javaclass",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::javaclassProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::javaclassProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "Value",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::valueProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::valueProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "LegacyValue",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::legacyvalueProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "LegacyName",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacynameProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::legacynameProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::legacynameProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "LegacyDescription",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::legacydescriptionProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "LegacyDefaultAction",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::legacydefaultactionProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, 'text')",
+    "dto": {
+      "type": "property",
+      "property": "ProviderDescription",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::providerdescriptionProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::haskeyboardfocusProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isoffscreenProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdialogProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isdialogProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isdialogProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::iscontrolelementProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::iscontentelementProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ispasswordProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ispasswordProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ispasswordProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::iskeyboardfocusableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isenabledProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isenabledProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isenabledProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isrequiredforformProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isdockpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isexpandcollapsepatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isgriditempatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isgridpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isinvokepatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ismultipleviewpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::israngevaluepatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isselectionitempatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isselectionpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isscrollpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::issynchronizedinputpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isscrollitempatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isvirtualizeditempatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isitemcontainerpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::istablepatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::istableitempatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::istextpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::istogglepatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::istransformpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::isvaluepatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, 'text')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, -7)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, @(1, 2, 3))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, [ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, [OrientationType]::Horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, [AutomationHeadingLevel]::Level2)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, None)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::iswindowpatternavailableProperty, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, button)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "button"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::BUTTON)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "BUTTON"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::button)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "button"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.button)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.button)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.button)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, calendar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "calendar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::CALENDAR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "CALENDAR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::calendar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "calendar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.calendar)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.calendar)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.calendar)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, checkbox)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "checkbox"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::CHECKBOX)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "CHECKBOX"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::checkbox)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "checkbox"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.checkbox)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.checkbox)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.checkbox)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, combobox)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "combobox"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::COMBOBOX)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "COMBOBOX"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::combobox)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "combobox"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.combobox)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.combobox)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.combobox)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, edit)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "edit"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::EDIT)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "EDIT"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::edit)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "edit"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.edit)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.edit)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.edit)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, hyperlink)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "hyperlink"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::HYPERLINK)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "HYPERLINK"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::hyperlink)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "hyperlink"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.hyperlink)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.hyperlink)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.hyperlink)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, image)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "image"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::IMAGE)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "IMAGE"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::image)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "image"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.image)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.image)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.image)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, listitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "listitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::LISTITEM)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "LISTITEM"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::listitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "listitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.listitem)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.listitem)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.listitem)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, list)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "list"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::LIST)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "LIST"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::list)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "list"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.list)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.list)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.list)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, menu)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "menu"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::MENU)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "MENU"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::menu)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "menu"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menu)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menu)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menu)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, menubar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "menubar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::MENUBAR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "MENUBAR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::menubar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "menubar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menubar)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menubar)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menubar)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, menuitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "menuitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::MENUITEM)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "MENUITEM"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::menuitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "menuitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menuitem)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menuitem)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.menuitem)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, progressbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "progressbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::PROGRESSBAR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "PROGRESSBAR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::progressbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "progressbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.progressbar)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.progressbar)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.progressbar)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, radiobutton)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "radiobutton"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::RADIOBUTTON)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "RADIOBUTTON"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::radiobutton)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "radiobutton"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.radiobutton)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.radiobutton)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.radiobutton)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, scrollbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "scrollbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::SCROLLBAR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "SCROLLBAR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::scrollbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "scrollbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.scrollbar)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.scrollbar)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.scrollbar)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, slider)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "slider"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::SLIDER)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "SLIDER"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::slider)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "slider"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.slider)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.slider)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.slider)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, spinner)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "spinner"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::SPINNER)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "SPINNER"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::spinner)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "spinner"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.spinner)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.spinner)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.spinner)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, statusbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "statusbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::STATUSBAR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "STATUSBAR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::statusbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "statusbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.statusbar)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.statusbar)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.statusbar)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, tab)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tab"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TAB)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TAB"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::tab)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tab"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tab)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tab)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tab)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, tabitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tabitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TABITEM)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TABITEM"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::tabitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tabitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tabitem)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tabitem)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tabitem)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, text)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TEXT)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TEXT"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::text)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "text"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.text)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.text)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.text)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, toolbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "toolbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TOOLBAR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TOOLBAR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::toolbar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "toolbar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.toolbar)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.toolbar)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.toolbar)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, tooltip)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tooltip"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TOOLTIP)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TOOLTIP"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::tooltip)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tooltip"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tooltip)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tooltip)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tooltip)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, tree)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tree"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TREE)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TREE"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::tree)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "tree"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tree)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tree)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.tree)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, treeitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "treeitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TREEITEM)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TREEITEM"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::treeitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "treeitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.treeitem)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.treeitem)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.treeitem)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, custom)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "custom"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::CUSTOM)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "CUSTOM"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::custom)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "custom"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.custom)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.custom)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.custom)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, group)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "group"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::GROUP)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "GROUP"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::group)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "group"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.group)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.group)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.group)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, thumb)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "thumb"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::THUMB)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "THUMB"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::thumb)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "thumb"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.thumb)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.thumb)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.thumb)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, datagrid)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "datagrid"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::DATAGRID)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "DATAGRID"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::datagrid)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "datagrid"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.datagrid)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.datagrid)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.datagrid)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, dataitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "dataitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::DATAITEM)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "DATAITEM"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::dataitem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "dataitem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.dataitem)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.dataitem)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.dataitem)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, document)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "document"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::DOCUMENT)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "DOCUMENT"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::document)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "document"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.document)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.document)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.document)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, splitbutton)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "splitbutton"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::SPLITBUTTON)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "SPLITBUTTON"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::splitbutton)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "splitbutton"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.splitbutton)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.splitbutton)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.splitbutton)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, window)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "window"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::WINDOW)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "WINDOW"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::window)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "window"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.window)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.window)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.window)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, pane)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "pane"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::PANE)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "PANE"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::pane)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "pane"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.pane)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.pane)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.pane)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, header)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "header"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::HEADER)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "HEADER"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::header)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "header"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.header)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.header)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.header)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, headeritem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "headeritem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::HEADERITEM)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "HEADERITEM"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::headeritem)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "headeritem"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.headeritem)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.headeritem)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.headeritem)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, table)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "table"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TABLE)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TABLE"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::table)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "table"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.table)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.table)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.table)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, titlebar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "titlebar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::TITLEBAR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "TITLEBAR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::titlebar)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "titlebar"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.titlebar)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.titlebar)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.titlebar)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, separator)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "separator"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::SEPARATOR)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "SEPARATOR"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::separator)",
+    "dto": {
+      "type": "property",
+      "property": "ControlType",
+      "value": "separator"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.separator)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.separator)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, ControlType.separator)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, none)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "none"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, [OrientationType]::none)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "none"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [OrientationType]::none)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "none"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, horizontal)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "horizontal"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, [OrientationType]::horizontal)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "horizontal"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [OrientationType]::horizontal)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, vertical)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "vertical"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, [OrientationType]::vertical)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": "vertical"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [OrientationType]::vertical)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, none)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "none"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::none)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "none"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.none)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.none)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.none)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level1)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level1"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level1)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level1"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level1)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level1)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level2)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level2"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level2)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level2"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level2)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level2)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level3)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level3"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level3)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level3"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level3)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level3)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level4)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level4"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level4)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level4"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level4)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level4)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level5)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level5"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level5)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level5"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level5)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level5)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level6)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level6"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level6)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level6"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level6)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level6)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level7)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level7"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level7)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level7"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level7)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level7)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level8)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level8"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level8)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level8"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level8)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level8)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, level9)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level9"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, [System.Windows.Automation.AutomationHeadingLevel]::level9)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": "level9"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level9)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level9)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::OrientationProperty, AutomationHeadingLevel.level<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, -1)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, -1)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 0)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": 0
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 0)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": 0
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 1)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": 1
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 1)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": 1
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 2)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": 2
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 2)",
+    "dto": {
+      "type": "property",
+      "property": "HeadingLevel",
+      "value": 2
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 3)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": 3
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 3)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 9)",
+    "dto": {
+      "type": "property",
+      "property": "Orientation",
+      "value": 9
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 9)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 10)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 10)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::Name, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new(NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new(AutomationElement.NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([automationelement]::nameproperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[PROPERTYCONDITION]::NEW([AUTOMATIONELEMENT]::NAMEPROPERTY, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[System.Windows.Automation.PropertyCondition]::new([AutomationElement]::NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[Automation.PropertyCondition]::new([AutomationElement]::NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[Property]::new([AutomationElement]::NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "new PropertyCondition(AutomationElement.NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "New-Object PropertyCondition([AutomationElement]::NameProperty, 'a')",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression 'New-Object PropertyCondition([AutomationElement]::NameProperty, 'a')'. Some parts of the selector were left unprocessed: 'New-Object <processed>'."
+  },
+  {
+    "selector": "New-Object System.Windows.Automation.PropertyCondition(NameProperty, 'a')",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression 'New-Object System.Windows.Automation.PropertyCondition(NameProperty, 'a')'. Some parts of the selector were left unprocessed: 'New-Object <processed>'."
+  },
+  {
+    "selector": "PropertyCondition(NameProperty, 'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "  [PropertyCondition]::new(  [AutomationElement]::NameProperty  ,   'a'  )  ",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '  [PropertyCondition]::new(  [AutomationElement]::NameProperty  ,   'a'  )  '. Some parts of the selector were left unprocessed: '  <processed>  '."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty,'a')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::AutomationIdProperty, 'btn_ok')",
+    "dto": {
+      "type": "property",
+      "property": "AutomationId",
+      "value": "btn_ok"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ClassNameProperty, 'Button')",
+    "dto": {
+      "type": "property",
+      "property": "ClassName",
+      "value": "Button"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::JavaClassProperty, 'javax.swing.JButton')",
+    "dto": {
+      "type": "property",
+      "property": "javaclass",
+      "value": "javax.swing.JButton"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::IsInvokePatternAvailableProperty, 'x')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, '')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": ""
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'hello world')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "hello world"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'it''s')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "it's"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'Calculator')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "Calculator"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'שורות')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "שורות"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, '日本語 🎉')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "日本語 🎉"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'a,b')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a,b"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'a)b')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "a)b"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, '[ControlType]::Button')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "[ControlType]::Button"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'TrueCondition')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "TrueCondition"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, '42')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "42"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, '@(1, 2)')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "@(1, 2)"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'line1\nline2')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "line1\nline2"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'back`tick')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "back`tick"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, '$x')",
+    "dto": {
+      "type": "property",
+      "property": "Name",
+      "value": "$x"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'unterminated)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::NameProperty, 'unterminated)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::NameProperty, 'unterminated)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, \"unterminated)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::NameProperty, \"unterminated)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::NameProperty, \"unterminated)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NativeWindowHandleProperty, 0)",
+    "dto": {
+      "type": "property",
+      "property": "NativeWindowHandle",
+      "value": 0
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NativeWindowHandleProperty, +12345)",
+    "dto": {
+      "type": "property",
+      "property": "NativeWindowHandle",
+      "value": 12345
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ProcessIdProperty, -5)",
+    "dto": {
+      "type": "property",
+      "property": "ProcessId",
+      "value": -5
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ProcessIdProperty, 1.5)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::ProcessIdProperty, 1.5)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::ProcessIdProperty, 1.5)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::SizeOfSetProperty, 3)",
+    "dto": {
+      "type": "property",
+      "property": "SizeOfSet",
+      "value": 3
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, @(42, 1, 7))",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [42, 1, 7]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, @(42))",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [42]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, [int[]] @(42, 1))",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [42, 1]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, [int32[]]@(42,1))",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [42, 1]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, new int[] {42, 1})",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [42, 1]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, int32[] [ 42 , 1 ])",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [42, 1]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, {42, 1})",
+    "dto": {
+      "type": "property",
+      "property": "RuntimeId",
+      "value": [42, 1]
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, $true)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, $true)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, $<processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, true)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, 'true')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::LabeledByProperty, 'x')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::ClickablePointProperty, 1)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::CultureProperty, 42)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::TrueCondition",
+    "dto": {
+      "type": "true"
+    }
+  },
+  {
+    "selector": "[PropertyCondition]::FalseCondition",
+    "dto": {
+      "type": "false"
+    }
+  },
+  {
+    "selector": "[Condition]::TrueCondition",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[Condition]::TrueCondition'. Some parts of the selector were left unprocessed: '[Condition]::TrueCondition'."
+  },
+  {
+    "selector": "[System.Windows.Automation.Condition]::FalseCondition",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[System.Windows.Automation.Condition]::FalseCondition'. Some parts of the selector were left unprocessed: '[System.Windows.Automation.Condition]::FalseCondition'."
+  },
+  {
+    "selector": "Condition.TrueCondition",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression 'Condition.TrueCondition'. Some parts of the selector were left unprocessed: 'Condition.TrueCondition'."
+  },
+  {
+    "selector": "TrueCondition",
+    "dto": {
+      "type": "true"
+    }
+  },
+  {
+    "selector": "FalseCondition",
+    "dto": {
+      "type": "false"
+    }
+  },
+  {
+    "selector": "[Automation]::RawViewCondition",
+    "dto": {
+      "type": "true"
+    }
+  },
+  {
+    "selector": "[Automation]::ControlViewCondition",
+    "dto": {
+      "type": "not",
+      "condition": {
+        "type": "property",
+        "property": "IsControlElement",
+        "value": false
+      }
+    }
+  },
+  {
+    "selector": "[Automation]::ContentViewCondition",
+    "dto": {
+      "type": "not",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "property",
+            "property": "IsControlElement",
+            "value": false
+          },
+          {
+            "type": "property",
+            "property": "IsContentElement",
+            "value": false
+          }
+        ]
+      }
+    }
+  },
+  {
+    "selector": "Automation.RawViewCondition",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression 'Automation.RawViewCondition'. Some parts of the selector were left unprocessed: 'Automation.RawViewCondition'."
+  },
+  {
+    "selector": "[System.Windows.Automation.Automation]::ControlViewCondition",
+    "dto": {
+      "type": "not",
+      "condition": {
+        "type": "property",
+        "property": "IsControlElement",
+        "value": false
+      }
+    }
+  },
+  {
+    "selector": "ContentViewCondition",
+    "dto": {
+      "type": "not",
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "property",
+            "property": "IsControlElement",
+            "value": false
+          },
+          {
+            "type": "property",
+            "property": "IsContentElement",
+            "value": false
+          }
+        ]
+      }
+    }
+  },
+  {
+    "selector": "[AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))",
+    "dto": {
+      "type": "and",
+      "conditions": [
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "A"
+        },
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "B"
+        }
+      ]
+    }
+  },
+  {
+    "selector": "[AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'C'))",
+    "dto": {
+      "type": "and",
+      "conditions": [
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "A"
+        },
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "B"
+        },
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "C"
+        }
+      ]
+    }
+  },
+  {
+    "selector": "[OrCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))",
+    "dto": {
+      "type": "or",
+      "conditions": [
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "A"
+        },
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "B"
+        }
+      ]
+    }
+  },
+  {
+    "selector": "[NotCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'))",
+    "dto": {
+      "type": "not",
+      "condition": {
+        "type": "property",
+        "property": "Name",
+        "value": "A"
+      }
+    }
+  },
+  {
+    "selector": "[System.Windows.Automation.AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [Condition]::TrueCondition)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[System.Windows.Automation.AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[System.Windows.Automation.AndCondition]::new(<processed>, [Condition]::TrueCondition)'."
+  },
+  {
+    "selector": "new AndCondition([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))",
+    "dto": {
+      "type": "and",
+      "conditions": [
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "A"
+        },
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "B"
+        }
+      ]
+    }
+  },
+  {
+    "selector": "New-Object OrCondition([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression 'New-Object OrCondition([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))'. Some parts of the selector were left unprocessed: 'New-Object <processed>'."
+  },
+  {
+    "selector": "[And]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))",
+    "dto": {
+      "type": "and",
+      "conditions": [
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "A"
+        },
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "B"
+        }
+      ]
+    }
+  },
+  {
+    "selector": "[NotCondition]::new([Automation]::ControlViewCondition)",
+    "dto": {
+      "type": "not",
+      "condition": {
+        "type": "not",
+        "condition": {
+          "type": "property",
+          "property": "IsControlElement",
+          "value": false
+        }
+      }
+    }
+  },
+  {
+    "selector": "[AndCondition]::new([OrCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B')), [NotCondition]::new([PropertyCondition]::new([AutomationElement]::ControlTypeProperty, Button)))",
+    "dto": {
+      "type": "and",
+      "conditions": [
+        {
+          "type": "or",
+          "conditions": [
+            {
+              "type": "property",
+              "property": "Name",
+              "value": "A"
+            },
+            {
+              "type": "property",
+              "property": "Name",
+              "value": "B"
+            }
+          ]
+        },
+        {
+          "type": "not",
+          "condition": {
+            "type": "property",
+            "property": "ControlType",
+            "value": "Button"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "selector": "[OrCondition]::new([AndCondition]::new([NotCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A')), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B')), [AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'C'), [OrCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'D'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'E'))))",
+    "dto": {
+      "type": "or",
+      "conditions": [
+        {
+          "type": "and",
+          "conditions": [
+            {
+              "type": "not",
+              "condition": {
+                "type": "property",
+                "property": "Name",
+                "value": "A"
+              }
+            },
+            {
+              "type": "property",
+              "property": "Name",
+              "value": "B"
+            }
+          ]
+        },
+        {
+          "type": "and",
+          "conditions": [
+            {
+              "type": "property",
+              "property": "Name",
+              "value": "C"
+            },
+            {
+              "type": "or",
+              "conditions": [
+                {
+                  "type": "property",
+                  "property": "Name",
+                  "value": "D"
+                },
+                {
+                  "type": "property",
+                  "property": "Name",
+                  "value": "E"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "selector": "[AndCondition]::new(\n  [PropertyCondition]::new([AutomationElement]::NameProperty, 'A'),\n  [PropertyCondition]::new([AutomationElement]::NameProperty, 'B')\n)",
+    "dto": {
+      "type": "and",
+      "conditions": [
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "A"
+        },
+        {
+          "type": "property",
+          "property": "Name",
+          "value": "B"
+        }
+      ]
+    }
+  },
+  {
+    "selector": "[AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'))",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'))'. expected AND condition to have at least 2 arguments."
+  },
+  {
+    "selector": "[OrCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'))",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[OrCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'))'. expected OR condition to have at least 2 arguments."
+  },
+  {
+    "selector": "[NotCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[NotCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))'. expected NOT condition to have exactly 1 arguments."
+  },
+  {
+    "selector": "[AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), 'B')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[OrCondition]::new(42, [PropertyCondition]::new([AutomationElement]::NameProperty, 'A'))",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[NotCondition]::new('A')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[NotCondition]::new([ControlType]::Button)",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression ''. Some parts of the selector were left unprocessed: ''."
+  },
+  {
+    "selector": "   ",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '   '. Some parts of the selector were left unprocessed: '   '."
+  },
+  {
+    "selector": "42",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '42'. The selector must be of type System.Windows.Automation.Condition.."
+  },
+  {
+    "selector": "'just a string'",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression ''just a string''. The selector must be of type System.Windows.Automation.Condition.."
+  },
+  {
+    "selector": "[ControlType]::Button",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[ControlType]::Button'. The selector must be of type System.Windows.Automation.Condition.."
+  },
+  {
+    "selector": "@(1, 2)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '@(1, 2)'. The selector must be of type System.Windows.Automation.Condition.."
+  },
+  {
+    "selector": "garbage",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression 'garbage'. Some parts of the selector were left unprocessed: 'garbage'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::UnknownProp, 'value')",
+    "error": "InvalidArgumentError"
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty)",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::NameProperty)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::NameProperty)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'a', 'b')",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::NameProperty, 'a', 'b')'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::NameProperty, <processed>, <processed>)'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'a') trailing",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::NameProperty, 'a') trailing'. Some parts of the selector were left unprocessed: '<processed> trailing'."
+  },
+  {
+    "selector": "[PropertyCondition]::new([AutomationElement]::NameProperty, 'a') [PropertyCondition]::new([AutomationElement]::NameProperty, 'b')",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::NameProperty, 'a') [PropertyCondition]::new([AutomationElement]::NameProperty, 'b')'. Some parts of the selector were left unprocessed: '<processed> <processed>'."
+  },
+  {
+    "selector": "[AndCondition]::new()",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[AndCondition]::new()'. Some parts of the selector were left unprocessed: '[AndCondition]::new()'."
+  },
+  {
+    "selector": "[FooCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'a'))",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[FooCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'a'))'. Some parts of the selector were left unprocessed: '[FooCondition]::new(<processed>)'."
+  },
+  {
+    "selector": "[Name] -eq 'x'",
+    "error": "InvalidSelectorError",
+    "message": "Could not parse Windows Automation selector expression '[Name] -eq 'x''. Some parts of the selector were left unprocessed: '[Name] -eq <processed>'."
+  }
+]
