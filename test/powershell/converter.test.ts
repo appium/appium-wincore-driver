@@ -12,6 +12,7 @@ import {
   FalseCondition,
 } from '../../lib/powershell/conditions';
 import {convertStringToCondition} from '../../lib/powershell/converter';
+import {conditionToDto} from '../../lib/server/converter-bridge';
 
 describe('convertStringToCondition', () => {
   describe('TrueCondition / FalseCondition', () => {
@@ -151,6 +152,27 @@ describe('convertStringToCondition', () => {
         "[PropertyCondition]::new([AutomationElement]::NameProperty, 'hello world')",
       );
       expect(condition).toBeInstanceOf(PropertyCondition);
+    });
+  });
+
+  describe('regressions', () => {
+    it('unescapes every doubled single quote, not just the first', () => {
+      const condition = convertStringToCondition(
+        "[PropertyCondition]::new([AutomationElement]::NameProperty, 'it''s a ''b''')",
+      );
+      expect(conditionToDto(condition)).toEqual({type: 'property', property: 'Name', value: "it's a 'b'"});
+    });
+
+    it('rejects an unterminated double-quoted string in linear time (ReDoS)', () => {
+      const start = performance.now();
+      expect(() => convertStringToCondition('[Name] -eq "' + '!'.repeat(5000))).toThrow();
+      expect(performance.now() - start).toBeLessThan(200);
+    });
+
+    it('rejects an unterminated single-quoted string in linear time (ReDoS)', () => {
+      const start = performance.now();
+      expect(() => convertStringToCondition("[Name] -eq '" + 'a'.repeat(5000))).toThrow();
+      expect(performance.now() - start).toBeLessThan(200);
     });
   });
 });
