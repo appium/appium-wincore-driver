@@ -6,10 +6,9 @@ import type {Element} from '@appium/types';
  */
 import {errors, W3C_ELEMENT_KEY} from 'appium/driver';
 
-import {convertStringToCondition} from '../powershell/converter';
 import {propertyCondition} from '../server/conditions';
-import {conditionToDto} from '../server/converter-bridge';
 import type {ConditionDto} from '../server/protocol';
+import {parseUiaSelector} from '../uia-selector/parser';
 import {xpathToElIdOrIds, type SendCommandFn} from '../xpath';
 
 export type {SendCommandFn};
@@ -71,7 +70,7 @@ export async function locateElements(
       condition = propertyCondition('ClassName', selector);
       break;
     case '-windows uiautomation':
-      condition = conditionToDto(convertStringToCondition(selector));
+      condition = parseUiaSelector(selector);
       break;
     case 'xpath':
       return await xpathToElIdOrIds(selector, mult, context, sendCommand);

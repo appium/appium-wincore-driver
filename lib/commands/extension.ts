@@ -10,10 +10,9 @@ import {MODIFY_FS_FEATURE} from '../constants';
 import type {AppiumWincoreDriver} from '../driver';
 import type {Enum} from '../enums';
 import {ClickType, Key} from '../enums';
-import {convertStringToCondition} from '../powershell/converter';
 import {propertyCondition} from '../server/conditions';
-import {conditionToDto} from '../server/converter-bridge';
 import type {RectResult} from '../server/protocol';
+import {parseUiaSelector} from '../uia-selector/parser';
 import {sleep} from '../util';
 import type {VirtualKey} from '../winapi/types';
 import {KeyEventFlags} from '../winapi/types';
@@ -171,8 +170,7 @@ export async function pushCacheRequest(this: AppiumWincoreDriver, cacheRequest: 
   }
 
   if (cacheRequest.treeFilter) {
-    const condition = convertStringToCondition(cacheRequest.treeFilter);
-    await this.sendCommand('setCacheRequestTreeFilter', {condition: conditionToDto(condition)});
+    await this.sendCommand('setCacheRequestTreeFilter', {condition: parseUiaSelector(cacheRequest.treeFilter)});
   }
 
   if (cacheRequest.treeScope) {
@@ -577,7 +575,7 @@ export async function getClipboardBase64(
   this: AppiumWincoreDriver,
   contentType?: ContentType | {contentType?: ContentType},
 ): Promise<string> {
-  if (!contentType || (contentType && typeof contentType === 'object')) {
+  if (!contentType || typeof contentType === 'object') {
     contentType = contentType?.contentType ?? ContentType.PLAINTEXT;
   }
 

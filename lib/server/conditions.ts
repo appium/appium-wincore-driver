@@ -1,9 +1,8 @@
 import type {ConditionDto} from './protocol';
 
 /**
- * Builder functions for creating ConditionDto objects.
- * These replace the PSObject-based condition classes when building conditions
- * directly (without going through the `-windows uiautomation` converter).
+ * Builder functions for creating ConditionDto objects, used by the locator strategies
+ * and by the `-windows uiautomation` selector parser (lib/uia-selector/parser.ts).
  */
 
 export function propertyCondition(property: string, value: unknown): ConditionDto {

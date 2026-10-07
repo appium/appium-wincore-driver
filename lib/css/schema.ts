@@ -19,6 +19,6 @@ export const ATTRIBUTE_SCHEMA: AttributeSchema = {
     'item-type': {type: 'string'},
     // Boolean attributes (enabled, offscreen, ...) are intentionally unsupported: the
     // `-windows uiautomation` DSL has no working literal for standalone $true/$false values
-    // (see lib/powershell/converter.ts — BOOLEAN_MATCHER is defined but never wired up).
+    // (see lib/uia-selector/parser.ts — BOOLEAN_MATCHER is only used for CultureInfo arguments).
   },
 };

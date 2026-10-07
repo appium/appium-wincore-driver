@@ -1,7 +1,7 @@
 import type {ParsedAttribute, ParsedRule, ParsedSelector, StrategyEmitter} from '@appium/css-locator-to-native';
 import {errors} from 'appium/driver';
 
-import {ControlType} from '../powershell/types';
+import {ControlType} from '../uia-selector/types';
 
 const STRING_PROPERTY_NAMES: Record<string, string> = {
   name: 'NameProperty',
@@ -19,7 +19,7 @@ const CONTROL_TYPE_VALUES = new Set<string>(Object.values(ControlType));
 /**
  * Converts parsed CSS selectors into `-windows uiautomation` condition DSL strings
  * (e.g. `[PropertyCondition]::new([AutomationElement]::NameProperty, 'OK')`), consumed by
- * `convertStringToCondition` in `lib/powershell/converter.ts`.
+ * `parseUiaSelector` in `lib/uia-selector/parser.ts`.
  *
  * Scope: single-rule, equality-only. UIA's `PropertyCondition` has no partial-match support, so
  * `^=`/`$=`/`~=`/`*=` operators are rejected. Combinators (`>`, ` `) are rejected too, since our
