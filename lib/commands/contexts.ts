@@ -3,10 +3,10 @@ import path from 'node:path';
 import {fs, node, system, tempDir, zip} from '@appium/support';
 import type {ChromedriverOpts} from 'appium-chromedriver';
 import {Chromedriver} from 'appium-chromedriver';
-import {errors} from 'appium/driver';
+import {errors} from 'appium/driver.js';
 
-import type {AppiumWincoreDriver} from '../driver';
-import {cdpRequest, downloadFile, sleep, MODULE_NAME} from '../util';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {cdpRequest, currentFilename, downloadFile, sleep, MODULE_NAME} from '../util.js';
 
 const NATIVE_APP = 'NATIVE_APP';
 const WEBVIEW = 'WEBVIEW';
@@ -235,7 +235,7 @@ async function getDriverExecutable(
     driverType = 'edgedriver';
   }
 
-  const root = node.getModuleRootSync(MODULE_NAME, __filename);
+  const root = node.getModuleRootSync(MODULE_NAME, currentFilename);
   if (!root) {
     throw new errors.InvalidArgumentError(`Cannot find the root folder of the ${MODULE_NAME} Node.js module`);
   }

@@ -20,7 +20,7 @@ export interface OpResult {
   };
 }
 
-const PERF_DIR = resolve(__dirname, '..');
+const PERF_DIR = resolve(import.meta.dirname, '..');
 
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) {

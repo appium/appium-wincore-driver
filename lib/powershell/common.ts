@@ -1,8 +1,8 @@
 import type {Element, Position, Rect} from '@appium/types';
-import {W3C_ELEMENT_KEY, errors} from 'appium/driver';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 
-import {PSObject} from './core';
-import {AutomationHeadingLevel, ControlType, ExtraControlType, OrientationType} from './types';
+import {PSObject} from './core.js';
+import {AutomationHeadingLevel, ControlType, ExtraControlType, OrientationType} from './types.js';
 
 export class PSString extends PSObject {
   constructor(value: string) {

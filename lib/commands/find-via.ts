@@ -4,13 +4,13 @@ import type {Element} from '@appium/types';
  * in driver.ts): xpath (including predicates like `contains()`), accessibility id,
  * name, class name, tag name, id, and `-windows uiautomation`.
  */
-import {errors, W3C_ELEMENT_KEY} from 'appium/driver';
+import {errors, W3C_ELEMENT_KEY} from 'appium/driver.js';
 
-import {convertStringToCondition} from '../powershell/converter';
-import {propertyCondition} from '../server/conditions';
-import {conditionToDto} from '../server/converter-bridge';
-import type {ConditionDto} from '../server/protocol';
-import {xpathToElIdOrIds, type SendCommandFn} from '../xpath';
+import {convertStringToCondition} from '../powershell/converter.js';
+import {propertyCondition} from '../server/conditions.js';
+import {conditionToDto} from '../server/converter-bridge.js';
+import type {ConditionDto} from '../server/protocol.js';
+import {xpathToElIdOrIds, type SendCommandFn} from '../xpath/index.js';
 
 export type {SendCommandFn};
 

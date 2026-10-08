@@ -1,4 +1,4 @@
-import {$} from '../util';
+import {$} from '../util.js';
 
 export class PSObject {
   private readonly command: string;

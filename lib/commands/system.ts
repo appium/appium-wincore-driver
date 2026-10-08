@@ -1,7 +1,7 @@
 import type {Orientation} from '@appium/types';
 
-import type {AppiumWincoreDriver} from '../driver';
-import {getDisplayOrientation} from '../winapi/user32';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {getDisplayOrientation} from '../winapi/user32.js';
 
 /**
  * Gets the display orientation of the primary monitor.

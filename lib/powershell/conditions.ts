@@ -1,5 +1,5 @@
-import {errors} from 'appium/driver';
-import {logger} from 'appium/support';
+import {errors} from 'appium/driver.js';
+import {logger} from 'appium/support.js';
 
 import {
   registerPropertyCondition,
@@ -9,8 +9,8 @@ import {
   registerNotCondition,
   registerTrueCondition,
   registerFalseCondition,
-} from '../server/converter-bridge';
-import {$} from '../util';
+} from '../server/converter-bridge.js';
+import {$} from '../util.js';
 import {
   PSAutomationElement,
   PSAutomationHeadingLevel,
@@ -23,9 +23,9 @@ import {
   PSPoint,
   PSRect,
   PSString,
-} from './common';
-import {PSObject} from './core';
-import type {Property} from './types';
+} from './common.js';
+import {PSObject} from './core.js';
+import type {Property} from './types.js';
 import {
   CultureInfoProperty,
   AutomationHeadingLevelProperty,
@@ -40,7 +40,7 @@ import {
   BooleanProperty,
   OrientationType,
   AutomationHeadingLevel,
-} from './types';
+} from './types.js';
 
 const PROPERTY_CONDITION = $ /* ps1 */ `[PropertyCondition]::new([AutomationElement]::${0}Property, ${1})`;
 const AND_CONDITION = $ /* ps1 */ `[AndCondition]::new(${0})`;

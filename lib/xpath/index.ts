@@ -14,7 +14,7 @@
  * per axis step / predicate read has been removed.
  */
 import type {Element} from '@appium/types';
-import {W3C_ELEMENT_KEY, errors} from 'appium/driver';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 
 export type SendCommandFn = (method: string, params: Record<string, unknown>) => Promise<unknown>;
 

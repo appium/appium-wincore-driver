@@ -1,4 +1,4 @@
-import type {Enum} from '../../enums';
+import type {Enum} from '../../enums.js';
 
 export const InputType = Object.freeze({
   /** The event is a mouse event. Use the mi structure of the union. */

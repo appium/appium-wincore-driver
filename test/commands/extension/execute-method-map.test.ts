@@ -1,4 +1,4 @@
-import {W3C_ELEMENT_KEY} from 'appium/driver';
+import {W3C_ELEMENT_KEY} from 'appium/driver.js';
 /**
  * Unit tests for the executeMethodMap dispatch path, focused on the arg-shape
  * normalization in coerceExecuteMethodArgs (raw W3C element -> { elementId },

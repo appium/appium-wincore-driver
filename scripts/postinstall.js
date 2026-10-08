@@ -10,11 +10,11 @@
  * which requires the .NET 10 SDK.
  */
 
-const {existsSync} = require('node:fs');
-const {join} = require('node:path');
-const {execSync} = require('node:child_process');
+import {execSync} from 'node:child_process';
+import {existsSync} from 'node:fs';
+import {join} from 'node:path';
 
-const prebuiltExe = join(__dirname, '..', 'native', 'win-x64', 'WincoreServer.exe');
+const prebuiltExe = join(import.meta.dirname, '..', 'native', 'win-x64', 'WincoreServer.exe');
 
 if (existsSync(prebuiltExe)) {
   console.log('[postinstall] Prebuilt WincoreServer.exe found — skipping native build.');
