@@ -8,13 +8,21 @@ import type {
   ScrollAction,
   WheelActionSequence,
 } from '@appium/types';
-import {W3C_ELEMENT_KEY, errors} from 'appium/driver';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 
-import type {AppiumWincoreDriver} from '../driver';
-import {Key} from '../enums';
-import type {RectResult} from '../server/protocol';
-import {sleep} from '../util';
-import {keyDown, keyUp, mouseMoveRelative, mouseMoveAbsolute, mouseDown, mouseUp, mouseScroll} from '../winapi/user32';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {Key} from '../enums.js';
+import type {RectResult} from '../server/protocol.js';
+import {sleep} from '../util.js';
+import {
+  keyDown,
+  keyUp,
+  mouseMoveRelative,
+  mouseMoveAbsolute,
+  mouseDown,
+  mouseUp,
+  mouseScroll,
+} from '../winapi/user32.js';
 
 /**
  * Executes a W3C WebDriver action chain (key, pointer, wheel, and none sequences), replaying

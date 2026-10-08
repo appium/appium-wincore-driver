@@ -1,7 +1,7 @@
 import type {Element} from '@appium/types';
-import {W3C_ELEMENT_KEY} from 'appium/driver';
+import {W3C_ELEMENT_KEY} from 'appium/driver.js';
 
-import type {AppiumWincoreDriver} from '../driver';
+import type {AppiumWincoreDriver} from '../driver.js';
 
 export type AccessibleNode = {
   name: string | null;

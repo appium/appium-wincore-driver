@@ -2,15 +2,18 @@ import {logger} from '@appium/support';
 import type {Orientation} from '@appium/types';
 
 const log = logger.getLogger('user32');
-import {errors} from 'appium/driver';
+import {errors} from 'appium/driver.js';
 import type {EasingFunction} from 'bezier-easing';
 import bezier from 'bezier-easing';
-import {load, struct, union, sizeof, array, proto, opaque, pointer, alias, types, address} from 'koffi';
+import koffi from 'koffi';
 
-import {Key} from '../enums';
-import {sleep} from '../util';
-import {InputType, KeyEventFlags, MouseEventFlags, ScanCode, VirtualKey, XMouseButton} from './types';
-import {SystemMetric} from './types/systemmetric';
+import {Key} from '../enums.js';
+import {sleep} from '../util.js';
+import {InputType, KeyEventFlags, MouseEventFlags, ScanCode, VirtualKey, XMouseButton} from './types/index.js';
+import {SystemMetric} from './types/systemmetric.js';
+
+// koffi is CJS, so named imports aren't available in ESM
+const {load, struct, union, sizeof, array, proto, opaque, pointer, alias, types, address} = koffi;
 
 interface Event {
   type: InputType;

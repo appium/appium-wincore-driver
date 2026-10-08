@@ -1,4 +1,4 @@
-import type {Enum} from '../../enums';
+import type {Enum} from '../../enums.js';
 
 export const SystemMetric = Object.freeze({
   /** The flags that specify how the system arranged minimized windows. For more information, see the Remarks section in this topic. */

@@ -1,4 +1,4 @@
-import type {FlagsEnum} from '../../enums';
+import type {FlagsEnum} from '../../enums.js';
 
 export const KeyEventFlags = Object.freeze({
   /** If specified, the wScan scan code consists of a sequence of two bytes, where the first byte has a value of 0xE0. See Extended-Key Flag for more info. */

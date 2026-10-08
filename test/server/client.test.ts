@@ -1,4 +1,4 @@
-import {errors} from 'appium/driver';
+import {errors} from 'appium/driver.js';
 /**
  * Unit tests for WincoreServerClient's server-error → WebDriver-error mapping.
  */

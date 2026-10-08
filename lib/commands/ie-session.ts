@@ -1,6 +1,6 @@
-import type {AppiumWincoreDriver} from '../driver';
-import {IESession, registerIESession, deleteIESession} from '../ie/session';
-import {isIEWindowHwnd} from '../winapi/user32';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {IESession, registerIESession, deleteIESession} from '../ie/session.js';
+import {isIEWindowHwnd} from '../winapi/user32.js';
 
 export {isIEWindowHwnd};
 

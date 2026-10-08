@@ -1,4 +1,4 @@
-export {WincoreServerClient} from './client';
-export {conditionToDto, conditionDtoMap} from './converter-bridge';
-export * from './conditions';
-export * from './protocol';
+export {WincoreServerClient} from './client.js';
+export {conditionToDto, conditionDtoMap} from './converter-bridge.js';
+export * from './conditions.js';
+export * from './protocol.js';

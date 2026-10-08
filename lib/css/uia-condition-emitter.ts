@@ -1,7 +1,7 @@
 import type {ParsedAttribute, ParsedRule, ParsedSelector, StrategyEmitter} from '@appium/css-locator-to-native';
-import {errors} from 'appium/driver';
+import {errors} from 'appium/driver.js';
 
-import {ControlType} from '../powershell/types';
+import {ControlType} from '../powershell/types.js';
 
 const STRING_PROPERTY_NAMES: Record<string, string> = {
   name: 'NameProperty',

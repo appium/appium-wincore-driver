@@ -1,11 +1,11 @@
 import type {ChildProcessWithoutNullStreams} from 'node:child_process';
 import {spawn} from 'node:child_process';
 
-import {fs, net, util} from 'appium/support';
+import {fs, net, util} from 'appium/support.js';
 import {waitForCondition} from 'asyncbox';
 
-import type {AppiumWincoreDriver} from '../driver';
-import {getBundledFfmpegPath} from '../util';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {getBundledFfmpegPath} from '../util.js';
 
 const RETRY_PAUSE = 300;
 const RETRY_TIMEOUT = 5000;

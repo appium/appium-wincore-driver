@@ -3,13 +3,16 @@ import https from 'node:https';
 import net from 'node:net';
 import path from 'node:path';
 import {pipeline} from 'node:stream/promises';
+import {fileURLToPath} from 'node:url';
 
-import {errors} from 'appium/driver';
-import {fs, zip, node, tempDir, logger} from 'appium/support';
+import {errors} from 'appium/driver.js';
+import {fs, zip, node, tempDir, logger} from 'appium/support.js';
 
-import type {AppiumWincoreDriver} from './driver';
+import type {AppiumWincoreDriver} from './driver.js';
 
 const log = logger.getLogger('util');
+
+export const currentFilename = fileURLToPath(import.meta.url);
 
 export async function findFreePort(start: number, end: number): Promise<number> {
   for (let port = start; port <= end; port++) {
@@ -44,7 +47,7 @@ export async function getBundledFfmpegPath(driver: AppiumWincoreDriver): Promise
     return ffmpegExecutablePath;
   }
 
-  const root = node.getModuleRootSync(MODULE_NAME, __filename);
+  const root = node.getModuleRootSync(MODULE_NAME, currentFilename);
   if (!root) {
     throw new errors.InvalidArgumentError(`Cannot find the root folder of the ${MODULE_NAME} Node.js module`);
   }

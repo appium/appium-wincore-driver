@@ -1,14 +1,14 @@
-import * as actions from './actions';
-import * as app from './app';
-import * as contexts from './contexts';
-import * as device from './device';
-import * as element from './element';
-import * as executeMethods from './execute-methods';
-import * as extension from './extension';
-import * as ieSession from './ie-session';
-import * as native from './native';
-import * as serverSession from './server-session';
-import * as system from './system';
+import * as actions from './actions.js';
+import * as app from './app.js';
+import * as contexts from './contexts.js';
+import * as device from './device.js';
+import * as element from './element.js';
+import * as executeMethods from './execute-methods.js';
+import * as extension from './extension.js';
+import * as ieSession from './ie-session.js';
+import * as native from './native.js';
+import * as serverSession from './server-session.js';
+import * as system from './system.js';
 
 const commands = {
   ...actions,
@@ -29,7 +29,7 @@ type Commands = {
   [key in keyof typeof commands]: (typeof commands)[key];
 };
 
-declare module '../driver' {
+declare module '../driver.js' {
   interface AppiumWincoreDriver extends Commands {}
 }
 

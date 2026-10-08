@@ -1,4 +1,4 @@
-import type {ConditionDto} from './protocol';
+import type {ConditionDto} from './protocol.js';
 
 /**
  * Builder functions for creating ConditionDto objects.

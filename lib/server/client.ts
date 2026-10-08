@@ -2,11 +2,12 @@ import type {ChildProcessWithoutNullStreams} from 'node:child_process';
 import {spawn} from 'node:child_process';
 import type {WriteStream} from 'node:fs';
 import {createWriteStream} from 'node:fs';
-import {join} from 'node:path';
+import {dirname, join} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
-import {errors} from 'appium/driver';
+import {errors} from 'appium/driver.js';
 
-import type {ServerRequest, ServerResponse} from './protocol';
+import type {ServerRequest, ServerResponse} from './protocol.js';
 
 const SERVER_EXE_NAME = 'WincoreServer.exe';
 
@@ -43,8 +44,8 @@ export class WincoreServerClient {
     if (process.env.WINCORE_SERVER_PATH) {
       return process.env.WINCORE_SERVER_PATH;
     }
-    // __dirname at runtime is build/lib/server/, so go up 3 levels to project root
-    return join(__dirname, '..', '..', '..', 'native', 'win-x64', SERVER_EXE_NAME);
+    // module dir at runtime is build/lib/server/, so go up 3 levels to project root
+    return join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'native', 'win-x64', SERVER_EXE_NAME);
   }
 
   async start(recordingPath?: string, env?: NodeJS.ProcessEnv): Promise<void> {

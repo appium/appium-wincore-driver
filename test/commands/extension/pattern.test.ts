@@ -1,4 +1,4 @@
-import {W3C_ELEMENT_KEY, errors} from 'appium/driver';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 /**
  * Unit tests for pattern extension commands (invoke, expand, collapse, close, etc.).
  */

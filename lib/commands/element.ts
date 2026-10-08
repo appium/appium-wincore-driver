@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type {Element, Rect} from '@appium/types';
-import {errors, W3C_ELEMENT_KEY} from 'appium/driver';
+import {errors, W3C_ELEMENT_KEY} from 'appium/driver.js';
 
-import type {AppiumWincoreDriver} from '../driver';
-import {Key} from '../enums';
-import {propertyCondition, andCondition, orCondition} from '../server/conditions';
-import type {RectResult} from '../server/protocol';
-import {sleep} from '../util';
-import {mouseDown, mouseMoveAbsolute, mouseUp, getCursorPos} from '../winapi/user32';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {Key} from '../enums.js';
+import {propertyCondition, andCondition, orCondition} from '../server/conditions.js';
+import type {RectResult} from '../server/protocol.js';
+import {sleep} from '../util.js';
+import {mouseDown, mouseMoveAbsolute, mouseUp, getCursorPos} from '../winapi/user32.js';
 
 /**
  * Reads a UI Automation property value from an element.

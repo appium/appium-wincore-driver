@@ -1,4 +1,4 @@
-import type {Enum} from '../../enums';
+import type {Enum} from '../../enums.js';
 
 export const XMouseButton = Object.freeze({
   XBUTTON1: 0x0001,

@@ -1,4 +1,4 @@
-import type {AppiumWincoreDriver} from '../driver';
+import type {AppiumWincoreDriver} from '../driver.js';
 
 const ISO_8061_FORMAT = 'yyyy-MM-ddTHH:mm:sszzz';
 

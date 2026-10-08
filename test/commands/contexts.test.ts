@@ -10,6 +10,7 @@ vi.mock('../../lib/util', () => ({
   downloadFile: vi.fn().mockResolvedValue(undefined),
   sleep: vi.fn().mockResolvedValue(undefined),
   MODULE_NAME: 'appium-wincore-driver',
+  currentFilename: '/mock/root/build/lib/util.js',
 }));
 
 vi.mock('appium-chromedriver', () => ({
