@@ -21,9 +21,8 @@ public static class FindCommands
         }
 
         // Route to a tree provider when the context is already one of its elements,
-        // or the search root is a window it auto-routes (Java windows). Opt-in-only
-        // providers (.NET bridge) are reached through their own *ViaDotnetBridge
-        // commands, never automatically from here.
+        // or the search root is a window it auto-routes. Opt-in-only providers are
+        // reached through their plugin's own commands, never automatically from here.
         if (TryRouteToProvider(state, contextElementId, out var provider, out var providerRootId))
         {
             return provider.FindFirst(providerRootId, conditionDto, scope);
@@ -432,15 +431,15 @@ public static class FindCommands
     // ── tree-provider routing ────────────────────────────────────────────────────
 
     /// <summary>
-    /// Decides whether a find should be served from a tree provider (Java agent,
-    /// .NET bridge) instead of real UIA, and if so resolves the provider's own root
+    /// Decides whether a find should be served from a tree provider instead of
+    /// real UIA, and if so resolves the provider's own root
     /// element id to search from.
     ///
     /// Routes when: the context is already one of a provider's elements (continuing
     /// a search inside that tree); or a fresh find whose window a provider both
     /// <see cref="ITreeProvider.OwnsWindow"/>s and <see cref="ITreeProvider.AutoRouteStandardFind"/>s
-    /// (Java — a Java window's children live only in the agent tree). Opt-in-only
-    /// providers such as the .NET bridge are never auto-routed here.
+    /// (the window's children live only in the provider's tree). Opt-in-only
+    /// providers are never auto-routed here.
     /// </summary>
     internal static bool TryRouteToProvider(
         SessionState state, string? contextElementId, out ITreeProvider provider, out string providerRootId)

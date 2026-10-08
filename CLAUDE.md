@@ -30,12 +30,12 @@ This is an **Appium driver** for Windows desktop UI automation, exposed via the 
 ### Server plugins (tree providers)
 
 `WincoreServer.exe` loads external .NET plugins at startup from directories on the
-`WINCORE_SERVER_PLUGINS` environment variable (`;`-separated; set by an installed
-`appium-wincore-*` Appium plugin before the server spawns). Each plugin folder has a
+`WINCORE_SERVER_PLUGINS` environment variable (`;`-separated; typically set by an installed
+Appium plugin before the server spawns). Each plugin folder has a
 `plugin.json` manifest + assembly implementing `IServerPlugin` (`csharp/WincoreServerSdk/`,
 the published plugin contract): it contributes JSON-RPC command handlers and one
 `ITreeProvider` — a source of elements outside the real UIA tree, addressed by an element-id
-prefix (`java:`, `dotnet:`). Element-scoped commands are routed centrally: each is registered
+prefix the provider declares. Element-scoped commands are routed centrally: each is registered
 in `CommandDispatcher.AddElementRoutes` with a UIA handler (receives the resolved element) and
 a provider handler (`ElementRoute`, `Server/ElementRoute.cs`); handlers never check ids
 themselves. A null provider handler marks a command UIA-only (window operations, session
@@ -43,13 +43,9 @@ root). New `ITreeProvider` capabilities get a default "not supported" body so ol
 keep loading. Find / XPath / page source route by window too (`TryResolveWindow(hwnd)`) and
 stay bespoke in their handlers. Loader + registry live in `csharp/WincoreServer/Plugins/`.
 
-The core server ships **no** built-in providers. Both bridges are their own repo + Appium
-plugin, loaded via `WINCORE_SERVER_PLUGINS`:
-[appium-wincore-java-bridge](https://github.com/y-schwab/appium-wincore-java-bridge) (JAB /
-Swing, `windows: attachJavaSwing`) and
-[appium-wincore-dotnet-bridge](https://github.com/y-schwab/appium-wincore-dotnet-bridge)
-(WinForms/WPF/DevExpress, `windows: attachDotnetBridge`). The driver has no bridge code or
-bridge capabilities.
+The core server ships **no** built-in providers, and the driver must stay plugin-agnostic:
+no code, comments, or docs here reference a specific plugin. Anything a plugin needs goes
+through the `WincoreServerSdk` contract.
 
 ### Element finding
 

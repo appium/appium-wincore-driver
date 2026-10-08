@@ -85,8 +85,7 @@ export async function clear(this: AppiumWincoreDriver, elementId: string): Promi
 /**
  * Sends text/keys to an element, focusing it first and translating WebDriver modifier-key
  * sequences (shift/ctrl/meta/alt) and special keys into key-down/key-up events interleaved
- * with plain text sent via `sendKeys`. Java agent elements bypass focus/sendKeys and are set
- * directly via `setElementValue`.
+ * with plain text sent via `sendKeys`.
  * @param value - The text to send, either as a string or an array of characters/key values.
  * @param elementId - The id of the element to send the value to.
  * @returns Resolves once all characters and key actions have been sent.
@@ -95,13 +94,6 @@ export async function setValue(this: AppiumWincoreDriver, value: string | string
   if (this.isIEContext()) {
     const text = Array.isArray(value) ? value.join('') : value;
     await this.ieSession!.setValue(elementId, text);
-    return;
-  }
-  // Java agent elements: sendKeys goes to the OS-focused field regardless of elementId.
-  // Use setElementValue which targets the element directly via AccessibleEditableText.
-  if (elementId.startsWith('java:')) {
-    const text = Array.isArray(value) ? value.join('') : value;
-    await this.sendCommand('setElementValue', {elementId, value: text});
     return;
   }
   await this.sendCommand('setFocus', {elementId});

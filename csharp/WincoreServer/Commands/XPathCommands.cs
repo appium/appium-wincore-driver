@@ -45,7 +45,7 @@ public static class XPathCommands
 
         // A tree provider owns its own tree — hand it the raw expression. Covers a
         // context that is already a provider element, and a context-less query on a
-        // window the provider auto-routes (Java windows). Same routing rule as find.
+        // window the provider auto-routes. Same routing rule as find.
         if (FindCommands.TryRouteToProvider(state, contextElementId, out var provider, out var providerRootId))
         {
             return provider.EvaluateXPath(providerRootId, expression, multiple);

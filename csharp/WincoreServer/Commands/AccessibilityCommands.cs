@@ -13,8 +13,8 @@ namespace WincoreServer.Commands;
 /// EnumChildWindows can never see them either, since a simple child has no window at
 /// all. This walks the raw IAccessible tree directly via AccessibleObjectFromWindow.
 /// If accChildCount is 0 here too, the control paints its own content with no
-/// accessibility tree either, and there is no structural data left to recover — use
-/// the vision fallback (findByVision / analyzeScreen) instead.
+/// accessibility tree either, and there is no structural data left to recover — fall
+/// back to image- or coordinate-based interaction instead.
 /// </summary>
 public static class AccessibilityCommands
 {
@@ -75,7 +75,7 @@ public static class AccessibilityCommands
         {
             throw new InvalidOperationException(
                 "The MSAA (IAccessible) fallback does not apply to tree-provider elements " +
-                "(Java agent / .NET bridge) — the provider already exposes the full accessible tree.");
+                "— the provider already exposes the full accessible tree.");
         }
 
         IntPtr hwnd;

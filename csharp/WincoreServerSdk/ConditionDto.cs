@@ -6,7 +6,7 @@ namespace Wincore.ServerSdk;
 /// <summary>
 /// Wire representation of an Appium locator, sent by the TS client and reconstructed
 /// into a real UIA3 <c>Condition</c> by the host (see <c>ConditionBuilder</c>) or
-/// evaluated natively by a tree provider (Java / .NET bridges).
+/// evaluated natively by a tree provider.
 ///
 /// This type lives in the SDK because a server plugin's <see cref="ITreeProvider"/>
 /// receives it directly. The JSON shape must stay byte-compatible with
@@ -23,7 +23,7 @@ public class ConditionDto
 
     /// <summary>
     /// Optional string match mode for a property condition: "contains" or "startsWith".
-    /// Absent means exact equality. Only the bridge agents (Java/.NET) evaluate this
+    /// Absent means exact equality. Only tree providers evaluate this
     /// natively; for UIA it degrades to a true-condition and the caller re-verifies
     /// client-side (see ConditionBuilder.BuildPropertyCondition).
     /// </summary>

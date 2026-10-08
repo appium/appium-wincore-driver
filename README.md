@@ -2,9 +2,7 @@
 
 Appium WinCore Driver is a Windows UI automation driver for
 [Appium 3](https://appium.io). It automates UWP, WinForms, WPF, Win32,
-and Internet Explorer applications via real UI Automation — Java Swing/AWT
-and WinForms/WPF/DevExpress content invisible to UIA are reached through
-[installable plugins](#plugins).
+and Internet Explorer applications via real UI Automation.
 
 Key advantages over WinAppDriver:
 
@@ -19,7 +17,6 @@ Key advantages over WinAppDriver:
 - WebView2, Chrome, and Edge embedded content via CDP
 - Internet Explorer 11 automation via built-in IE DOM Bridge
 - Built-in screen recording and clipboard API
-- Java Swing/AWT and .NET (WinForms/WPF/DevExpress) automation via installable plugins — see [Plugins](#plugins) below
 
 ## Installation
 
@@ -29,16 +26,9 @@ appium driver install --source=npm appium-wincore-driver
 
 Requires Appium 3 and Windows 10 or later.
 
-## Plugins
+## Related projects
 
-The driver core ships with no bridge or agent code — everything beyond plain UIA is an
-installable Appium plugin that registers itself with `WincoreServer.exe` at load time. See
-each plugin's own README for install steps, commands, and capabilities:
-
-- [appium-wincore-java-bridge](https://github.com/y-schwab/appium-wincore-java-bridge) — Java Swing/AWT automation via the Java Attach API (`windows: attachJavaSwing`)
-- [appium-wincore-dotnet-bridge](https://github.com/y-schwab/appium-wincore-dotnet-bridge) — WinForms/WPF/DevExpress automation via CLR injection (`windows: attachDotnetBridge`)
-- [appium-wincore-vision-plugin](https://github.com/verisoft-ai/appium-wincore-vision-plugin) — LLM vision-based element finding (`windows: findByVision`), kept separate so its dependencies (OpenCV, canvas, provider SDKs) aren't required by default
-- [wincore-mcp](https://github.com/verisoft-ai/wincore-mcp) — MCP server for AI-agent use, driving `wincore` sessions purely over the WebDriver protocol (not an Appium plugin, a separate package)
+- [wincore-mcp](https://github.com/verisoft-ai/wincore-mcp) — MCP server for AI-agent use, driving `wincore` sessions purely over the WebDriver protocol (a separate package)
 
 ## Capabilities
 
@@ -111,7 +101,7 @@ await driver.executeScript('windows: switchToWindowByTitle', [{ title: 'Notepad'
 // To include untitled windows (getWindowHandles omits them), use getWindows instead.
 // It returns { handle, title, className } for every visible top-level window.
 const windows = await driver.executeScript('windows: getWindows', []);
-const popup = windows.find(w => w.className === 'SunAwtDialog' && w.title === '');
+const popup = windows.find(w => w.className === '#32770' && w.title === '');
 if (popup) await driver.switchToWindow(popup.handle);
 
 const titleBar = await driver.$('//TitleBar');

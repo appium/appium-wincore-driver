@@ -16,7 +16,7 @@ public delegate object? PluginCommandHandler(ISessionContext context, JsonElemen
 /// </summary>
 public interface IServerPlugin
 {
-    /// <summary>Stable short name for logs and collision diagnostics, e.g. "dotnet-bridge".</summary>
+    /// <summary>Stable short name for logs and collision diagnostics, e.g. "my-plugin".</summary>
     string Name { get; }
 
     /// <summary>
@@ -27,8 +27,8 @@ public interface IServerPlugin
     string SdkVersion { get; }
 
     /// <summary>
-    /// Extra JSON-RPC methods this plugin answers (e.g. <c>windows: attachDotnetBridge</c>,
-    /// <c>findElementViaDotnetBridge</c>). Merged into the host dispatcher; a name
+    /// Extra JSON-RPC methods this plugin answers (e.g. an attach command or
+    /// provider-specific finds). Merged into the host dispatcher; a name
     /// that collides with a core method or another plugin's method is a startup error.
     /// </summary>
     IReadOnlyDictionary<string, PluginCommandHandler> GetCommands();

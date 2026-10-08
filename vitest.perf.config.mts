@@ -6,10 +6,6 @@ import {defineConfig} from 'vitest/config';
 // (the suite is describe.skipIf-gated), and it needs a running Appium server with
 // this driver plus the wpf-large fixture built in the sibling appium-wincore-test-apps
 // checkout. Run with `npm run test:perf`.
-//
-// The java-agent and .NET-bridge perf suites live in appium-wincore-java-bridge and
-// appium-wincore-dotnet-bridge now — each plugin owns its own performance suite; the
-// driver only benchmarks what it's actually aware of (native UIA).
 export default defineConfig({
   test: {
     globals: true,

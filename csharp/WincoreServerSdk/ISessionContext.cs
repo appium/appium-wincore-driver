@@ -3,8 +3,7 @@ namespace Wincore.ServerSdk;
 /// <summary>
 /// The narrowed view of the host's per-session state that a server plugin and its
 /// <see cref="ITreeProvider"/> are given. Deliberately small: a provider owns its
-/// own element cache and connection state (as the in-repo Java/.NET bridges always
-/// have) — all it needs from the host is the current window and the perf/log sinks.
+/// own element cache and connection state — all it needs from the host is the current window and the perf/log sinks.
 /// </summary>
 public interface ISessionContext
 {

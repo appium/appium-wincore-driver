@@ -22,7 +22,7 @@ public class SessionState : ISessionContext
     public bool PerfMetricsEnabled { get; set; }
     public PerfCounters Perf { get; } = new();
 
-    /// <summary>Tree providers contributed by loaded plugins (Java agent, .NET bridge, …).</summary>
+    /// <summary>Tree providers contributed by loaded plugins.</summary>
     public ProviderRegistry Providers { get; } = new();
 
     // ── ISessionContext (the narrowed view handed to plugins / their providers) ──

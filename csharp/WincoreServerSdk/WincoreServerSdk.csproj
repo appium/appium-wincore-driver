@@ -9,8 +9,7 @@
     <AssemblyName>WincoreServerSdk</AssemblyName>
     <RootNamespace>Wincore.ServerSdk</RootNamespace>
 
-    <!-- Packed to NuGet and consumed by out-of-repo bridge plugins
-         (appium-wincore-dotnet-bridge, appium-wincore-java-bridge). The major
+    <!-- Packed to NuGet and consumed by out-of-repo server plugins. The major
          version is the plugin contract version: PluginLoader refuses a plugin
          whose declared SdkVersion has a different major. -->
     <Version>1.1.0</Version>

@@ -99,13 +99,10 @@ describe('MatchPropertyCondition', () => {
   });
 
   it('nests inside an AndCondition DTO alongside the node-test condition', () => {
-    const and = new AndCondition(
-      new TrueCondition(),
-      new MatchPropertyCondition('JavaSimpleClass', 'Cell', 'contains'),
-    );
+    const and = new AndCondition(new TrueCondition(), new MatchPropertyCondition('ClassName', 'Cell', 'contains'));
     expect(conditionToDto(and)).toEqual({
       type: 'and',
-      conditions: [{type: 'true'}, {type: 'property', property: 'JavaSimpleClass', value: 'Cell', match: 'contains'}],
+      conditions: [{type: 'true'}, {type: 'property', property: 'ClassName', value: 'Cell', match: 'contains'}],
     });
   });
 });

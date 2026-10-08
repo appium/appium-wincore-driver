@@ -19,8 +19,7 @@ public sealed class PluginHost
     public IReadOnlyList<IServerPlugin> Plugins => _plugins;
 
     /// <summary>
-    /// Loads every external plugin listed on <c>WINCORE_SERVER_PLUGINS</c> (the
-    /// Java and .NET bridges each ship as their own repo + Appium plugin). The
+    /// Loads every external plugin listed on <c>WINCORE_SERVER_PLUGINS</c>. The
     /// core server has no built-in providers.
     /// </summary>
     public static PluginHost Create(Action<string> log)

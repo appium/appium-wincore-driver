@@ -4,8 +4,8 @@ using System.Xml.XPath;
 namespace Wincore.ServerSdk;
 
 /// <summary>
-/// Shared back half of every <c>evaluateXPath</c> path (real UIA, the .NET bridge,
-/// the Java agent). Each caller materialises its runtime's subtree into an
+/// Shared back half of every <c>evaluateXPath</c> path (real UIA and any tree
+/// provider). Each caller materialises its runtime's subtree into an
 /// <see cref="XmlDocument"/> whose elements carry a node-id attribute, then hands
 /// the document here to run the expression through <c>System.Xml.XPath</c> and map
 /// the result nodes back to element-table ids.

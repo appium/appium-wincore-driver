@@ -13,8 +13,8 @@ public delegate object? ProviderElementHandler(ITreeProvider provider, string el
 
 /// <summary>
 /// Single routing point for every command that acts on an existing <c>elementId</c>.
-/// The id is resolved once: an id minted by a tree provider (Java agent, .NET bridge,
-/// SAP, …) goes to the provider handler, anything else is looked up in the UIA element
+/// The id is resolved once: an id minted by a tree provider goes to the provider
+/// handler, anything else is looked up in the UIA element
 /// table and handed to the UIA handler. Handlers never check ids themselves.
 ///
 /// A null provider handler marks the command UIA-only (window operations, session

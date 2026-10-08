@@ -111,7 +111,7 @@ export async function execute(this: AppiumWincoreDriver, script: string, args: a
     // merged driver+active-plugins executeMethodMap and throws its own UnknownCommandError
     // for anything unmatched — do not gate on `this.constructor.executeMethodMap` here, that
     // static property is this driver's own map only and has no visibility into commands a
-    // plugin (e.g. `windows: attachUiaBridge`) contributes, which made every plugin-provided
+    // plugin contributes, which made every plugin-provided
     // `windows: *` command unreachable via the classic execute/executeScript endpoint.
     return await this.executeMethod(script, executeMethodArgs);
   }
@@ -233,7 +233,7 @@ async function expandViaAltDown(this: AppiumWincoreDriver, elementId: string): P
 
 // Reads the live ExpandCollapseState (added alongside this fix — see ElementCommands.cs
 // GetProperty / UIA.ExpandCollapseStatePropertyId). Returns undefined when the state can't
-// be read at all (e.g. Java elements, or a control with no real ExpandCollapsePattern) —
+// be read at all (e.g. tree-provider elements, or a control with no real ExpandCollapsePattern) —
 // callers must treat that as "can't verify" rather than "failed".
 async function isExpanded(this: AppiumWincoreDriver, elementId: string): Promise<boolean | undefined> {
   try {
@@ -270,7 +270,7 @@ async function waitForCollapsed(this: AppiumWincoreDriver, elementId: string): P
 // ALT+Down is a combo-box keyboard trick: sending it to a grid row, tree item or button
 // does something unrelated and masks the failure, so only a ComboBox gets the keyboard
 // fallback; anything else surfaces the error. That covers both PatternNotSupported (the
-// element has no expand/collapse at all — e.g. a button or a Java tree leaf) and the
+// element has no expand/collapse at all — e.g. a button or a tree leaf) and the
 // server's InvalidElementState (a verified MSAA action that had no effect; real patterns
 // are trusted). An unreadable control type also surfaces it — never send keys blind. For
 // a ComboBox, ALT+Down is the remaining lever when the pattern is missing or didn't open it.
@@ -295,7 +295,7 @@ export async function patternExpand(this: AppiumWincoreDriver, element: Element)
 
   try {
     await this.sendCommand('expandElement', {elementId});
-    // `undefined` means the state couldn't be read at all (e.g. Java elements, or a
+    // `undefined` means the state couldn't be read at all (e.g. tree-provider elements, or a
     // control with no real ExpandCollapsePattern) — trust the reported success since
     // there's no stronger signal available. Only a confirmed `false` means the C#
     // server's LegacyIAccessible fallback (PatternCommands.cs Expand) fired without
@@ -315,7 +315,7 @@ export async function patternExpand(this: AppiumWincoreDriver, element: Element)
   }
 
   // Last-resort fallback — ExpandCollapseState isn't trustworthy here (unreadable for
-  // JAB, unreliable for legacy controls), so just trust the keyboard action.
+  // tree-provider elements, unreliable for legacy controls), so just trust the keyboard action.
   await expandViaAltDown.call(this, elementId);
 }
 
@@ -1332,9 +1332,3 @@ export async function windowsGetMonitors(this: AppiumWincoreDriver): Promise<obj
 export function executeGetDpiScale(): number {
   return getResolutionScalingFactor();
 }
-
-// The Java Access Bridge and .NET (WinForms/WPF) bridges are entirely external:
-// appium-wincore-java-bridge contributes windows: attachJavaSwing and
-// appium-wincore-dotnet-bridge contributes windows: attachDotnetBridge +
-// windows: *ViaDotnetBridge, each with its own WincoreServer tree provider.
-// This driver has no bridge code or bridge capabilities.

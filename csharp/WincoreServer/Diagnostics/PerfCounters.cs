@@ -5,7 +5,7 @@ namespace WincoreServer.Diagnostics;
 /// <summary>
 /// Lightweight per-session performance counters, opt-in via the <c>perfMetrics</c>
 /// capability. Records a call count and summed elapsed milliseconds per string label
-/// (e.g. <c>java.getChildren</c>), so a benchmark can attribute where a slow
+/// (e.g. <c>uia.pageSource.node</c>), so a benchmark can attribute where a slow
 /// high-level operation — page source, a full-tree XPath scan — actually spends its
 /// time.
 ///
@@ -32,7 +32,7 @@ public sealed class PerfCounters : Wincore.ServerSdk.IPerfSink
 
     /// <summary>
     /// Snapshot of every counter plus rolled-up totals, shaped for JSON:
-    /// <c>{ totalCalls, totalMs, byLabel: { "java.getChildren": { count, totalMs }, ... } }</c>.
+    /// <c>{ totalCalls, totalMs, byLabel: { "uia.pageSource.node": { count, totalMs }, ... } }</c>.
     /// </summary>
     public object Snapshot()
     {
