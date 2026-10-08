@@ -2,10 +2,9 @@
  * XPath location strategy.
  *
  * Evaluation happens in the process that owns the tree — `WincoreServer.exe`
- * for real UIA, the injected Java / .NET bridge agents for bridged apps — via the
- * `evaluateXPath` RPC. Each runtime runs the whole expression through its
- * platform's mature XPath 1.0 engine (`System.Xml.XPath` for .NET, Jaxen for
- * Java) bound to its native object model, and returns element-table ids in
+ * for real UIA, or a server plugin's tree provider for the windows it owns — via the
+ * `evaluateXPath` RPC. Each runtime runs the whole expression through a mature
+ * XPath 1.0 engine bound to its native object model, and returns element-table ids in
  * document order. This module is just the thin client shim: forward the raw
  * expression, wrap the returned ids as W3C element references.
  *

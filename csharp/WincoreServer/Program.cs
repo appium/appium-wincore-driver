@@ -22,8 +22,8 @@ class Program
             }
         }
 
-        // Load plugins (built-in Java + .NET bridges, plus anything on
-        // WINCORE_SERVER_PLUGINS) before the server starts so the dispatcher can
+        // Load plugins (anything on WINCORE_SERVER_PLUGINS) before the server
+        // starts so the dispatcher can
         // merge their command handlers.
         var plugins = PluginHost.Create(msg => Console.Error.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] {msg}"));
 

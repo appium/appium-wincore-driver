@@ -26,9 +26,8 @@ export type AccessibleChildrenResult = {supported: true; node: AccessibleNode} |
  * implementation for screen-reader compliance that exposes rows/cells as "simple
  * children" — plain integer childIds with no HWND, so EnumChildWindows can't see
  * them either. If `supported` is false or the root node has zero children, the
- * control paints its own content with no accessibility tree left to recover — use
- * the vision fallback (`windows: findByVision`, provided by the separately-installed
- * appium-window2-vision-plugin) instead.
+ * control paints its own content with no accessibility tree left to recover — fall back
+ * to image- or coordinate-based interaction instead.
  * @param element - The WebDriver element reference whose MSAA children should be walked.
  * @returns The MSAA accessible tree rooted at the element, or `{ supported: false }` if the
  * element exposes no IAccessible implementation.

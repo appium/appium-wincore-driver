@@ -12,8 +12,7 @@ const SUITE = 'uia';
  * Plain-UIA tree-walk benchmark against the wpf-large fixture. WPF exposes a native
  * UIA provider (AutomationPeer), so this measures the real cost of the COM tree walk
  * (getPageSource / XPath materialisation) without the MSAA->UIA bridge tax that
- * WinForms carries — benchmarking the protocol, not the bridge. Each perf fixture
- * feeds exactly one suite; winforms-large is the .NET-bridge suite's fixture.
+ * WinForms carries — benchmarking the protocol, not the bridge.
  * Perf counters here are per-node COM-walk timings (`uia.pageSource.node`,
  * `uia.xpathModel.node`), not RPCs.
  *

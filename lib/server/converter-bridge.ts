@@ -187,8 +187,6 @@ export function registerMatchPropertyCondition(
     itemstatus: 'ItemStatus',
     itemtype: 'ItemType',
     frameworkid: 'FrameworkId',
-    javaclass: 'JavaClass',
-    javasimpleclass: 'JavaSimpleClass',
     value: 'Value',
     legacyvalue: 'LegacyValue',
     legacyname: 'LegacyName',

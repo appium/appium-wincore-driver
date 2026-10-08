@@ -62,9 +62,8 @@ public class CommandDispatcher
             ["deleteFile"] = FileSystemCommands.DeleteFile,
             ["deleteFolder"] = FileSystemCommands.DeleteFolder,
 
-            // Tree-provider bridges (Java agent, .NET bridge) contribute their own
-            // commands — enableJavaSwing / injectJavaAgent / injectDotnetBridge /
-            // *ViaDotnetBridge — via IServerPlugin.GetCommands(); merged below.
+            // Server plugins contribute their own commands via
+            // IServerPlugin.GetCommands(); merged below.
 
             // Diagnostics
             ["getPerfMetrics"] = PerfCommands.GetPerfMetrics,
@@ -113,9 +112,8 @@ public class CommandDispatcher
 
         // Patterns
         AddElement("invokeElement", PatternCommands.Invoke, (tp, id, _) => { tp.Invoke(id); return null; });
-        // Java throws "JAB_NO_EXPAND_ACTION" when AccessibleAction is unavailable, and
-        // an unsupported Collapse throws NotSupportedException — the TypeScript
-        // patternExpand / patternCollapse catch both and fall back to ALT+Down.
+        // An unsupported Expand / Collapse throws — the TypeScript patternExpand /
+        // patternCollapse catch it and fall back to ALT+Down.
         AddElement("expandElement", PatternCommands.Expand, (tp, id, _) => { tp.Expand(id); return null; });
         AddElement("collapseElement", PatternCommands.Collapse, (tp, id, _) => { tp.Collapse(id); return null; });
         // No provider has a TogglePattern equivalent — fire the default accessible

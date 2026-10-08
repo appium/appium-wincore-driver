@@ -17,11 +17,10 @@ public static class PageSourceCommands
             return "<DummyRoot></DummyRoot>";
         }
 
-        // When a tree provider owns this window and auto-swaps page source (the Java
-        // agent — UIA sees a Java window as an opaque childless pane), build the page
-        // source from the provider's tree instead of UIA. Opt-in-only providers (the
-        // .NET bridge) never auto-swap; their tree is reached via the plugin's own
-        // "windows: getPageSourceViaDotnetBridge".
+        // When a tree provider owns this window and auto-swaps page source (UIA sees
+        // the window as an opaque childless pane), build the page source from the
+        // provider's tree instead of UIA. Opt-in-only providers never auto-swap; their
+        // tree is reached via the plugin's own commands.
         var rootHwnd = root.CurrentNativeWindowHandle;
         var rootName = root.get_CurrentName() ?? "";
         if (rootHwnd != IntPtr.Zero

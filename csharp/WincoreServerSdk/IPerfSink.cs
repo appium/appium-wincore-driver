@@ -2,7 +2,7 @@ namespace Wincore.ServerSdk;
 
 /// <summary>
 /// Per-session performance sink, opt-in via the <c>perfMetrics</c> capability. A
-/// tree provider records one entry per RPC round trip (e.g. <c>java.getChildren</c>)
+/// tree provider records one entry per RPC round trip (e.g. <c>myProvider.getChildren</c>)
 /// so a benchmark can attribute where a slow high-level operation spends its time.
 /// When perf metrics are disabled the host supplies a no-op sink.
 /// </summary>

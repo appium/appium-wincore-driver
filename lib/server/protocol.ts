@@ -20,7 +20,7 @@ export interface ConditionDto {
   value?: unknown;
   /**
    * String match mode for a property condition. Absent = exact equality.
-   * Only the bridge agents (Java/.NET) evaluate 'contains' / 'startsWith'
+   * Only tree providers evaluate 'contains' / 'startsWith'
    * natively; for UIA the server returns a true-condition and the XPath
    * engine re-checks the original expression client-side.
    */

@@ -54,8 +54,7 @@ const SET_WINDOW_MAX_POLL_ATTEMPTS = 2;
 /**
  * How long to wait for the main window after attaching to a splash screen when
  * `ms:waitForAppLaunch` isn't set. A decorated window always passes the splash
- * probe through its native title bar and system menu (that is why a Java Swing
- * frame qualifies before its bridge is attached), so this only bites undecorated
+ * probe through its native title bar and system menu, so this only bites undecorated
  * windows. Kept short because an app whose real main window is undecorated and
  * has fewer than two keyboard-focusable elements pays it on every launch. Apps
  * with long splash screens should set `ms:waitForAppLaunch`, which replaces this.

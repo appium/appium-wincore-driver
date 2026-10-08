@@ -25,7 +25,7 @@ for installation, capabilities, and usage examples.
 - [W3C Actions](#w3c-actions)
 - [WebView and CDP](#webview-and-cdp)
 - [Internet Explorer](#internet-explorer)
-- [Plugins](#plugins)
+- [Server Plugins](#server-plugins)
 
 ## Locator Strategies
 
@@ -378,19 +378,19 @@ Each entry in the returned array contains:
 | --- | --- | --- |
 | `handle` | string | Hex window handle (e.g. `0x000a1234`) — pass directly to `driver.switchToWindow()` |
 | `title` | string | Window title. Empty string `""` for untitled windows |
-| `className` | string | Win32 window class name (e.g. `SunAwtDialog`, `Notepad`, `#32770`) |
+| `className` | string | Win32 window class name (e.g. `Notepad`, `#32770`) |
 
 **Difference from `getWindowHandles()`:** The standard `getWindowHandles()` only returns windows with a non-empty title. `windows: getWindows` returns all visible windows and provides richer metadata, making it possible to locate and switch to untitled popups and dialogs by their class name or handle.
 
 ```js
 const windows = await driver.executeScript('windows: getWindows', []);
 // [
-//   { handle: '0x000a1234', title: 'My App', className: 'SunAwtFrame' },
-//   { handle: '0x000b5678', title: '',        className: 'SunAwtDialog' },
+//   { handle: '0x000a1234', title: 'My App', className: 'Notepad' },
+//   { handle: '0x000b5678', title: '',        className: '#32770' },
 // ]
 
-// Switch to an untitled Java Swing dialog by class name
-const popup = windows.find(w => w.className === 'SunAwtDialog' && w.title === '');
+// Switch to an untitled dialog by class name
+const popup = windows.find(w => w.className === '#32770' && w.title === '');
 await driver.switchToWindow(popup.handle);
 ```
 
@@ -510,14 +510,6 @@ const video = await driver.executeScript(
 );
 // video is a base64-encoded mp4
 ```
-
-### Vision-Based Finding
-
-`windows: findByVision` moved to a separate installable plugin —
-[appium-window2-vision-plugin](https://github.com/verisoft-ai/appium-window2-vision-plugin) —
-so driver users who don't need LLM-based vision finding don't pay for its
-dependencies. See that repo's README for setup and usage; the command's
-argument shape and supported providers are unchanged.
 
 ### PowerShell Execution
 
@@ -804,7 +796,7 @@ Supported XPath patterns: `//tag`, `//tag[@attr="val"]`,
 ### Limitations
 
 When the active window is IE, the following are not available:
-Java Swing agent, WebView2/CDP, screen recording, clipboard API,
+WebView2/CDP, screen recording, clipboard API,
 `appium:prerun`/`appium:postrun`, and UIA locator strategies
 (`accessibility id`, `-windows uiautomation`, `class name`).
 
@@ -814,13 +806,13 @@ equivalents (`element.click()`, `driver.url()`, `executeScript`) instead.
 
 Supported on Windows 10/11 with IE 11 only.
 
-## Plugins
+## Server Plugins
 
-The driver core has no bridge or agent code — Java Swing/AWT and .NET (WinForms/WPF/
-DevExpress) automation, and LLM vision-based finding, are installable Appium plugins that
-register their own commands and a server-side tree provider with `WincoreServer.exe` at load
-time. Full command reference, capabilities, and setup live in each plugin's own README:
-
-- [appium-wincore-java-bridge](https://github.com/y-schwab/appium-wincore-java-bridge) — `windows: attachJavaSwing`
-- [appium-wincore-dotnet-bridge](https://github.com/y-schwab/appium-wincore-dotnet-bridge) — `windows: attachDotnetBridge`, `windows: findElementViaDotnetBridge`, `windows: findElementsViaDotnetBridge`, `windows: getPageSourceViaDotnetBridge`
-- [appium-wincore-vision-plugin](https://github.com/verisoft-ai/appium-wincore-vision-plugin) — `windows: findByVision`
+`WincoreServer.exe` can be extended with .NET plugins built against the
+`WincoreServerSdk` NuGet package. At startup it loads every plugin folder listed on the
+`WINCORE_SERVER_PLUGINS` environment variable (`;`-separated). Each folder holds a
+`plugin.json` manifest and an assembly implementing `IServerPlugin`, which can contribute
+extra JSON-RPC commands and an `ITreeProvider`: a source of elements outside the real UIA
+tree. Element-scoped driver commands (click, text, value, patterns, screenshots) on elements
+the provider minted are routed to it automatically. Usually an Appium plugin sets
+`WINCORE_SERVER_PLUGINS` before the session starts.

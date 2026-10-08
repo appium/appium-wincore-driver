@@ -277,16 +277,6 @@ export async function createExplorerSession(extraCaps?: Record<string, unknown>)
   return createSimpleAppSession(EXPLORER_APP_PATH, extraCaps);
 }
 
-export const WINFORMS_LARGE_APP_PATH = resolve(
-  TEST_APPS_DIR,
-  'winforms-large',
-  'bin',
-  'x64',
-  'Debug',
-  'net472',
-  'WinformsLarge.exe',
-);
-
 export const WPF_LARGE_APP_PATH = resolve(TEST_APPS_DIR, 'wpf-large', 'bin', 'x64', 'Debug', 'net472', 'WpfLarge.exe');
 
 /**
@@ -312,9 +302,7 @@ export async function createMsaaLegacyControlsSession(extraCaps?: Record<string,
  * Launches the wpf-large performance fixture via Appium (native-UIA — WPF has its own
  * AutomationPeer provider, so this measures the plain-UIA walk without the MSAA->UIA
  * bridge tax WinForms carries). Not a correctness fixture — used only by the `uia` perf
- * benchmark in test/perf/. The .NET-bridge and Java-agent perf suites now live in their
- * own plugin repos (appium-wincore-dotnet-bridge, appium-wincore-java-bridge) — the driver
- * only benchmarks what it's actually aware of.
+ * benchmark in test/perf/.
  */
 export async function createWpfLargeSession(nodeCount = 1500, extraCaps?: Record<string, unknown>): Promise<Browser> {
   const driver = await remote({

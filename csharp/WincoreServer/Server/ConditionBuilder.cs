@@ -172,7 +172,7 @@ public static class ConditionBuilder
         }
 
         // Substring / prefix match modes ("contains", "startsWith") are only understood
-        // by the bridge agents (Java/.NET), which read dto.Match off the wire directly.
+        // by tree providers, which read dto.Match off the wire directly.
         // UIA3's native FindFirst/FindAll has no reliable substring predicate, so here it
         // degrades to a true-condition — the XPath engine keeps the original contains()/
         // starts-with() expression as a client-side post-filter, so results are identical

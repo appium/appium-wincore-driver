@@ -36,9 +36,7 @@ jobs:
       - name: Install dependencies
         run: npm install --no-package-lock
 
-      # Native server + TS. The uia suite is pure native UIA — no agent jar or
-      # .NET bridge artifacts needed (those suites moved to their own plugin
-      # repos, each with its own perf CI).
+      # Native server + TS. The uia suite is pure native UIA.
       - name: Build driver
         run: npm run build:native && npm run build
 

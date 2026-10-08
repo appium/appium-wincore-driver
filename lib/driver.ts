@@ -261,13 +261,6 @@ export class AppiumWincoreDriver extends BaseDriver<WincoreDriverConstraints, St
       {
         await this.startServerSession();
 
-        // Java Swing (JAB) and .NET (WinForms/WPF) bridge attach are not
-        // driver concerns — the appium-wincore-java-bridge and
-        // appium-wincore-dotnet-bridge plugins own them via
-        // `windows: attachJavaSwing` / `windows: attachDotnetBridge`,
-        // called after switching to the target window (same shape as the
-        // uia-bridge plugin).
-
         if (this.caps.prerun) {
           this.log.info('Executing prerun PowerShell script...');
           await this.executePowerShellScript(

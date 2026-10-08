@@ -3,11 +3,11 @@ using System.Xml;
 namespace Wincore.ServerSdk;
 
 /// <summary>
-/// A source of UI elements outside the real UI Automation tree — the Java (JAB /
-/// AccessibleContext) agent, the .NET (WinForms / WPF / DevExpress) bridge, etc.
+/// A source of UI elements outside the real UI Automation tree, such as an agent
+/// injected into the target process that reads the UI framework's own object model.
 ///
 /// The host routes a command to a provider by element-id prefix (an id this
-/// provider minted, e.g. <c>java:1234:56</c>) or, for a fresh find / page source /
+/// provider minted, e.g. <c>myprov:1234:56</c>) or, for a fresh find / page source /
 /// xpath rooted at a window, by <see cref="OwnsWindow"/>. Every method works purely
 /// in terms of opaque element-id strings that this provider itself minted and
 /// caches — the host never inspects a provider element.
@@ -21,12 +21,12 @@ namespace Wincore.ServerSdk;
 /// </summary>
 public interface ITreeProvider : IDisposable
 {
-    /// <summary>Stable short name for logs, e.g. "java", "dotnet".</summary>
+    /// <summary>Stable short name for logs, e.g. "myprov".</summary>
     string Name { get; }
 
     /// <summary>
     /// Element-id prefixes this provider mints and answers for, e.g.
-    /// <c>["java:"]</c> or <c>["dotnet:", "dotnetcore:"]</c>. Used by the host to
+    /// <c>["myprov:"]</c>. Used by the host to
     /// route a command carrying an existing element id.
     /// </summary>
     IReadOnlyList<string> ElementIdPrefixes { get; }
@@ -54,16 +54,15 @@ public interface ITreeProvider : IDisposable
 
     /// <summary>
     /// When true, a standard <c>findElement</c> from a plain window root auto-descends
-    /// into this provider's tree (Java: a Java window's children live only in the
-    /// agent tree). When false the provider is opt-in only — standard find stays on
-    /// real UIA and this tree is reached through the plugin's own dedicated commands
-    /// (the .NET bridge's <c>*ViaDotnetBridge</c> family).
+    /// into this provider's tree (for windows whose children live only in the
+    /// provider's tree). When false the provider is opt-in only — standard find stays
+    /// on real UIA and this tree is reached through the plugin's own dedicated commands.
     /// </summary>
     bool AutoRouteStandardFind { get; }
 
     /// <summary>
     /// When true, <c>getPageSource</c> for an owned window is built from this
-    /// provider's tree instead of UIA (Java: the window is an opaque pane to UIA).
+    /// provider's tree instead of UIA (for windows UIA sees as an opaque pane).
     /// </summary>
     bool AutoSwapsPageSource { get; }
 
@@ -81,8 +80,8 @@ public interface ITreeProvider : IDisposable
 
     /// <summary>
     /// Value of a UIA-named property for a provider element. The provider owns the
-    /// mapping to whatever its runtime exposes (Java derives ExpandCollapseState /
-    /// HasKeyboardFocus from the AccessibleState list, etc.) and any freshness
+    /// mapping to whatever its runtime exposes (e.g. deriving ExpandCollapseState /
+    /// HasKeyboardFocus from the framework's own state flags) and any freshness
     /// re-fetch a given property needs.
     /// </summary>
     object? GetProperty(string elementId, string propertyName);

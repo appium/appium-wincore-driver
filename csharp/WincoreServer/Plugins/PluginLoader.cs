@@ -8,11 +8,11 @@ namespace WincoreServer.Plugins;
 /// <summary>
 /// Discovers external <see cref="IServerPlugin"/> assemblies. Each entry on the
 /// <c>WINCORE_SERVER_PLUGINS</c> environment variable (<c>;</c>-separated absolute
-/// directories, set by an installed <c>appium-wincore-*</c> Appium plugin) is a
+/// directories, typically set by an installed Appium plugin) is a
 /// folder holding a <c>plugin.json</c> manifest and its .NET assembly.
 ///
 /// <code>
-/// plugin.json:  { "entry": "WincoreDotnetBridge.dll", "type": "Wincore.DotNetBridge.Plugin", "sdkVersion": "1.0.0" }
+/// plugin.json:  { "entry": "MyPlugin.dll", "type": "MyCompany.MyPlugin.Plugin", "sdkVersion": "1.0.0" }
 /// </code>
 ///
 /// Each plugin is loaded into its own <see cref="AssemblyLoadContext"/> so it can

@@ -3,13 +3,6 @@
 Tracks the cost of the driver's expensive tree-walk paths so regressions are visible
 and improvements are documented with numbers.
 
-The driver only benchmarks what it's actually aware of — core, native-UIA
-functionality. The Java-agent and .NET-bridge suites now live in their own plugin
-repos, since the driver has no knowledge of external plugins:
-
-- `java` → [appium-wincore-java-bridge/test/perf](https://github.com/y-schwab/appium-wincore-java-bridge/tree/main/test/perf)
-- `dotnet-bridge` → [appium-wincore-dotnet-bridge/test/perf](https://github.com/y-schwab/appium-wincore-dotnet-bridge/tree/main/test/perf)
-
 | suite | fixture | what it measures |
 | --- | --- | --- |
 | `uia` | `wpf-large` | plain UIA walk (COM property reads + `FindAll` per node, in-process) |
@@ -55,9 +48,6 @@ Counter labels by suite:
 | --- | --- | --- | --- |
 | `uia` | `uia.pageSource.node`, `uia.xpathModel.node` | nodes walked | summed per-node COM-walk time |
 
-The plugin repos' own perf suites use the same capability and log `java.<rpcCommand>` /
-`dotnetBridge.<rpcCommand>` counters respectively — see their `test/perf/` docs.
-
 ## Updating a baseline
 
 `test/perf/baselines/<suite>.json` holds reference-machine p50 milliseconds keyed by
@@ -69,38 +59,26 @@ file into `baseline`, set `referenceMachine`, commit.
 
 ## Results log
 
-Historical — recorded back when `java` and `dotnet-bridge` still ran from this repo.
-Their own results logs now live in their plugin repos; entries below are kept for
-record and are not reproducible here.
-
 `nodeCount=1500` (tree ≈ 1385 nodes). Reference machine: Intel Core 5 120U, 12 cores,
 17GB, Windows 11. All figures p50 of 5 iterations after 1 warm-up.
 
 ### First baseline — 2026-09-03, sha `05df564` (pre-fix)
 
 Fixtures now show every section at once (a first run against tabbed fixtures only
-walked the selected tab, ~280 nodes). All three trees are ~1500–1740 nodes.
+walked the selected tab, ~280 nodes).
 
 | suite | nodes | getPageSource p50 | findAll `//*` p50 | deep find p50 | walk count | walk time (per run) |
 | --- | --- | --- | --- | --- | --- | --- |
 | **uia** | 1738 | **8492ms** | 9063ms | 8047ms | 1738 nodes | ~8390ms |
-| **java** | 1570 | 278ms | 882ms | 127ms | 1570 `getChildren` RPC | ~104ms |
-| **dotnet-bridge** | 1452 | 207ms | 204ms | 191ms | 1452 `getChildren` RPC | ~93ms |
 
-**The bottleneck is plain UIA, not the RPC bridges.** UIA `getPageSource` on a ~1740
+**The bottleneck is the plain UIA walk.** `getPageSource` on a ~1740
 node tree is **8.5 seconds** — ~4.8ms/node, and the per-node COM walk is ~99% of that.
 Each node does ~20 `get_Current*` property reads + `CurrentBoundingRectangle` +
 `FindAll(children)`, every one a cross-process COM round trip, with no caching and no
-batching. Scale to ~4000 nodes and you are at ~20s. **This is very likely what the
-original report actually hit** (a large or mixed UIA tree), whether or not a Java app
-also stalls on Nagle somewhere.
-
-The two RPC bridges are ~40x faster here: ≈1 `getChildren` per node (N+1 confirmed) but
-~0.065ms per round trip — **no Nagle/delayed-ACK stall on this machine**. `dumpTree`
-batching would still cut their round-trip count, but it is not the pressing problem.
+batching. Scale to ~4000 nodes and you are at ~20s.
 
 Also: every XPath find (`find-anchorLast`) materialises the whole tree first, so it
-costs the same as `getPageSource` in each suite — for UIA that means an 8s single-element
+costs the same as `getPageSource` — for UIA that means an 8s single-element
 find.
 
 ### uia — plain UIA
@@ -136,74 +114,3 @@ over a whole subtree) **and incomplete** (cached ~850 of 1744 nodes — offscree
 children not enumerated in a bulk request). The per-level approach matches exactly what
 the live walk and native find see. `UIA_NO_CACHE=1` on the server env forces the live
 path for A/B. 198 UIA e2e tests green (Calculator/Notepad page source, XPath, attributes).
-
-### java — Java Swing agent
-
-Default suite nodeCount raised to 12000 (~11.5k nodes, JTable-cell dominated) to push
-the walk into the multi-second range.
-
-| Stage | getPageSource p50 | findAll `//*` p50 | deep find p50 | `java.getChildren` | RPC wait | notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| baseline, 1500 nodes | 278ms | 882ms | 127ms | 1570 | ~104ms | small tree |
-| baseline, 12000 nodes | 1391ms | 6666ms | 985ms | 11472 | ~460ms | RPC wait is only ~1/3 of getPageSource |
-| + delete `FindKey` (12000) | 1100ms | 7543ms | 677ms | 11472 | ~440ms | −21% / −31%; all saved on host CPU |
-| **+ `dumpTree` RPC** (12000) | **834ms** | 7890ms | **414ms** | **2** | ~140ms | one RPC walks the whole subtree agent-side; 11472 `JsonDocument.Parse`/`Clone` → 1 |
-
-**Cumulative: getPageSource 1391 → 834ms (−40%), deep XPath find 985 → 414ms (−58%).**
-`rpcCalls` is now 2 (getWindowRoot + dumpTree) regardless of tree size — the walk is no
-longer N-sensitive, so the machine-load amplification that likely caused the original
-20s is gone. Measured while the reference machine was also playing video; still held.
-97 `java-swing-form` e2e tests green (page-source content, XPath, virtual-cell
-`TableRow`/`TableColumn`, `contains()` — all unchanged).
-
-`findAll //*` stays ~7.9s: that is serialising 11,472 element handles over the
-WebDriver HTTP response + wdio parsing them. Nothing server-side left to cut — it is
-inherent to returning 11.5k elements in one call.
-
-Falls back to the per-node `getChildren` walk if the agent jar predates `dumpTree`
-(shouldn't happen — the jar ships with the driver). Same change still **pending for the
-.NET bridge** (`BridgeAgentService`), which has the identical per-node structure.
-
-At 11.5k nodes the **RPC round trips are not the dominant cost** (~460ms of a 1391ms
-`getPageSource`). The rest is host-side. `FindKey` was the biggest single piece:
-`GetString`→`FindKey` re-implemented case-insensitive lookup by `ToLowerInvariant()`-ing
-every key on every call — on a dictionary already `StringComparer.OrdinalIgnoreCase` —
-~20 lookups/node. **Deleted** (both `JavaAgentService` and `BridgeAgentService`, use
-`info.TryGetValue` directly): −21% on `getPageSource`, −31% on deep find, no behaviour
-change (33 server tests green).
-
-Remaining host-side cost after that (~660ms of the 1100ms):
-- `Call()` does `JsonDocument.Parse(response)` + `resultEl.Clone()` per `getChildren` — 11472 parses of ~20-child payloads. `dumpTree` collapses this to 1.
-- `ParseInfo` allocates a fresh `Dictionary` + ~25 boxed entries per node.
-- `XmlDocument` builds ~20 `SetAttribute` nodes per node (~230k `XmlAttribute` objects).
-
-`findAll //*` at 6.7s is tree materialisation + XPath eval + serialising 11.5k element
-handles back over the WebDriver HTTP response (wdio then parses them all) — the last
-part is inherent to asking for 11.5k elements.
-
-### dotnet-bridge — .NET bridge
-
-Default suite nodeCount raised to 6000 (~5.7k nodes). Same N+1 as Java; `dumpTree`
-added to **both** bridge agents — `BridgeServer.cs` (CoreCLR) and `BridgeAgent.cpp`
-(.NET Framework, C++/CLI) — plus the host `BridgeAgentService` (mirrors the Java host
-change). Falls back to the per-node walk if the injected bridge predates `dumpTree`
-(set `BRIDGE_NO_DUMPTREE=1` on the server env to force the fallback for A/B runs).
-
-| Stage | getPageSource p50 | findAll `//*` | deep find | `getChildren` RPC | RPC wait | notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| baseline, 1500 nodes | 202ms | 185ms | 169ms | 1453 | ~108ms | small tree |
-| baseline, 6000 nodes (`BRIDGE_NO_DUMPTREE=1`) | 873ms | 600ms | 535ms | 5728 | ~630ms | |
-| **+ `dumpTree`** (6000) | **502ms** | 457ms | 388ms | **2** | ~270ms | −42% getPageSource; RPC calls flat vs tree size |
-
-`rpcCalls` is 2 (getWindowRoot + dumpTree) regardless of tree size. Most of the saving
-is the RPC wait (5728 round trips → one ~large response); the one big `JsonDocument.Parse`
-costs about what 5728 small ones did, so host CPU is roughly flat — the point is the walk
-is no longer N-sensitive, same as Java. 37 bridge e2e tests green (CoreCLR + Framework +
-32-bit + WPF paths). The 32-bit path exercised the fallback (its x86 DLL was rebuilt
-after).
-
-Original hypothesis (still unconfirmed on the reference machine): a Java `getPageSource`
-was ~20s because each of ~N accessible nodes costs one synchronous newline-JSON round
-trip to the in-process agent, and neither socket disables Nagle — so every round trip
-can stall on the ~200ms delayed-ACK timer. Not reproduced here (~0.065ms/RPC). The
-`uia` result above is the more likely explanation for the original slowness.
