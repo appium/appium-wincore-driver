@@ -1,5 +1,5 @@
-import {logger} from '@appium/support';
 import type {Orientation} from '@appium/types';
+import {logger} from 'appium/support.js';
 
 const log = logger.getLogger('user32');
 import {errors} from 'appium/driver.js';
