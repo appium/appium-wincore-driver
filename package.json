@@ -28,7 +28,7 @@
     "build/lib/**/*",
     "iebridge/IEBridge.exe",
     "native/win-x64/WincoreServer.exe",
-    "scripts/postinstall.js",
+    "scripts/postinstall.mjs",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"
@@ -56,8 +56,8 @@
     "test": "npx vitest run",
     "test:e2e": "npx vitest run --config vitest.e2e.config.mts",
     "test:perf": "vitest run --config vitest.perf.config.mts",
-    "postinstall": "node scripts/postinstall.js",
-    "pack:dist": "node scripts/pack-dist.js"
+    "postinstall": "node scripts/postinstall.mjs",
+    "pack:dist": "node scripts/pack-dist.mjs"
   },
   "dependencies": {
     "@appium/css-locator-to-native": "^1.0.6",
