@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type {ChildProcess} from 'child_process';
+import type {ChildProcess} from 'node:child_process';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {createInterface} from 'node:readline';

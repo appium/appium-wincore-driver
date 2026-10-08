@@ -30,7 +30,7 @@ export async function getCurrentContext(this: AppiumWincoreDriver): Promise<stri
  */
 export async function setContext(this: AppiumWincoreDriver, name?: string | null): Promise<void> {
   if (!name || name === NATIVE_APP) {
-    this.chromedriver?.stop();
+    await this.chromedriver?.stop();
     this.chromedriver = null;
     this.jwpProxyActive = false;
     this.proxyReqRes = null;
@@ -277,7 +277,7 @@ async function getDriverExecutable(
   const CHROME_BASE_URL = this.caps.chromedriverCdnUrl || 'https://storage.googleapis.com/chrome-for-testing-public';
   const EDGE_BASE_URL = this.caps.edgedriverCdnUrl || 'https://msedgedriver.microsoft.com';
 
-  let downloadUrl = '';
+  let downloadUrl: string;
 
   if (browserType === 'Chrome') {
     const url = new URL(CHROME_BASE_URL);

@@ -659,7 +659,7 @@ export async function attachToWindowHandles(
   let fallbackElementId = '';
 
   for (const hwnd of handles) {
-    let candidateId = '';
+    let candidateId: string;
     try {
       candidateId = ((await this.sendCommand('elementFromHandle', {handle: hwnd})) as string) ?? '';
     } catch (err) {

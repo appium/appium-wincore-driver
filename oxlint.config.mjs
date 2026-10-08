@@ -22,7 +22,7 @@ export default defineConfig({
       },
     },
     {
-      files: ['scripts/**/*.js'],
+      files: ['scripts/**/*.{js,mjs}'],
       rules: {
         'no-console': 'off',
       },
