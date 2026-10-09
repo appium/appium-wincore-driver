@@ -46,7 +46,25 @@ jobs:
       - name: Install Appium
         shell: powershell
         run: |
-          # Match the driver's peer range (npm is a no-op if already satisfied)
+          # A leftover Appium process (e.g. from a cancelled run or manual debugging)
+          # would lock the files being replaced and squat on the port, so the readiness
+          # check later could latch onto it instead of this job's own instance.
+          $stalePids = Get-NetTCPConnection -LocalPort 4723 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
+          foreach ($stalePid in $stalePids) {
+            Write-Host "Killing stale process on port 4723: PID $stalePid"
+            Stop-Process -Id $stalePid -Force -ErrorAction SilentlyContinue
+          }
+
+          # Drop any previous global Appium, then start from a pristine APPIUM_HOME
+          # (own dir, so other drivers in ~/.appium on this runner are left alone)
+          npm uninstall -g appium
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $appiumHome = Join-Path $env:RUNNER_TEMP 'appium-home'
+          if (Test-Path $appiumHome) { Remove-Item -Recurse -Force $appiumHome }
+          New-Item -ItemType Directory -Path $appiumHome | Out-Null
+          "APPIUM_HOME=$appiumHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          # Match the driver's peer range
           $range = node -p "require('./package.json').peerDependencies.appium"
           npm install -g "appium@$range"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -55,11 +73,8 @@ jobs:
       - name: Install driver into Appium
         shell: powershell
         run: |
-          $installed = appium driver list --installed --json | ConvertFrom-Json
-          if ($installed.PSObject.Properties.Name -contains "wincore") {
-            appium driver uninstall wincore
-          }
           appium driver install --source=local $PWD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Install Windows Calculator
         shell: powershell
@@ -114,15 +129,6 @@ jobs:
       - name: Start Appium and run E2E tests
         shell: powershell
         run: |
-          # A leftover Appium process (e.g. from manual debugging on this machine)
-          # squatting on the port would make the readiness check below silently
-          # latch onto it instead of this job's own instance. Clear the port first.
-          $stalePids = Get-NetTCPConnection -LocalPort 4723 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique
-          foreach ($stalePid in $stalePids) {
-            Write-Host "Killing stale process on port 4723: PID $stalePid"
-            Stop-Process -Id $stalePid -Force -ErrorAction SilentlyContinue
-          }
-
           $appiumPath = (Get-Command appium.cmd).Source
           $proc = Start-Process -FilePath $appiumPath `
             -ArgumentList "--log-level","info","--allow-insecure","wincore:modify_fs" `
