@@ -55,7 +55,8 @@ export class IESession {
       if (resp.ok) {
         cb.resolve(resp);
       } else {
-        cb.reject(new Error(String(resp.error ?? 'IE_ERROR')));
+        const err = resp.error ?? 'IE_ERROR';
+        cb.reject(new Error(typeof err === 'string' ? err : JSON.stringify(err)));
       }
     });
 

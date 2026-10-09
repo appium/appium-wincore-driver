@@ -43,7 +43,7 @@ interface MouseEvent extends Event {
     mi: {
       dx: unknown;
       dy: unknown;
-      mouseData: XMouseButton | number;
+      mouseData: number;
       dwFlags: MouseEventFlags;
       time: unknown;
       dwExtraInfo: unknown;
@@ -1117,7 +1117,7 @@ function isForeground(targetHWnd: HWND): boolean {
 }
 
 export async function trySetForegroundWindow(windowHandle: number): Promise<boolean> {
-  let targetHWnd: HWND | null = null;
+  let targetHWnd: HWND = null;
 
   try {
     EnumWindows((hWnd) => {

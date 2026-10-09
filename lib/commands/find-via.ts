@@ -76,7 +76,7 @@ export async function locateElements(
     case 'xpath':
       return await xpathToElIdOrIds(selector, mult, context, sendCommand);
     default:
-      throw new errors.InvalidArgumentError(`Invalid find strategy ${strategy}`);
+      throw new errors.InvalidArgumentError(`Invalid find strategy ${String(strategy)}`);
   }
 
   const params: Record<string, unknown> = {

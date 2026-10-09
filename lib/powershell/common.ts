@@ -17,7 +17,9 @@ export class PSString extends PSObject {
 export class PSBoolean extends PSObject {
   constructor(value: boolean) {
     if (typeof value !== 'boolean') {
-      throw new errors.InvalidArgumentError(`PSBoolean accepts only boolean in the constructor, but got '${value}'.`);
+      throw new errors.InvalidArgumentError(
+        `PSBoolean accepts only boolean in the constructor, but got '${String(value)}'.`,
+      );
     }
     super(value ? /* ps1 */ `$true` : /* ps1 */ `$false`);
   }
@@ -38,7 +40,7 @@ export class PSInt32Array extends PSObject {
   constructor(value: number[]) {
     if (!(Array.isArray(value) && value.every(Number.isInteger))) {
       throw new errors.InvalidArgumentError(
-        `PSInt32Array accepts only array of integers in the constructor, but got ${Array.isArray(value) ? `[${value}]` : `'${value}'`}.`,
+        `PSInt32Array accepts only array of integers in the constructor, but got ${Array.isArray(value) ? `[${value.join(',')}]` : `'${String(value)}'`}.`,
       );
     }
 
