@@ -1,3 +1,20 @@
+## [4.0.0-beta.2](https://github.com/appium/appium-wincore-driver/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2026-10-09)
+
+### ⚠ BREAKING CHANGES
+
+* the package is now ESM-only.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+
+### Features
+
+* migrate to ESM ([8548f38](https://github.com/appium/appium-wincore-driver/commit/8548f38a7a64239347335dfa326034131c4d9548))
+
+### Miscellaneous Chores
+
+* fix lint errors and warnings ([76d529e](https://github.com/appium/appium-wincore-driver/commit/76d529e4d1936b19441ff7df2e7916152dc0a125))
+* rename scripts to .mjs ([ae6e716](https://github.com/appium/appium-wincore-driver/commit/ae6e716c69fdea655c010b13056efd7dd9f65e6d))
+
 ## [4.0.0-beta.1](https://github.com/appium/appium-wincore-driver/compare/v3.1.2...v4.0.0-beta.1) (2026-10-07)
 
 ### ⚠ BREAKING CHANGES
