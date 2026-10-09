@@ -1,8 +1,8 @@
+import assert from 'node:assert/strict';
 import {existsSync, unlinkSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-
-import {describe, it, expect, afterEach} from 'vitest';
+import {afterEach, describe, it} from 'node:test';
 
 import {createCalculatorSession, quitSession, CALCULATOR_APP_ID, closeAllTestApps} from './helpers/session.js';
 
@@ -10,7 +10,7 @@ import {createCalculatorSession, quitSession, CALCULATOR_APP_ID, closeAllTestApp
 
 describe('App lifecycle commands', () => {
   afterEach(() => {
-    closeAllTestApps;
+    closeAllTestApps();
   });
   describe('windows: launchApp and closeApp cycle', () => {
     it('windows: launchApp launches a new app instance and display shows 0', async () => {
@@ -19,7 +19,7 @@ describe('App lifecycle commands', () => {
         await driver.executeScript('windows: launchApp', []);
         const display = await driver.$('~CalculatorResults');
         const text = await display.getText();
-        expect(text).toContain('0');
+        assert.ok(text.includes('0'));
       } finally {
         await quitSession(driver);
       }
@@ -73,7 +73,7 @@ describe('App lifecycle commands', () => {
       try {
         await driver.executeScript('windows: closeApp', []);
         // Second close should throw (app already closed)
-        await expect(driver.executeScript('windows: closeApp', [])).rejects.toThrow();
+        await assert.rejects(driver.executeScript('windows: closeApp', []));
       } finally {
         await quitSession(driver);
       }
@@ -90,7 +90,7 @@ describe('App lifecycle commands', () => {
       const rootDriver = await (await import('./helpers/session.js')).createRootSession();
       try {
         const handles = await rootDriver.getWindowHandles();
-        expect(handles).not.toContain(handle);
+        assert.ok(!handles.includes(handle));
       } finally {
         await quitSession(rootDriver);
       }
@@ -108,7 +108,7 @@ describe('App lifecycle commands', () => {
       const rootDriver = await (await import('./helpers/session.js')).createRootSession();
       try {
         const handles = await rootDriver.getWindowHandles();
-        expect(handles).toContain(handle);
+        assert.ok(handles.includes(handle));
       } finally {
         // Clean up the orphaned window directly by its handle. Launching a fresh
         // Calculator session here (as this used to do) spawns an unrelated second
@@ -128,8 +128,8 @@ describe('App lifecycle commands', () => {
         'ms:forcequit': true,
       });
       // Simply verify session creation and quit succeeds
-      expect(await driver.getWindowHandle()).toBeTruthy();
-      await expect(driver.deleteSession()).resolves.not.toThrow();
+      assert.ok(await driver.getWindowHandle());
+      await assert.doesNotReject(driver.deleteSession());
     });
   });
 
@@ -142,7 +142,7 @@ describe('App lifecycle commands', () => {
         },
       });
       try {
-        expect(existsSync(markerPath)).toBe(true);
+        assert.equal(existsSync(markerPath), true);
       } finally {
         await quitSession(driver);
         if (existsSync(markerPath)) {
@@ -161,7 +161,7 @@ describe('App lifecycle commands', () => {
       await driver.deleteSession();
       // Give postrun a moment to execute
       await new Promise((resolve) => setTimeout(resolve, 500));
-      expect(existsSync(markerPath)).toBe(true);
+      assert.equal(existsSync(markerPath), true);
       if (existsSync(markerPath)) {
         unlinkSync(markerPath);
       }

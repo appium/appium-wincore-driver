@@ -1,10 +1,11 @@
-import {afterAll, beforeAll, describe, expect, it} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, before, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {createWpfLargeSession, quitSession} from '../e2e/helpers/session.js';
 import {finalizeRun, measure, type OpResult} from './helpers/bench.js';
 
-const RUN = process.env.RUN_PERF === '1' || process.env.RUN_PERF === 'true';
 const NODE_COUNT = Number(process.env.PERF_NODE_COUNT || 1500);
 const SUITE = 'uia';
 
@@ -17,20 +18,23 @@ const SUITE = 'uia';
  * Perf counters here are per-node COM-walk timings (`uia.pageSource.node`,
  * `uia.xpathModel.node`), not RPCs.
  *
- * Opt-in: RUN_PERF=1, a running Appium server with this driver, wpf-large built
+ * Needs a running Appium server with this driver and wpf-large built
  * in ../appium-wincore-test-apps. Records to test/perf/results/, fails only on a >3x
  * regression vs test/perf/baselines/uia.json.
  */
-describe.skipIf(!RUN)('plain UIA page source / tree walk perf', () => {
+describe('plain UIA page source / tree walk perf', () => {
   let driver: Browser;
   const results: OpResult[] = [];
 
-  beforeAll(async () => {
-    driver = await createWpfLargeSession(NODE_COUNT, {'appium:perfMetrics': true});
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }, 120_000);
+  before(
+    async () => {
+      driver = await createWpfLargeSession(NODE_COUNT, {'appium:perfMetrics': true});
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    },
+    {timeout: 120_000},
+  );
 
-  afterAll(async () => {
+  after(async () => {
     try {
       finalizeRun(SUITE, results);
     } finally {
@@ -39,27 +43,30 @@ describe.skipIf(!RUN)('plain UIA page source / tree walk perf', () => {
   });
 
   it('measures getPageSource', async () => {
-    const r = await measure(driver, 'getPageSource', NODE_COUNT, () => driver.getPageSource());
+    const r = await measure(driver, 'getPageSource', NODE_COUNT, async () => await driver.getPageSource());
     results.push(r);
-    expect(r.p50Ms).toBeGreaterThan(0);
+    assert.ok(r.p50Ms > 0);
   });
 
   it('measures full-tree //* findElements', async () => {
-    const r = await measure(driver, 'findAll-star', NODE_COUNT, () => driver.$$('//*'));
+    const r = await measure(driver, 'findAll-star', NODE_COUNT, async () => await driver.$$('//*'));
     results.push(r);
-    expect(r.p50Ms).toBeGreaterThan(0);
+    assert.ok(r.p50Ms > 0);
   });
 
   it('measures a deep single-element XPath find', async () => {
-    const r = await measure(driver, 'find-anchorLast', NODE_COUNT, () =>
-      driver.$('//*[@Name="perfAnchorLast"]').getAttribute('Name'),
+    const r = await measure(
+      driver,
+      'find-anchorLast',
+      NODE_COUNT,
+      async () => await driver.$('//*[@Name="perfAnchorLast"]').getAttribute('Name'),
     );
     results.push(r);
-    expect(r.p50Ms).toBeGreaterThan(0);
+    assert.ok(r.p50Ms > 0);
   });
 
   it('measures bulk getAttribute over 50 elements', async () => {
-    const fields = await driver.$$('//Text');
+    const fields = (await driver.$$('//Text')) as unknown as WebdriverIO.Element[];
     const slice = fields.slice(0, 50);
     const r = await measure(driver, 'getAttribute-x50', NODE_COUNT, async () => {
       for (const el of slice) {
@@ -67,6 +74,6 @@ describe.skipIf(!RUN)('plain UIA page source / tree walk perf', () => {
       }
     });
     results.push(r);
-    expect(r.p50Ms).toBeGreaterThan(0);
+    assert.ok(r.p50Ms > 0);
   });
 });

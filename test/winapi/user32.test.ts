@@ -1,13 +1,21 @@
-import {describe, it, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it, mock} from 'node:test';
 
-import {VirtualKey} from '../../lib/winapi/types/virtualkey';
-import {isExtendedKeyVk, sendsAsUnicodePacket} from '../../lib/winapi/user32';
+import {VirtualKey} from '../../lib/winapi/types/virtualkey.js';
+
+// Off-Windows the DLLs can't load; stub only koffi's `load` so the real pure functions still run.
+if (process.platform !== 'win32') {
+  const {default: koffi} = await import('koffi');
+  const lib = {func: () => () => 0};
+  mock.module('koffi', {exports: {default: {...koffi, load: () => lib}}});
+}
+const {isExtendedKeyVk, sendsAsUnicodePacket} = await import('../../lib/winapi/user32.js');
 
 describe('isExtendedKeyVk', () => {
   // Regression: SendInput must set KEYEVENTF_EXTENDEDKEY for these VKs, or
   // Windows can resolve them against the wrong physical key depending on
   // NumLock state (e.g. VK_DOWN colliding with the Numpad-2 key location).
-  it.each([
+  const extended: [string, VirtualKey][] = [
     ['VK_UP', VirtualKey.VK_UP],
     ['VK_DOWN', VirtualKey.VK_DOWN],
     ['VK_LEFT', VirtualKey.VK_LEFT],
@@ -26,11 +34,14 @@ describe('isExtendedKeyVk', () => {
     ['VK_LWIN', VirtualKey.VK_LWIN],
     ['VK_RWIN', VirtualKey.VK_RWIN],
     ['VK_APPS', VirtualKey.VK_APPS],
-  ])('returns true for %s', (_name, vk) => {
-    expect(isExtendedKeyVk(vk)).toBe(true);
-  });
+  ];
+  for (const [name, vk] of extended) {
+    it(`returns true for ${name}`, () => {
+      assert.equal(isExtendedKeyVk(vk), true);
+    });
+  }
 
-  it.each([
+  const notExtended: [string, VirtualKey][] = [
     ['VK_KEY_A', VirtualKey.VK_KEY_A],
     ['VK_KEY_0', VirtualKey.VK_KEY_0],
     ['VK_RETURN', VirtualKey.VK_RETURN],
@@ -39,33 +50,40 @@ describe('isExtendedKeyVk', () => {
     ['VK_SHIFT', VirtualKey.VK_SHIFT],
     ['VK_CONTROL (left)', VirtualKey.VK_CONTROL],
     ['VK_MENU (left Alt)', VirtualKey.VK_MENU],
-  ])('returns false for %s', (_name, vk) => {
-    expect(isExtendedKeyVk(vk)).toBe(false);
-  });
+  ];
+  for (const [name, vk] of notExtended) {
+    it(`returns false for ${name}`, () => {
+      assert.equal(isExtendedKeyVk(vk), false);
+    });
+  }
 
   it('returns false for undefined (scan-code-based events have no vk)', () => {
-    expect(isExtendedKeyVk(undefined)).toBe(false);
+    assert.equal(isExtendedKeyVk(undefined), false);
   });
 });
 
 describe('sendsAsUnicodePacket', () => {
   // executeKeys pauses after Unicode-packet keystrokes (VK_PACKET): queued packets can turn
   // into the last character, and keys behind them can be lost, when the target falls behind.
-  it.each(['a', 'z', '0', '9'])('is false for scan-code character %s', (char) => {
-    expect(sendsAsUnicodePacket(char)).toBe(false);
-  });
+  for (const char of ['a', 'z', '0', '9']) {
+    it(`is false for scan-code character ${char}`, () => {
+      assert.equal(sendsAsUnicodePacket(char), false);
+    });
+  }
 
-  it.each([' ', ',', '!', 'A', 'é', '\u{1F600}'])('is true for %j (no scan code)', (char) => {
-    expect(sendsAsUnicodePacket(char)).toBe(true);
-  });
+  for (const char of [' ', ',', '!', 'A', 'é', '\u{1F600}']) {
+    it(`is true for ${JSON.stringify(char)} (no scan code)`, () => {
+      assert.equal(sendsAsUnicodePacket(char), true);
+    });
+  }
 
   it('is true for every character with forceUnicode', () => {
-    expect(sendsAsUnicodePacket('a', true)).toBe(true);
-    expect(sendsAsUnicodePacket('5', true)).toBe(true);
+    assert.equal(sendsAsUnicodePacket('a', true), true);
+    assert.equal(sendsAsUnicodePacket('5', true), true);
   });
 
   it('is false for WebDriver special keys (virtual keys)', () => {
-    expect(sendsAsUnicodePacket('')).toBe(false); // Key.BACKSPACE
-    expect(sendsAsUnicodePacket('', true)).toBe(false); // Key.TAB
+    assert.equal(sendsAsUnicodePacket(''), false); // Key.BACKSPACE
+    assert.equal(sendsAsUnicodePacket('', true), false); // Key.TAB
   });
 });

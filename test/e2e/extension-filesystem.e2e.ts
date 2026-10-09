@@ -1,8 +1,9 @@
+import assert from 'node:assert/strict';
 import {existsSync, mkdirSync, writeFileSync, rmdirSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {after, afterEach, before, beforeEach, describe, it} from 'node:test';
 
-import {describe, it, beforeAll, afterAll, beforeEach, afterEach, expect} from 'vitest';
 import type {Browser} from 'webdriverio';
 
 import {createCalculatorSession, quitSession} from './helpers/session.js';
@@ -10,11 +11,11 @@ import {createCalculatorSession, quitSession} from './helpers/session.js';
 describe('windows: deleteFile and deleteFolder', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createCalculatorSession();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
@@ -38,18 +39,18 @@ describe('windows: deleteFile and deleteFolder', () => {
     });
 
     it('deletes an existing temp file and the file no longer exists', async () => {
-      expect(existsSync(testFilePath)).toBe(true);
+      assert.equal(existsSync(testFilePath), true);
       await driver.executeScript('windows: deleteFile', [{path: testFilePath}]);
-      expect(existsSync(testFilePath)).toBe(false);
+      assert.equal(existsSync(testFilePath), false);
     });
 
     it('throws when the file does not exist', async () => {
       const nonExistent = join(tmpdir(), 'appiumdesktop-nonexistent-xyz.txt');
-      await expect(driver.executeScript('windows: deleteFile', [{path: nonExistent}])).rejects.toThrow();
+      await assert.rejects(driver.executeScript('windows: deleteFile', [{path: nonExistent}]));
     });
 
     it('throws when path is not provided', async () => {
-      await expect(driver.executeScript('windows: deleteFile', [{}])).rejects.toThrow();
+      await assert.rejects(driver.executeScript('windows: deleteFile', [{}]));
     });
   });
 
@@ -73,9 +74,9 @@ describe('windows: deleteFile and deleteFolder', () => {
 
     it('deletes an existing empty temp directory', async () => {
       mkdirSync(testDirPath);
-      expect(existsSync(testDirPath)).toBe(true);
+      assert.equal(existsSync(testDirPath), true);
       await driver.executeScript('windows: deleteFolder', [{path: testDirPath}]);
-      expect(existsSync(testDirPath)).toBe(false);
+      assert.equal(existsSync(testDirPath), false);
     });
 
     it('deletes a directory with files recursively (recursive: true, default)', async () => {
@@ -83,16 +84,16 @@ describe('windows: deleteFile and deleteFolder', () => {
       writeFileSync(join(testDirPath, 'file1.txt'), 'content');
       writeFileSync(join(testDirPath, 'file2.txt'), 'content');
       await driver.executeScript('windows: deleteFolder', [{path: testDirPath, recursive: true}]);
-      expect(existsSync(testDirPath)).toBe(false);
+      assert.equal(existsSync(testDirPath), false);
     });
 
     it('throws when the folder does not exist', async () => {
       const nonExistent = join(tmpdir(), 'appiumdesktop-nonexistent-dir-xyz');
-      await expect(driver.executeScript('windows: deleteFolder', [{path: nonExistent}])).rejects.toThrow();
+      await assert.rejects(driver.executeScript('windows: deleteFolder', [{path: nonExistent}]));
     });
 
     it('throws when path is not provided', async () => {
-      await expect(driver.executeScript('windows: deleteFolder', [{}])).rejects.toThrow();
+      await assert.rejects(driver.executeScript('windows: deleteFolder', [{}]));
     });
   });
 });

@@ -163,36 +163,50 @@ jobs:
             exit 1
           }
 
-          npx vitest run --config vitest.e2e.config.mts `
-            test/e2e/extension-powershell.e2e.ts `
-            test/e2e/extension-webview.e2e.ts `
-            test/e2e/actions.e2e.ts `
-            test/e2e/element-commands.e2e.ts `
-            test/e2e/extension-app-lifecycle.e2e.ts `
-            test/e2e/device-file-transfer.e2e.ts `
-            test/e2e/device-system.e2e.ts `
-            test/e2e/extension-cache-request.e2e.ts `
-            test/e2e/extension-clipboard.e2e.ts `
-            test/e2e/find-element.e2e.ts `
-            test/e2e/extension-winform-combo.e2e.ts `
-            test/e2e/extension-patterns.e2e.ts `
-            test/e2e/extension-filesystem.e2e.ts `
-            test/e2e/extension-input.e2e.ts `
-            test/e2e/navigation-window.e2e.ts `
-            test/e2e/session.e2e.ts `
-            test/e2e/window.e2e.ts `
-            test/e2e/xpath-axes.e2e.ts `
-            test/e2e/xpath-boolean-attributes.e2e.ts `
-            test/e2e/no-runtimeid-element.e2e.ts `
-            test/e2e/extension-screen-recording.e2e.ts `
-            test/e2e/standard-accessibility-values.e2e.ts
+          $specs = @(
+            "build/test/e2e/extension-powershell.e2e.js"
+            "build/test/e2e/extension-webview.e2e.js"
+            "build/test/e2e/actions.e2e.js"
+            "build/test/e2e/element-commands.e2e.js"
+            "build/test/e2e/extension-app-lifecycle.e2e.js"
+            "build/test/e2e/device-file-transfer.e2e.js"
+            "build/test/e2e/device-system.e2e.js"
+            "build/test/e2e/extension-cache-request.e2e.js"
+            "build/test/e2e/extension-clipboard.e2e.js"
+            "build/test/e2e/find-element.e2e.js"
+            "build/test/e2e/extension-winform-combo.e2e.js"
+            "build/test/e2e/extension-patterns.e2e.js"
+            "build/test/e2e/extension-filesystem.e2e.js"
+            "build/test/e2e/extension-input.e2e.js"
+            "build/test/e2e/navigation-window.e2e.js"
+            "build/test/e2e/session.e2e.js"
+            "build/test/e2e/window.e2e.js"
+            "build/test/e2e/xpath-axes.e2e.js"
+            "build/test/e2e/xpath-boolean-attributes.e2e.js"
+            "build/test/e2e/no-runtimeid-element.e2e.js"
+            "build/test/e2e/extension-screen-recording.e2e.js"
+            "build/test/e2e/standard-accessibility-values.e2e.js"
+          )
+
+          # Retry failed tests once (UI automation is flaky); each attempt writes its own JUnit report
+          # so a pass-on-retry stays distinguishable from a clean pass.
+          $nodeArgs = @(
+            "--enable-source-maps", "--test", "--test-concurrency=1", "--test-timeout=60000",
+            "--test-rerun-failures=test-results/e2e-rerun.json",
+            "--test-reporter=spec", "--test-reporter-destination=stdout"
+          )
+          node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit.xml" @specs
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Retrying failed tests once"
+            node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit-retry.xml" @specs
+          }
 
       - name: Publish E2E test report
         if: always()
         uses: dorny/test-reporter@v1
         with:
           name: E2E Test Results
-          path: test-results/e2e-junit.xml
+          path: test-results/e2e-junit*.xml
           reporter: java-junit
           fail-on-error: false
 

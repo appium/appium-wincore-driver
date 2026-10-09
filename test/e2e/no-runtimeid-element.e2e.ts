@@ -1,4 +1,6 @@
-import {describe, it, beforeEach, afterEach, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {afterEach, beforeEach, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {createWinformComboSession, quitSession} from './helpers/session.js';
@@ -25,18 +27,18 @@ describe('elements with no native RuntimeId (uuid fallback)', () => {
 
   it('finds and reads a fragment with a genuinely empty RuntimeId', async () => {
     const item = await app.$('~noRuntimeIdItem');
-    expect(await item.getAttribute('name')).toBe('No RuntimeId Item');
-    expect(await item.getAttribute('runtimeid')).toBe('');
+    assert.equal(await item.getAttribute('name'), 'No RuntimeId Item');
+    assert.equal(await item.getAttribute('runtimeid'), '');
   });
 
   it('assigns a GUID-shaped element id instead of a dot-joined RuntimeId', async () => {
     const GUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
     const item = await app.$('~noRuntimeIdItem');
-    expect(item.elementId).toMatch(GUID_RE);
+    assert.match((item as any).elementId, GUID_RE);
 
     // Contrast: a real control still gets a dot-joined RuntimeId id.
     const txtLog = await app.$('~txtLog');
-    expect(txtLog.elementId).toMatch(/^\d+(\.\d+)+$/);
+    assert.match((txtLog as any).elementId, /^\d+(\.\d+)+$/);
   });
 });

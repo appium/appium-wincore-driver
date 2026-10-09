@@ -9,15 +9,19 @@ npm run build          # Compile TypeScript to build/
 npm run watch          # Watch mode compilation
 npm run lint           # oxlint validation
 npm run format         # oxfmt formatting (format:check in CI)
-npm run test           # Unit tests (Vitest)
+npm run test           # Unit tests (node:test, compiled from test/ to build/test/)
 npm run test:e2e       # E2E tests (requires Windows + Appium setup)
+npm run test:perf      # Perf benchmark (requires Windows + Appium server)
 ```
 
-Run a single test file:
+Tests are TypeScript compiled by `tsc` (`npm run build`); run a single compiled test file:
 
 ```bash
-npx vitest run test/path/to/file.test.ts
+npm run build && node --enable-source-maps --experimental-test-module-mocks --test build/test/path/to/file.test.js
 ```
+
+Unit tests use `node:test` + `node:assert/strict`; module mocks via `mock.module()` (needs the flag above), so the code
+under test must be loaded with a dynamic `await import()` after the mocks are registered. Shared helpers: `test/helpers/`.
 
 ## Architecture
 
@@ -74,10 +78,6 @@ All driver commands live in `lib/commands/` and are mixed into the driver class 
 ### ESM
 
 The package is ESM (`"type": "module"`, NodeNext resolution). Relative imports in `lib/` need explicit `.js` extensions, `appium/driver.js` / `appium/support.js` need the extension too, and CJS-only deps such as `koffi` must be default-imported. Use `import.meta.url` instead of `__dirname`/`__filename` (see `currentFilename` in `lib/util.ts`). The entry point is `lib/index.ts`.
-
-### TypeScript paths
-
-`@/` resolves to `lib/` (configured in both `tsconfig.json` and Vitest configs).
 
 ## Key capabilities
 
