@@ -69,6 +69,10 @@ const CHROMEDRIVER_NO_PROXY: RouteMatcher[] = [
   // context. Letting them proxy means logs work while a WEBVIEW_* context is active.
 ];
 
+function capToString(value: unknown): string {
+  return typeof value === 'string' ? value : JSON.stringify(value);
+}
+
 export class AppiumWincoreDriver extends BaseDriver<WincoreDriverConstraints, StringRecord> {
   static executeMethodMap = executeMethodMap;
 
@@ -213,7 +217,7 @@ export class AppiumWincoreDriver extends BaseDriver<WincoreDriverConstraints, St
         const prefixed = am[`appium:${cap}`];
         if (unprefixed !== undefined && prefixed !== undefined && unprefixed !== prefixed) {
           this.log.warn(
-            `Conflicting values for '${cap}': unprefixed='${unprefixed}', appium:${cap}='${prefixed}'. The appium:-prefixed value takes precedence.`,
+            `Conflicting values for '${cap}': unprefixed='${capToString(unprefixed)}', appium:${cap}='${capToString(prefixed)}'. The appium:-prefixed value takes precedence.`,
           );
         }
       }
@@ -278,7 +282,7 @@ export class AppiumWincoreDriver extends BaseDriver<WincoreDriverConstraints, St
     }
   }
 
-  override async deleteSession(sessionId?: string | null | undefined): Promise<void> {
+  override async deleteSession(sessionId?: string | null): Promise<void> {
     this.log.debug('Deleting AppiumWincore driver session...');
 
     if (this.ieSession) {

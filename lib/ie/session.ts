@@ -4,8 +4,8 @@ import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {createInterface} from 'node:readline';
 
-import {node} from '@appium/support';
 import {errors, W3C_ELEMENT_KEY} from 'appium/driver.js';
+import {node} from 'appium/support.js';
 
 import {MODULE_NAME, currentFilename} from '../util.js';
 
@@ -55,7 +55,8 @@ export class IESession {
       if (resp.ok) {
         cb.resolve(resp);
       } else {
-        cb.reject(new Error(String(resp.error ?? 'IE_ERROR')));
+        const err = resp.error ?? 'IE_ERROR';
+        cb.reject(new Error(typeof err === 'string' ? err : JSON.stringify(err)));
       }
     });
 

@@ -619,7 +619,8 @@ export async function waitForNewWindow(
   const knownPids = new Set<number>([launcherPid]);
 
   while (performance.now() - start < timeout) {
-    for (const pid of [...knownPids]) {
+    // snapshot: the loop body adds to knownPids
+    for (const pid of Array.from(knownPids)) {
       const childPids = (await this.sendCommand('getChildProcessIds', {parentPid: pid})) as number[];
       for (const child of childPids) {
         knownPids.add(child);

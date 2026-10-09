@@ -1,9 +1,9 @@
 import path from 'node:path';
 
-import {fs, node, system, tempDir, zip} from '@appium/support';
 import type {ChromedriverOpts} from 'appium-chromedriver';
 import {Chromedriver} from 'appium-chromedriver';
 import {errors} from 'appium/driver.js';
+import {fs, node, system, tempDir, zip} from 'appium/support.js';
 
 import type {AppiumWincoreDriver} from '../driver.js';
 import {cdpRequest, currentFilename, downloadFile, sleep, MODULE_NAME} from '../util.js';
