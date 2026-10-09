@@ -14,6 +14,11 @@ on:
       - develop
       - beta
 
+# A newer commit on the same PR cancels the in-flight run (one shared runner/Appium port)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
     runs-on: [self-hosted, Windows, X64]
@@ -27,7 +32,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '24.x'
+          node-version: lts/*
 
       - name: Verify .NET SDK
         shell: powershell
