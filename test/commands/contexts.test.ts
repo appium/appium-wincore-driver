@@ -1,5 +1,5 @@
-import type * as SupportModule from '@appium/support';
-import {fs, system} from '@appium/support';
+import type * as SupportModule from 'appium/support.js';
+import {fs, system} from 'appium/support.js';
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 
 import * as contexts from '../../lib/commands/contexts';
@@ -25,7 +25,7 @@ vi.mock('appium-chromedriver', () => ({
   }),
 }));
 
-vi.mock('@appium/support', async (importOriginal) => {
+vi.mock('appium/support.js', async (importOriginal) => {
   const actual = await importOriginal<typeof SupportModule>();
   return {
     ...actual,
