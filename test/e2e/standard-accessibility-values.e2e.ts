@@ -203,7 +203,8 @@ describe('standard accessibility values (MSAA-only fixture)', () => {
       // The MSAA Proxy reports pinBox as IsPassword but still returns its PIN (4721)
       // from both Value and LegacyValue — the driver must blank them.
       const source = await app.getPageSource();
-      expect(source).not.toContain('4721');
+      // match attribute values only: AutomationId can embed the digits (e.g. "4721040")
+      expect(source).not.toMatch(/(?:Legacy)?Value="[^"]*4721/);
       expect(await app.$$('//Edit[@Name="pinBox" and @Value="" and @LegacyValue=""]').length).toBe(1);
     });
 

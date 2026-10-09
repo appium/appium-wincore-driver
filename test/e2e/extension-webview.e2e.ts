@@ -9,13 +9,26 @@ import type {Browser} from 'webdriverio';
 
 import {quitSession, closeAllTestApps, createChromeWebviewSession} from './helpers/session.js';
 
-/** Switch to the first WEBVIEW_ context; throws if none found. */
-async function switchToFirstWebview(driver: Browser): Promise<string> {
-  const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{id: string}>;
-  const webviewId = contexts.find((c) => c.id.startsWith('WEBVIEW_'))?.id;
-  if (!webviewId) {
-    throw new Error('No WEBVIEW_ context found');
+type WebviewContext = {id: string; title?: string; url?: string};
+
+/** All WEBVIEW_ contexts; Chrome also lists non-page targets such as extension background pages. */
+async function getWebviews(driver: Browser): Promise<WebviewContext[]> {
+  const contexts = (await driver.execute('mobile: getContexts', [{}])) as WebviewContext[];
+  return contexts.filter((c) => c.id.startsWith('WEBVIEW_'));
+}
+
+/** The WEBVIEW_ context showing the local fixture page; throws if none found. */
+async function getFixtureWebviewId(driver: Browser): Promise<string> {
+  const webview = (await getWebviews(driver)).find((c) => c.url?.includes('webview.html'));
+  if (!webview) {
+    throw new Error('No WEBVIEW_ context for the fixture page found');
   }
+  return webview.id;
+}
+
+/** Switch to the fixture page's WEBVIEW_ context. */
+async function switchToFixtureWebview(driver: Browser): Promise<string> {
+  const webviewId = await getFixtureWebviewId(driver);
   await driver.switchContext(webviewId);
   return webviewId;
 }
@@ -52,22 +65,18 @@ describe('Chrome WebView context support', () => {
   });
 
   it('mobile:getContexts returns title and url metadata for webview pages', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{
-      id: string;
-      title?: string;
-      url?: string;
-    }>;
-    const webview = contexts.find((c) => c.id.startsWith('WEBVIEW_'));
+    const webviews = await getWebviews(driver);
 
-    expect(webview).toBeDefined();
-    expect(typeof webview!.title).toBe('string');
-    expect(typeof webview!.url).toBe('string');
-    expect(webview!.url).toContain('webview.html');
+    expect(webviews.length).toBeGreaterThan(0);
+    for (const webview of webviews) {
+      expect(typeof webview.title).toBe('string');
+      expect(typeof webview.url).toBe('string');
+    }
+    expect(webviews.some((c) => c.url?.includes('webview.html'))).toBe(true);
   });
 
   it('switches to Chrome webview context and executes JavaScript', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{id: string}>;
-    const webviewId = contexts.find((c) => c.id.startsWith('WEBVIEW_'))!.id;
+    const webviewId = await getFixtureWebviewId(driver);
 
     await driver.switchContext(webviewId);
     expect(await driver.getContext()).toBe(webviewId);
@@ -81,8 +90,7 @@ describe('Chrome WebView context support', () => {
   });
 
   it('finds element by CSS selector inside Chrome webview', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{id: string}>;
-    const webviewId = contexts.find((c) => c.id.startsWith('WEBVIEW_'))!.id;
+    const webviewId = await getFixtureWebviewId(driver);
 
     await driver.switchContext(webviewId);
 
@@ -92,8 +100,7 @@ describe('Chrome WebView context support', () => {
   });
 
   it('finds element by XPath inside Chrome webview', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{id: string}>;
-    const webviewId = contexts.find((c) => c.id.startsWith('WEBVIEW_'))!.id;
+    const webviewId = await getFixtureWebviewId(driver);
 
     await driver.switchContext(webviewId);
 
@@ -103,8 +110,7 @@ describe('Chrome WebView context support', () => {
   });
 
   it('can interact with elements inside Chrome webview', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{id: string}>;
-    const webviewId = contexts.find((c) => c.id.startsWith('WEBVIEW_'))!.id;
+    const webviewId = await getFixtureWebviewId(driver);
 
     await driver.switchContext(webviewId);
 
@@ -114,8 +120,7 @@ describe('Chrome WebView context support', () => {
   });
 
   it('switches back to NATIVE_APP after entering webview context', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{id: string}>;
-    const webviewId = contexts.find((c) => c.id.startsWith('WEBVIEW_'))!.id;
+    const webviewId = await getFixtureWebviewId(driver);
 
     await driver.switchContext(webviewId);
     await driver.switchContext('NATIVE_APP');
@@ -124,8 +129,7 @@ describe('Chrome WebView context support', () => {
   });
 
   it('executes JS mutation inside webview and reads it back', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as Array<{id: string}>;
-    const webviewId = contexts.find((c) => c.id.startsWith('WEBVIEW_'))!.id;
+    const webviewId = await getFixtureWebviewId(driver);
 
     await driver.switchContext(webviewId);
 
@@ -135,7 +139,7 @@ describe('Chrome WebView context support', () => {
   });
 
   it('windows: execute commands work in webview context (routed to UIA, not Chromedriver)', async () => {
-    await switchToFirstWebview(driver);
+    await switchToFixtureWebview(driver);
 
     // windows:getDeviceTime is in CHROMEDRIVER_NO_PROXY — must still reach UIA handler
     const time = (await driver.execute('windows: getDeviceTime', {})) as string;
@@ -144,7 +148,7 @@ describe('Chrome WebView context support', () => {
   });
 
   it('powerShell script still works in webview context', async () => {
-    await switchToFirstWebview(driver);
+    await switchToFixtureWebview(driver);
 
     const result = (await driver.executeScript('powerShell', [{script: 'Write-Output "hello"'}])) as string;
     expect(result.trim()).toBe('hello');

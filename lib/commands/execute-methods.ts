@@ -8,10 +8,10 @@ import type {Element} from '@appium/types';
  * implementations (in `extension.ts` / `native.ts`) already expect.
  * Behavior is not duplicated here - each wrapper just bridges args and delegates.
  */
-import {W3C_ELEMENT_KEY} from 'appium/driver';
+import {W3C_ELEMENT_KEY} from 'appium/driver.js';
 
-import type {AppiumWincoreDriver} from '../driver';
-import type {ClickType} from '../enums';
+import type {AppiumWincoreDriver} from '../driver.js';
+import type {ClickType} from '../enums.js';
 import {
   patternInvoke,
   patternExpand,
@@ -45,8 +45,8 @@ import {
   stopRecordingScreen,
   pushCacheRequest,
   executeGetDpiScale,
-} from './extension';
-import {executeGetNativeChildren} from './native';
+} from './extension.js';
+import {executeGetNativeChildren} from './native.js';
 
 function toElement(elementId: string): Element {
   return {[W3C_ELEMENT_KEY]: elementId} as Element;

@@ -1,11 +1,11 @@
 import type {CssTransformer, NativeLocator, StrategyKey} from '@appium/css-locator-to-native';
-import {errors} from 'appium/driver';
+import {errors} from 'appium/driver.js';
 
-import {UIA_CONDITION_EMITTER_KEY, UIA_CONDITION_STRATEGY} from './constants';
-import {ATTRIBUTE_SCHEMA} from './schema';
-import {UiaConditionEmitter} from './uia-condition-emitter';
+import {UIA_CONDITION_EMITTER_KEY, UIA_CONDITION_STRATEGY} from './constants.js';
+import {ATTRIBUTE_SCHEMA} from './schema.js';
+import {UiaConditionEmitter} from './uia-condition-emitter.js';
 
-export {UIA_CONDITION_STRATEGY} from './constants';
+export {UIA_CONDITION_STRATEGY} from './constants.js';
 
 const emitters = {
   [UIA_CONDITION_EMITTER_KEY]: new UiaConditionEmitter(UIA_CONDITION_STRATEGY),

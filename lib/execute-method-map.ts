@@ -1,6 +1,6 @@
 import type {ExecuteMethodMap} from '@appium/types';
 
-import type {AppiumWincoreDriver} from './driver';
+import type {AppiumWincoreDriver} from './driver.js';
 
 /**
  * Standard Appium execute-method descriptors for the `windows:` commands, so they're

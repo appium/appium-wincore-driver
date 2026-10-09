@@ -1,14 +1,14 @@
 import {normalize} from 'node:path';
 
-import type {AppiumWincoreDriver} from '../driver';
-import {WincoreServerClient} from '../server/client';
-import {findFreePort} from '../util';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {WincoreServerClient} from '../server/client.js';
+import {findFreePort} from '../util.js';
 import {
   getAllWindowHandles,
   getWindowAllHandlesForProcessIds,
   isIEWindowHwnd,
   trySetForegroundWindow,
-} from '../winapi/user32';
+} from '../winapi/user32.js';
 
 const MAX_INIT_RETRIES = 5;
 const INIT_RETRY_DELAY_MS = 500;

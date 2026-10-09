@@ -1,4 +1,4 @@
-import {errors} from 'appium/driver';
+import {errors} from 'appium/driver.js';
 
 import {
   PSAutomationHeadingLevel,
@@ -11,7 +11,7 @@ import {
   PSPoint,
   PSRect,
   PSString,
-} from './common';
+} from './common.js';
 import {
   AndCondition,
   Condition,
@@ -20,16 +20,16 @@ import {
   OrCondition,
   PropertyCondition,
   TrueCondition,
-} from './conditions';
-import type {PSObject} from './core';
+} from './conditions.js';
+import type {PSObject} from './core.js';
 import {
   ConstructorRegexMatcher,
   PropertyRegexMatcher,
   RegexItem,
   StringRegexMatcher,
   VarArgsRegexMatcher,
-} from './regex';
-import {AutomationHeadingLevel, ControlType, ExtraControlType, OrientationType, Property} from './types';
+} from './regex.js';
+import {AutomationHeadingLevel, ControlType, ExtraControlType, OrientationType, Property} from './types.js';
 
 const BOOLEAN_REGEX = /(?<=[\s,])(?:\$)?(true|false)(?=[\s)])/;
 const INTEGER_REGEX = /((?<![\d.+-])[+-]?\d+(?![\d.]))/;

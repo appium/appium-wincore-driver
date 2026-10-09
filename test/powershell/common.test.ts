@@ -1,4 +1,4 @@
-import {W3C_ELEMENT_KEY} from 'appium/driver';
+import {W3C_ELEMENT_KEY} from 'appium/driver.js';
 /**
  * Unit tests for lib/powershell/common.ts (PS type wrappers)
  */

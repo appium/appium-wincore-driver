@@ -28,12 +28,21 @@
     "build/lib/**/*",
     "iebridge/IEBridge.exe",
     "native/win-x64/WincoreServer.exe",
-    "scripts/postinstall.js",
+    "scripts/postinstall.mjs",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"
   ],
-  "main": "build/lib/driver.js",
+  "type": "module",
+  "main": "./build/lib/index.js",
+  "types": "./build/lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/lib/index.d.ts",
+      "import": "./build/lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "build": "tsc -b",
     "build:native": "dotnet publish csharp/WincoreServer/WincoreServer.csproj -c Release -o native/win-x64/",
@@ -47,8 +56,8 @@
     "test": "npx vitest run",
     "test:e2e": "npx vitest run --config vitest.e2e.config.mts",
     "test:perf": "vitest run --config vitest.perf.config.mts",
-    "postinstall": "node scripts/postinstall.js",
-    "pack:dist": "node scripts/pack-dist.js"
+    "postinstall": "node scripts/postinstall.mjs",
+    "pack:dist": "node scripts/pack-dist.mjs"
   },
   "dependencies": {
     "@appium/css-locator-to-native": "^1.0.6",

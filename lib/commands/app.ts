@@ -3,13 +3,13 @@ import {normalize} from 'node:path';
 import {performance} from 'node:perf_hooks';
 
 import type {Element, Rect} from '@appium/types';
-import {errors, W3C_ELEMENT_KEY} from 'appium/driver';
+import {errors, W3C_ELEMENT_KEY} from 'appium/driver.js';
 
-import type {AppiumWincoreDriver} from '../driver';
-import {Key} from '../enums';
-import {propertyCondition} from '../server/conditions';
-import type {RectResult} from '../server/protocol';
-import {sleep} from '../util';
+import type {AppiumWincoreDriver} from '../driver.js';
+import {Key} from '../enums.js';
+import {propertyCondition} from '../server/conditions.js';
+import type {RectResult} from '../server/protocol.js';
+import {sleep} from '../util.js';
 import {
   getAllWindowHandles,
   getVisibleWindowsWithTitles,
@@ -18,7 +18,7 @@ import {
   keyDown,
   keyUp,
   trySetForegroundWindow,
-} from '../winapi/user32';
+} from '../winapi/user32.js';
 
 /**
  * Polling interval used when waiting for windows/elements to appear during
@@ -659,7 +659,7 @@ export async function attachToWindowHandles(
   let fallbackElementId = '';
 
   for (const hwnd of handles) {
-    let candidateId = '';
+    let candidateId: string;
     try {
       candidateId = ((await this.sendCommand('elementFromHandle', {handle: hwnd})) as string) ?? '';
     } catch (err) {

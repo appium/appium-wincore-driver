@@ -71,6 +71,10 @@ All driver commands live in `lib/commands/` and are mixed into the driver class 
 - `server-session.ts` — session-level root element / server lifecycle
 - `screen-recorder.ts` — FFmpeg-based recording
 
+### ESM
+
+The package is ESM (`"type": "module"`, NodeNext resolution). Relative imports in `lib/` need explicit `.js` extensions, `appium/driver.js` / `appium/support.js` need the extension too, and CJS-only deps such as `koffi` must be default-imported. Use `import.meta.url` instead of `__dirname`/`__filename` (see `currentFilename` in `lib/util.ts`). The entry point is `lib/index.ts`.
+
 ### TypeScript paths
 
 `@/` resolves to `lib/` (configured in both `tsconfig.json` and Vitest configs).

@@ -9,22 +9,22 @@ import type {
 } from '@appium/types';
 import type {Chromedriver} from 'appium-chromedriver';
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {BaseDriver, errors} from 'appium/driver';
-import {system} from 'appium/support';
+import {BaseDriver, errors} from 'appium/driver.js';
+import {system} from 'appium/support.js';
 
-import commands from './commands';
-import {locateElements} from './commands/find-via';
-import type {ScreenRecorder} from './commands/screen-recorder';
-import type {WincoreDriverConstraints} from './constraints';
-import {UI_AUTOMATION_DRIVER_CONSTRAINTS} from './constraints';
-import {cssToNativeLocator} from './css';
-import {executeMethodMap} from './execute-method-map';
-import type {IESession} from './ie/session';
-import type {LogFileMirror} from './log-file';
-import {attachLogFileMirror} from './log-file';
-import type {WincoreServerClient} from './server/client';
-import {assertSupportedEasingFunction} from './util';
-import {DRIVER_VERSION} from './version';
+import {locateElements} from './commands/find-via.js';
+import commands from './commands/index.js';
+import type {ScreenRecorder} from './commands/screen-recorder.js';
+import type {WincoreDriverConstraints} from './constraints.js';
+import {UI_AUTOMATION_DRIVER_CONSTRAINTS} from './constraints.js';
+import {cssToNativeLocator} from './css/index.js';
+import {executeMethodMap} from './execute-method-map.js';
+import type {IESession} from './ie/session.js';
+import type {LogFileMirror} from './log-file.js';
+import {attachLogFileMirror} from './log-file.js';
+import type {WincoreServerClient} from './server/client.js';
+import {assertSupportedEasingFunction} from './util.js';
+import {DRIVER_VERSION} from './version.js';
 
 type W3CWincoreDriverCaps = W3CDriverCaps<WincoreDriverConstraints>;
 type DefaultWindowsCreateSessionResult = DefaultCreateSessionResult<WincoreDriverConstraints>;

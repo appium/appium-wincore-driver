@@ -6,11 +6,11 @@ import {
   PSControlType,
   PSOrientationType,
   PSAutomationHeadingLevel,
-} from '../powershell/common';
-import type {Condition} from '../powershell/conditions';
-import {TrueCondition, FalseCondition} from '../powershell/conditions';
-import type {PSObject} from '../powershell/core';
-import type {ConditionDto} from './protocol';
+} from '../powershell/common.js';
+import type {Condition} from '../powershell/conditions.js';
+import {TrueCondition, FalseCondition} from '../powershell/conditions.js';
+import type {PSObject} from '../powershell/core.js';
+import type {ConditionDto} from './protocol.js';
 
 /**
  * Converts a PSObject-based Condition (used by the `-windows uiautomation` converter)

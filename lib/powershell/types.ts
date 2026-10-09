@@ -1,4 +1,4 @@
-import type {Enum} from '../enums';
+import type {Enum} from '../enums.js';
 
 export const CultureInfoProperty = Object.freeze({
   CULTURE: 'culture',

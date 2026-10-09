@@ -1,4 +1,4 @@
-import {W3C_ELEMENT_KEY} from 'appium/driver';
+import {W3C_ELEMENT_KEY} from 'appium/driver.js';
 import {describe, it, expect, vi} from 'vitest';
 
 import {xpathToElIdOrIds} from '../../lib/xpath';

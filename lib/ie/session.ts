@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type {ChildProcess} from 'child_process';
+import type {ChildProcess} from 'node:child_process';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {createInterface} from 'node:readline';
 
 import {node} from '@appium/support';
-import {errors, W3C_ELEMENT_KEY} from 'appium/driver';
+import {errors, W3C_ELEMENT_KEY} from 'appium/driver.js';
 
-import {MODULE_NAME} from '../util';
+import {MODULE_NAME, currentFilename} from '../util.js';
 
 function bridgeExePath(): string {
-  const root = node.getModuleRootSync(MODULE_NAME, __filename);
+  const root = node.getModuleRootSync(MODULE_NAME, currentFilename);
   if (!root) {
     throw new Error('Cannot resolve module root');
   }

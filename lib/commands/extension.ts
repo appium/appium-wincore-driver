@@ -4,19 +4,19 @@ import {dirname, extname, join} from 'node:path';
 
 import type {Element} from '@appium/types';
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {PROTOCOLS, W3C_ELEMENT_KEY, errors} from 'appium/driver';
+import {PROTOCOLS, W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 
-import {MODIFY_FS_FEATURE} from '../constants';
-import type {AppiumWincoreDriver} from '../driver';
-import type {Enum} from '../enums';
-import {ClickType, Key} from '../enums';
-import {convertStringToCondition} from '../powershell/converter';
-import {propertyCondition} from '../server/conditions';
-import {conditionToDto} from '../server/converter-bridge';
-import type {RectResult} from '../server/protocol';
-import {sleep} from '../util';
-import type {VirtualKey} from '../winapi/types';
-import {KeyEventFlags} from '../winapi/types';
+import {MODIFY_FS_FEATURE} from '../constants.js';
+import type {AppiumWincoreDriver} from '../driver.js';
+import type {Enum} from '../enums.js';
+import {ClickType, Key} from '../enums.js';
+import {convertStringToCondition} from '../powershell/converter.js';
+import {propertyCondition} from '../server/conditions.js';
+import {conditionToDto} from '../server/converter-bridge.js';
+import type {RectResult} from '../server/protocol.js';
+import {sleep} from '../util.js';
+import type {VirtualKey} from '../winapi/types/index.js';
+import {KeyEventFlags} from '../winapi/types/index.js';
 import {
   getAllWindowsWithDetails,
   getResolutionScalingFactor,
@@ -29,10 +29,10 @@ import {
   sendKeyboardEvents,
   sendsAsUnicodePacket,
   typeKey,
-} from '../winapi/user32';
-import {click} from './element';
-import type {UploadOptions} from './screen-recorder';
-import {DEFAULT_EXT, ScreenRecorder, uploadRecordedMedia} from './screen-recorder';
+} from '../winapi/user32.js';
+import {click} from './element.js';
+import type {UploadOptions} from './screen-recorder.js';
+import {DEFAULT_EXT, ScreenRecorder, uploadRecordedMedia} from './screen-recorder.js';
 
 const PLATFORM_COMMAND_PREFIX = 'windows:';
 
