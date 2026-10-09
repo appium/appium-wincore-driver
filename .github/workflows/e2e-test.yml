@@ -7,6 +7,11 @@ on:
       - develop
       - beta
 
+# A newer commit on the same PR cancels the in-flight run (one shared runner/Appium port)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
     if: github.event.pull_request.head.repo.full_name == github.repository
@@ -21,7 +26,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '24.x'
+          node-version: lts/*
 
       - name: Verify .NET SDK
         shell: powershell
@@ -41,11 +46,11 @@ jobs:
       - name: Install Appium
         shell: powershell
         run: |
-          if (-not (Get-Command appium -ErrorAction SilentlyContinue)) {
-            npm install -g appium@3.5.0
-          } else {
-            Write-Host "Appium already installed: $(appium --version)"
-          }
+          # Match the driver's peer range (npm is a no-op if already satisfied)
+          $range = node -p "require('./package.json').peerDependencies.appium"
+          npm install -g "appium@$range"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host "Appium: $(appium --version)"
 
       - name: Install driver into Appium
         shell: powershell
