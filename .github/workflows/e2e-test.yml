@@ -188,6 +188,9 @@ jobs:
             "build/test/e2e/standard-accessibility-values.e2e.js"
           )
 
+          # node's JUnit reporter and rerun state don't create missing directories
+          New-Item -ItemType Directory -Force -Path test-results | Out-Null
+
           # Retry failed tests once (UI automation is flaky); each attempt writes its own JUnit report
           # so a pass-on-retry stays distinguishable from a clean pass.
           $nodeArgs = @(
