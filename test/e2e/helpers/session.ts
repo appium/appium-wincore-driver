@@ -1,5 +1,6 @@
-import {execSync, spawn} from 'node:child_process';
+import {execFileSync, execSync, spawn} from 'node:child_process';
 import type {ChildProcess} from 'node:child_process';
+import {rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -112,9 +113,28 @@ export async function createRootSession(extraCaps?: Record<string, unknown>): Pr
   return driver;
 }
 
+/**
+ * Kill Chrome instances (and drop the profile) left over for this profile dir. A new
+ * chrome.exe with the same --user-data-dir hands its window to a lingering instance and
+ * exits, so the driver never finds a window to attach to.
+ */
+function killChromeForProfile(userDataDir: string): void {
+  const script =
+    `Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" | ` +
+    `Where-Object { $_.CommandLine -like '*${userDataDir}*' } | ` +
+    `ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`;
+  try {
+    execFileSync('powershell', ['-NoProfile', '-Command', script], {stdio: 'ignore'});
+    rmSync(userDataDir, {recursive: true, force: true});
+  } catch {
+    // nothing to clean up (or profile still locked) — ok
+  }
+}
+
 export async function createChromeWebviewSession(extraCaps?: Record<string, unknown>): Promise<Browser> {
   const port = (extraCaps?.['appium:webviewDevtoolsPort'] as number) ?? CHROME_DEBUG_PORT;
   const userDataDir = join(tmpdir(), `chrome-test-${port}`);
+  killChromeForProfile(userDataDir);
   const driver = await remote({
     ...APPIUM_SERVER,
     capabilities: {
