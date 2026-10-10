@@ -1,4 +1,3 @@
-import {W3C_ELEMENT_KEY} from 'appium/driver.js';
 /**
  * Unit tests for the executeMethodMap dispatch path, focused on the arg-shape
  * normalization in coerceExecuteMethodArgs (raw W3C element -> { elementId },
@@ -7,49 +6,57 @@ import {W3C_ELEMENT_KEY} from 'appium/driver.js';
  * Uses the real @appium/base-driver executeMethod (via withExecuteMethodDispatch)
  * rather than a reimplementation, so these tests track real validation behavior.
  */
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import assert from 'node:assert/strict';
+import {beforeEach, describe, it, mock} from 'node:test';
 
-import * as executeMethods from '../../../lib/commands/execute-methods';
-import * as extension from '../../../lib/commands/extension';
-import {createMockDriver, withExecuteMethodDispatch, MOCK_ELEMENT} from '../../fixtures/driver';
+import {W3C_ELEMENT_KEY} from 'appium/driver.js';
+
+import {createMockDriver, withExecuteMethodDispatch, MOCK_ELEMENT} from '../../fixtures/driver.js';
+import {mockCommonModules} from '../../helpers/common.js';
+import {calls, assertCalledTimes, assertCalledWith} from '../../helpers/mock.js';
+import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
+
+mockUser32(createUser32Mock());
+await mockCommonModules();
+const executeMethods = await import('../../../lib/commands/execute-methods.js');
+const extension = await import('../../../lib/commands/extension.js');
 
 describe('execute (executeMethodMap dispatch)', () => {
   let driver: any;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    driver = withExecuteMethodDispatch(createMockDriver()) as any;
+  beforeEach(async () => {
+    driver = (await withExecuteMethodDispatch(createMockDriver())) as any;
     Object.assign(driver, extension, executeMethods);
   });
 
   it('routes a zero-arg script straight through', async () => {
-    driver.launchApp = vi.fn().mockResolvedValue(undefined);
+    driver.launchApp = mock.fn(async () => undefined);
     await extension.execute.call(driver, 'windows: launchApp', []);
-    expect(driver.launchApp).toHaveBeenCalledOnce();
+    assertCalledTimes(driver.launchApp, 1);
   });
 
   it('accepts the standard { elementId } opts object', async () => {
     const elementId = MOCK_ELEMENT[W3C_ELEMENT_KEY];
     await extension.execute.call(driver, 'windows: invoke', [{elementId}]);
-    expect(driver.sendCommand).toHaveBeenCalledWith('invokeElement', {elementId});
+    assertCalledWith(driver.sendCommand, 'invokeElement', {elementId});
   });
 
   it('reassembles a multi-field opts object (click) correctly', async () => {
     await extension.execute.call(driver, 'windows: click', [{x: 5, y: 7}]);
-    expect(driver.sendCommand).not.toHaveBeenCalledWith('invokeElement', expect.anything());
+    assert.ok(!calls(driver.sendCommand).some(([method]) => method === 'invokeElement'));
   });
 
   it('normalizes a raw W3C element (WebdriverIO calling convention) into { elementId }', async () => {
     // e.g. calc.executeScript('windows: invoke', [oneBtn]) - WebdriverIO serializes
     // the element handle to a raw W3C element object, not { elementId }.
     await extension.execute.call(driver, 'windows: invoke', [MOCK_ELEMENT]);
-    expect(driver.sendCommand).toHaveBeenCalledWith('invokeElement', {elementId: MOCK_ELEMENT[W3C_ELEMENT_KEY]});
+    assertCalledWith(driver.sendCommand, 'invokeElement', {elementId: MOCK_ELEMENT[W3C_ELEMENT_KEY]});
   });
 
   it('normalizes the legacy setValue(element, value) two-positional-arg call', async () => {
     // e.g. notepad.executeScript('windows: setValue', [textArea, 'some value'])
     await extension.execute.call(driver, 'windows: setValue', [MOCK_ELEMENT, 'some value']);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setElementValue', {
+    assertCalledWith(driver.sendCommand, 'setElementValue', {
       elementId: MOCK_ELEMENT[W3C_ELEMENT_KEY],
       value: 'some value',
     });
@@ -57,13 +64,15 @@ describe('execute (executeMethodMap dispatch)', () => {
 
   it('throws InvalidArgumentError when args do not match any understood shape', async () => {
     // Two positional args for a script other than setValue - nothing normalizes this.
-    await expect(
+    await assert.rejects(
       extension.execute.call(driver, 'windows: invoke', [MOCK_ELEMENT, 'unexpected-extra-arg']),
-    ).rejects.toThrow('Did not get correct format of arguments');
+      /Did not get correct format of arguments/,
+    );
   });
 
   it('throws UnknownCommandError for an unrecognized windows: script', async () => {
-    await expect(extension.execute.call(driver, 'windows: unknownCommand', [])).rejects.toThrow(
+    await assert.rejects(
+      extension.execute.call(driver, 'windows: unknownCommand', []),
       /Unsupported execute method 'windows: unknownCommand'/,
     );
   });

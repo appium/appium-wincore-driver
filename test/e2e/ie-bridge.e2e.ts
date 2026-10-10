@@ -12,7 +12,9 @@
  *   - Appium running on localhost:4723 with appium-wincore-driver installed
  *   - Internet Explorer 11 at C:\Program Files\Internet Explorer\iexplore.exe
  */
-import {afterAll, beforeAll, describe, expect, it} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, before, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {
@@ -29,31 +31,31 @@ const BASE_URL = 'https://the-internet.herokuapp.com';
 describe('IE bridge — launch via app capability', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createIEBridgeSession(`${BASE_URL}/login`);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
   it('getTitle returns non-empty string', async () => {
     const title = await driver.getTitle();
-    expect(typeof title).toBe('string');
-    expect(title.length).toBeGreaterThan(0);
+    assert.equal(typeof title, 'string');
+    assert.ok(title.length > 0);
   });
 
   it('getUrl returns the navigated URL', async () => {
     const url = await driver.getUrl();
-    expect(url).toContain('the-internet.herokuapp.com');
+    assert.ok(url.includes('the-internet.herokuapp.com'));
   });
 
   it('getPageSource returns HTML containing known elements', async () => {
     const source = await driver.getPageSource();
-    expect(typeof source).toBe('string');
-    expect(source.toLowerCase()).toContain('<html');
-    expect(source).toContain('username');
-    expect(source).toContain('password');
+    assert.equal(typeof source, 'string');
+    assert.ok(source.toLowerCase().includes('<html'));
+    assert.ok(source.includes('username'));
+    assert.ok(source.includes('password'));
   });
 });
 
@@ -62,31 +64,31 @@ describe('IE bridge — launch via app capability', () => {
 describe('IE bridge — attach to existing IE window', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     // Launch IE externally, get its HWND, then attach without taking ownership
     const {hwnd} = await launchIEExternally(`${BASE_URL}/login`);
     await new Promise((resolve) => setTimeout(resolve, 6000));
     driver = await createIEBridgeAttachSession(hwnd);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
   it('getTitle works after attaching to existing window', async () => {
     const title = await driver.getTitle();
-    expect(typeof title).toBe('string');
-    expect(title.length).toBeGreaterThan(0);
+    assert.equal(typeof title, 'string');
+    assert.ok(title.length > 0);
   });
 
   it('getUrl returns URL of existing window', async () => {
     const url = await driver.getUrl();
-    expect(url).toContain('the-internet.herokuapp.com');
+    assert.ok(url.includes('the-internet.herokuapp.com'));
   });
 
   it('can find elements in the attached window', async () => {
     const el = await driver.$('#username');
-    expect(await el.isExisting()).toBe(true);
+    assert.equal(await el.isExisting(), true);
   });
 });
 
@@ -95,47 +97,47 @@ describe('IE bridge — attach to existing IE window', () => {
 describe('IE bridge — locator strategies — /login', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createIEBridgeSession(`${BASE_URL}/login`);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
   describe('id', () => {
     it('findElement by id returns element', async () => {
       const el = await driver.findElement('id', 'username');
-      expect(el).toBeDefined();
+      assert.notEqual(el, undefined);
     });
 
     it('findElements by id returns array', async () => {
       const els = await driver.findElements('id', 'username');
-      expect(Array.isArray(els)).toBe(true);
-      expect(els.length).toBe(1);
+      assert.equal(Array.isArray(els), true);
+      assert.equal(els.length, 1);
     });
   });
 
   describe('css selector', () => {
     it('findElement by css selector — simple id selector', async () => {
       const el = await driver.$('#username');
-      expect(await el.isExisting()).toBe(true);
+      assert.equal(await el.isExisting(), true);
     });
 
     it('findElement by css selector — attribute selector', async () => {
       const el = await driver.$('input[type="password"]');
-      expect(await el.isExisting()).toBe(true);
+      assert.equal(await el.isExisting(), true);
     });
 
     it('findElement by css selector — class selector', async () => {
       const el = await driver.$('button.radius');
-      expect(await el.isExisting()).toBe(true);
+      assert.equal(await el.isExisting(), true);
     });
 
     it('findElements by css selector returns all matches', async () => {
-      const inputs = await driver.$$('input');
-      expect(Array.isArray(inputs)).toBe(true);
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      const inputs = await driver.$$('input').getElements();
+      assert.equal(Array.isArray(inputs), true);
+      assert.ok(inputs.length >= 2);
     });
 
     // Regression: some legacy IE document/compat modes hide querySelectorAll
@@ -145,14 +147,14 @@ describe('IE bridge — locator strategies — /login', () => {
     // (0x80020101) with no diagnostic message in that scenario.
     it('findElements by css selector — attribute selector returns matches', async () => {
       const inputs = await driver.findElements('css selector', 'input[type="password"]');
-      expect(Array.isArray(inputs)).toBe(true);
-      expect(inputs.length).toBe(1);
+      assert.equal(Array.isArray(inputs), true);
+      assert.equal(inputs.length, 1);
     });
 
     it('findElement with no match returns isExisting false', async () => {
       await driver.setTimeout({implicit: 500});
       const el = await driver.$('#does-not-exist-xyz');
-      expect(await el.isExisting()).toBe(false);
+      assert.equal(await el.isExisting(), false);
       await driver.setTimeout({implicit: 5000});
     });
   });
@@ -160,18 +162,18 @@ describe('IE bridge — locator strategies — /login', () => {
   describe('xpath', () => {
     it('findElement by xpath — attribute predicate', async () => {
       const el = await driver.$('//input[@id="username"]');
-      expect(await el.isExisting()).toBe(true);
+      assert.equal(await el.isExisting(), true);
     });
 
     it('findElement by xpath — text content', async () => {
       const el = await driver.$('//button[contains(text(),"Login")]');
-      expect(await el.isExisting()).toBe(true);
+      assert.equal(await el.isExisting(), true);
     });
 
     it('findElements by xpath returns array', async () => {
-      const inputs = await driver.$$('//input');
-      expect(Array.isArray(inputs)).toBe(true);
-      expect(inputs.length).toBeGreaterThanOrEqual(2);
+      const inputs = await driver.$$('//input').getElements();
+      assert.equal(Array.isArray(inputs), true);
+      assert.ok(inputs.length >= 2);
     });
   });
 });
@@ -181,45 +183,45 @@ describe('IE bridge — locator strategies — /login', () => {
 describe('IE bridge — element interactions — /login', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createIEBridgeSession(`${BASE_URL}/login`);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
   it('getText returns visible text', async () => {
     const btn = await driver.$('button[type="submit"]');
     const text = await btn.getText();
-    expect(typeof text).toBe('string');
-    expect(text.length).toBeGreaterThan(0);
+    assert.equal(typeof text, 'string');
+    assert.ok(text.length > 0);
   });
 
   it('getAttribute returns the requested attribute', async () => {
     const el = await driver.$('#username');
-    expect(await el.getAttribute('type')).toBe('text');
+    assert.equal(await el.getAttribute('type'), 'text');
   });
 
   it('isDisplayed returns true for visible element', async () => {
-    expect(await driver.$('#username').isDisplayed()).toBe(true);
+    assert.equal(await driver.$('#username').isDisplayed(), true);
   });
 
   it('isEnabled returns true for enabled input', async () => {
-    expect(await driver.$('#username').isEnabled()).toBe(true);
+    assert.equal(await driver.$('#username').isEnabled(), true);
   });
 
   it('setValue types into username field', async () => {
     const el = await driver.$('#username');
     await el.setValue('tomsmith');
-    expect(await el.getValue()).toBe('tomsmith');
+    assert.equal(await el.getValue(), 'tomsmith');
   });
 
   it('clearValue empties the field', async () => {
     const el = await driver.$('#username');
     await el.setValue('tomsmith');
     await el.clearValue();
-    expect(await el.getValue()).toBe('');
+    assert.equal(await el.getValue(), '');
   });
 
   it('click on submit navigates away from login', async () => {
@@ -228,7 +230,7 @@ describe('IE bridge — element interactions — /login', () => {
     await driver.$('button[type="submit"]').click();
     await driver.pause(2000);
     const url = await driver.getUrl();
-    expect(url).not.toContain('/login');
+    assert.ok(!url.includes('/login'));
   });
 });
 
@@ -237,25 +239,25 @@ describe('IE bridge — element interactions — /login', () => {
 describe('IE bridge — checkboxes — /checkboxes', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createIEBridgeSession(`${BASE_URL}/checkboxes`);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
   it('isSelected returns boolean for checkbox', async () => {
-    const boxes = await driver.$$('input[type="checkbox"]');
-    expect(typeof (await boxes[0].isSelected())).toBe('boolean');
+    const boxes = await driver.$$('input[type="checkbox"]').getElements();
+    assert.equal(typeof (await boxes[0].isSelected()), 'boolean');
   });
 
   it('click toggles checkbox isSelected state', async () => {
-    const boxes = await driver.$$('input[type="checkbox"]');
-    const before = await boxes[0].isSelected();
+    const boxes = await driver.$$('input[type="checkbox"]').getElements();
+    const wasSelected = await boxes[0].isSelected();
     await boxes[0].click();
     await driver.pause(300);
-    expect(await boxes[0].isSelected()).toBe(!before);
+    assert.equal(await boxes[0].isSelected(), !wasSelected);
   });
 });
 
@@ -264,25 +266,25 @@ describe('IE bridge — checkboxes — /checkboxes', () => {
 describe('IE bridge — navigation', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createIEBridgeSession(`${BASE_URL}/login`);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
   it('url() navigates and getUrl reflects the new page', async () => {
     await driver.url(`${BASE_URL}/checkboxes`);
     await driver.pause(2000);
-    expect(await driver.getUrl()).toContain('/checkboxes');
+    assert.ok((await driver.getUrl()).includes('/checkboxes'));
   });
 
   it('getTitle updates after navigation', async () => {
     await driver.url(`${BASE_URL}/login`);
     await driver.pause(2000);
     const title = await driver.getTitle();
-    expect(title.length).toBeGreaterThan(0);
+    assert.ok(title.length > 0);
   });
 });
 
@@ -293,29 +295,29 @@ describe('IE bridge — navigation', () => {
 describe('IE bridge — switchToFrame / switchToDefaultContent', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createIEBridgeSession(`${BASE_URL}/nested_frames`);
     await driver.pause(2000);
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
   it('switchFrame(0) scopes finds to the first frame (frame-top)', async () => {
     await driver.switchFrame(0 as never);
     const nestedFrameset = await driver.$('//frameset');
-    expect(await nestedFrameset.isExisting()).toBe(true);
+    assert.equal(await nestedFrameset.isExisting(), true);
     await driver.switchFrame(null);
   });
 
   it("switchFrame by name scopes finds to that frame's content", async () => {
     const frameEl = await driver.$('//frame[@name="frame-bottom"]');
-    expect(await frameEl.isExisting()).toBe(true);
+    assert.equal(await frameEl.isExisting(), true);
     await driver.switchFrame(frameEl);
     const body = await driver.$('//body');
-    expect(await body.isExisting()).toBe(true);
-    expect(await body.getText()).toContain('BOTTOM');
+    assert.equal(await body.isExisting(), true);
+    assert.ok((await body.getText()).includes('BOTTOM'));
     await driver.switchFrame(null);
   });
 
@@ -324,7 +326,7 @@ describe('IE bridge — switchToFrame / switchToDefaultContent', () => {
     await driver.switchFrame(frameEl);
     await driver.setTimeout({implicit: 500});
     const topFrameset = await driver.$('//frameset');
-    expect(await topFrameset.isExisting()).toBe(false);
+    assert.equal(await topFrameset.isExisting(), false);
     await driver.setTimeout({implicit: 5000});
     await driver.switchFrame(null);
   });
@@ -334,19 +336,19 @@ describe('IE bridge — switchToFrame / switchToDefaultContent', () => {
     await driver.switchFrame(frameEl);
     await driver.switchFrame(null);
     const topFrameset = await driver.$('//frameset');
-    expect(await topFrameset.isExisting()).toBe(true);
+    assert.equal(await topFrameset.isExisting(), true);
   });
 
   it('switching directly between two frames (no default-content in between) scopes correctly each time', async () => {
     const bottomEl = await driver.$('//frame[@name="frame-bottom"]');
     await driver.switchFrame(bottomEl);
-    expect(await (await driver.$('//body')).getText()).toContain('BOTTOM');
+    assert.ok((await (await driver.$('//body')).getText()).includes('BOTTOM'));
     await driver.switchFrame(null);
 
     const topEl = await driver.$('//frame[@name="frame-top"]');
     await driver.switchFrame(topEl);
     const nestedFrameset = await driver.$('//frameset');
-    expect(await nestedFrameset.isExisting()).toBe(true);
+    assert.equal(await nestedFrameset.isExisting(), true);
     await driver.switchFrame(null);
   });
 
@@ -355,25 +357,25 @@ describe('IE bridge — switchToFrame / switchToDefaultContent', () => {
     await driver.switchFrame(topEl);
 
     const leftEl = await driver.$('//frame[@name="frame-left"]');
-    expect(await leftEl.isExisting()).toBe(true);
+    assert.equal(await leftEl.isExisting(), true);
     await driver.switchFrame(leftEl);
 
     const body = await driver.$('//body');
-    expect(await body.getText()).toContain('LEFT');
+    assert.ok((await body.getText()).includes('LEFT'));
 
     await driver.switchFrame(null);
     const topFrameset = await driver.$('//frameset');
-    expect(await topFrameset.isExisting()).toBe(true);
+    assert.equal(await topFrameset.isExisting(), true);
   });
 
   it('repeated in/out cycles do not leak stale frame state', async () => {
     for (let i = 0; i < 2; i++) {
       const bottomEl = await driver.$('//frame[@name="frame-bottom"]');
       await driver.switchFrame(bottomEl);
-      expect(await (await driver.$('//body')).getText()).toContain('BOTTOM');
+      assert.ok((await (await driver.$('//body')).getText()).includes('BOTTOM'));
       await driver.switchFrame(null);
       const topFrameset = await driver.$('//frameset');
-      expect(await topFrameset.isExisting()).toBe(true);
+      assert.equal(await topFrameset.isExisting(), true);
     }
   });
 
@@ -397,11 +399,11 @@ describe('IE bridge — switchToFrame / switchToDefaultContent', () => {
 
     const input = await driver.$('#ieb-test-input');
     await input.setValue('hello-frame');
-    expect(await input.getValue()).toBe('hello-frame');
+    assert.equal(await input.getValue(), 'hello-frame');
 
     const btn = await driver.$('#ieb-test-btn');
     await btn.click();
-    expect(await btn.getAttribute('data-clicked')).toBe('hello-frame');
+    assert.equal(await btn.getAttribute('data-clicked'), 'hello-frame');
 
     await driver.switchFrame(null);
   });
