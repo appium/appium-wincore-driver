@@ -21,17 +21,18 @@ jobs:
 
     steps:
       - name: Checkout driver
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Checkout test apps
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: verisoft-ai/appium-wincore-test-apps
           path: appium-wincore-test-apps
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
-          node-version: '24.x'
+          node-version: lts/*
+          check-latest: true
 
       - name: Install dependencies
         run: npm install --no-package-lock
