@@ -1,4 +1,6 @@
-import {describe, it, beforeAll, afterAll, beforeEach, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, before, beforeEach, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {createCalculatorSession, quitSession, resetCalculator} from './helpers/session.js';
@@ -6,11 +8,11 @@ import {createCalculatorSession, quitSession, resetCalculator} from './helpers/s
 describe('windows: getMonitors extension command', () => {
   let calc: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     calc = await createCalculatorSession();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(calc);
   });
 
@@ -21,59 +23,59 @@ describe('windows: getMonitors extension command', () => {
   describe('getMonitors — response shape', () => {
     it('returns a non-empty array', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
-      expect(Array.isArray(monitors)).toBe(true);
-      expect(monitors.length).toBeGreaterThanOrEqual(1);
+      assert.equal(Array.isArray(monitors), true);
+      assert.ok(monitors.length >= 1);
     });
 
     it('each monitor has required numeric index and non-empty deviceName', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       for (const monitor of monitors) {
-        expect(typeof monitor.index).toBe('number');
-        expect(typeof monitor.deviceName).toBe('string');
-        expect(monitor.deviceName.length).toBeGreaterThan(0);
+        assert.equal(typeof monitor.index, 'number');
+        assert.equal(typeof monitor.deviceName, 'string');
+        assert.ok(monitor.deviceName.length > 0);
       }
     });
 
     it('each monitor has a boolean primary field', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       for (const monitor of monitors) {
-        expect(typeof monitor.primary).toBe('boolean');
+        assert.equal(typeof monitor.primary, 'boolean');
       }
     });
 
     it('exactly one monitor is marked as primary', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       const primaries = monitors.filter((m: any) => m.primary);
-      expect(primaries).toHaveLength(1);
+      assert.equal(primaries.length, 1);
     });
 
     it('each monitor has bounds with positive width and height', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       for (const monitor of monitors) {
-        expect(typeof monitor.bounds.x).toBe('number');
-        expect(typeof monitor.bounds.y).toBe('number');
-        expect(monitor.bounds.width).toBeGreaterThan(0);
-        expect(monitor.bounds.height).toBeGreaterThan(0);
+        assert.equal(typeof monitor.bounds.x, 'number');
+        assert.equal(typeof monitor.bounds.y, 'number');
+        assert.ok(monitor.bounds.width > 0);
+        assert.ok(monitor.bounds.height > 0);
       }
     });
 
     it('each monitor has workingArea with positive width and height', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       for (const monitor of monitors) {
-        expect(typeof monitor.workingArea.x).toBe('number');
-        expect(typeof monitor.workingArea.y).toBe('number');
-        expect(monitor.workingArea.width).toBeGreaterThan(0);
-        expect(monitor.workingArea.height).toBeGreaterThan(0);
+        assert.equal(typeof monitor.workingArea.x, 'number');
+        assert.equal(typeof monitor.workingArea.y, 'number');
+        assert.ok(monitor.workingArea.width > 0);
+        assert.ok(monitor.workingArea.height > 0);
       }
     });
 
     it('workingArea is contained within bounds for each monitor', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       for (const monitor of monitors) {
-        expect(monitor.workingArea.x).toBeGreaterThanOrEqual(monitor.bounds.x);
-        expect(monitor.workingArea.y).toBeGreaterThanOrEqual(monitor.bounds.y);
-        expect(monitor.workingArea.width).toBeLessThanOrEqual(monitor.bounds.width);
-        expect(monitor.workingArea.height).toBeLessThanOrEqual(monitor.bounds.height);
+        assert.ok(monitor.workingArea.x >= monitor.bounds.x);
+        assert.ok(monitor.workingArea.y >= monitor.bounds.y);
+        assert.ok(monitor.workingArea.width <= monitor.bounds.width);
+        assert.ok(monitor.workingArea.height <= monitor.bounds.height);
       }
     });
 
@@ -81,15 +83,15 @@ describe('windows: getMonitors extension command', () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       const indices = monitors.map((m: any) => m.index).sort((a: number, b: number) => a - b);
       for (let i = 0; i < indices.length; i++) {
-        expect(indices[i]).toBe(i);
+        assert.equal(indices[i], i);
       }
     });
 
     it('primary monitor bounds origin is at the Windows virtual origin (0, 0)', async () => {
       const monitors = (await calc.executeScript('windows: getMonitors', [])) as any[];
       const primary = monitors.find((m: any) => m.primary);
-      expect(primary.bounds.x).toBe(0);
-      expect(primary.bounds.y).toBe(0);
+      assert.equal(primary.bounds.x, 0);
+      assert.equal(primary.bounds.y, 0);
     });
   });
 
@@ -106,7 +108,7 @@ describe('windows: getMonitors extension command', () => {
       await calc.executeScript('windows: click', [{x, y}]);
 
       const display = await calc.$('~CalculatorResults');
-      expect(await display.getText()).toContain('9');
+      assert.ok((await display.getText()).includes('9'));
     });
 
     it('clicking Calculator "5" button by absolute screen coordinates shows 5 in display', async () => {
@@ -121,7 +123,7 @@ describe('windows: getMonitors extension command', () => {
       await calc.executeScript('windows: click', [{x, y}]);
 
       const display = await calc.$('~CalculatorResults');
-      expect(await display.getText()).toContain('5');
+      assert.ok((await display.getText()).includes('5'));
     });
 
     it('absolute coordinates derived from getMonitors primary bounds contain the Calculator window', async () => {
@@ -135,12 +137,10 @@ describe('windows: getMonitors extension command', () => {
 
       // Calculator window should fall within primary monitor bounds
       // (it was launched without any monitor preference, so it opens on primary)
-      expect(windowRect.x).toBeGreaterThanOrEqual(primary.bounds.x - TOLERANCE);
-      expect(windowRect.y).toBeGreaterThanOrEqual(primary.bounds.y - TOLERANCE);
-      expect(windowRect.x + windowRect.width).toBeLessThanOrEqual(primary.bounds.x + primary.bounds.width + TOLERANCE);
-      expect(windowRect.y + windowRect.height).toBeLessThanOrEqual(
-        primary.bounds.y + primary.bounds.height + TOLERANCE,
-      );
+      assert.ok(windowRect.x >= primary.bounds.x - TOLERANCE);
+      assert.ok(windowRect.y >= primary.bounds.y - TOLERANCE);
+      assert.ok(windowRect.x + windowRect.width <= primary.bounds.x + primary.bounds.width + TOLERANCE);
+      assert.ok(windowRect.y + windowRect.height <= primary.bounds.y + primary.bounds.height + TOLERANCE);
     });
   });
 });

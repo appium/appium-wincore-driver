@@ -12,5 +12,5 @@
     "types": ["node"],
     "noImplicitOverride": true
   },
-  "include": ["lib"]
+  "include": ["lib", "test"]
 }

@@ -1,4 +1,5 @@
-import {describe, it, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
 import {createCalculatorSession, quitSession} from './helpers/session.js';
 
@@ -66,7 +67,7 @@ describe('windows: cacheRequest', () => {
   it('throws InvalidArgumentError when no property is provided', async () => {
     const driver = await createCalculatorSession();
     try {
-      await expect(driver.executeScript('windows: cacheRequest', [{}])).rejects.toThrow();
+      await assert.rejects(driver.executeScript('windows: cacheRequest', [{}]));
     } finally {
       await quitSession(driver);
     }
@@ -75,7 +76,7 @@ describe('windows: cacheRequest', () => {
   it('throws InvalidArgumentError for an invalid treeScope value', async () => {
     const driver = await createCalculatorSession();
     try {
-      await expect(driver.executeScript('windows: cacheRequest', [{treeScope: 'InvalidScope'}])).rejects.toThrow();
+      await assert.rejects(driver.executeScript('windows: cacheRequest', [{treeScope: 'InvalidScope'}]));
     } finally {
       await quitSession(driver);
     }
@@ -84,9 +85,7 @@ describe('windows: cacheRequest', () => {
   it('throws InvalidArgumentError for an invalid automationElementMode value', async () => {
     const driver = await createCalculatorSession();
     try {
-      await expect(
-        driver.executeScript('windows: cacheRequest', [{automationElementMode: 'InvalidMode'}]),
-      ).rejects.toThrow();
+      await assert.rejects(driver.executeScript('windows: cacheRequest', [{automationElementMode: 'InvalidMode'}]));
     } finally {
       await quitSession(driver);
     }

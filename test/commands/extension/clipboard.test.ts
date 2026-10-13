@@ -1,91 +1,91 @@
 /**
  * Unit tests for getClipboardBase64 and setClipboardFromBase64 extension commands.
  */
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
-import {getClipboardBase64, setClipboardFromBase64} from '../../../lib/commands/extension';
-import {createMockDriver} from '../../fixtures/driver';
+import {createMockDriver} from '../../fixtures/driver.js';
+import {assertCalledWith} from '../../helpers/mock.js';
+import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
+
+mockUser32(createUser32Mock());
+const {getClipboardBase64, setClipboardFromBase64} = await import('../../../lib/commands/extension.js');
 
 describe('getClipboardBase64', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('returns plaintext clipboard by default', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue('aGVsbG8=');
+    driver.sendCommand.mock.mockImplementation(async () => 'aGVsbG8=');
     const result = await getClipboardBase64.call(driver);
-    expect(driver.sendCommand).toHaveBeenCalledWith('getClipboardText', {});
-    expect(result).toBe('aGVsbG8=');
+    assertCalledWith(driver.sendCommand, 'getClipboardText', {});
+    assert.equal(result, 'aGVsbG8=');
   });
 
   it('accepts contentType as plaintext', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue('dGVzdA==');
+    driver.sendCommand.mock.mockImplementation(async () => 'dGVzdA==');
     const result = await getClipboardBase64.call(driver, 'plaintext');
-    expect(driver.sendCommand).toHaveBeenCalledWith('getClipboardText', {});
-    expect(result).toBe('dGVzdA==');
+    assertCalledWith(driver.sendCommand, 'getClipboardText', {});
+    assert.equal(result, 'dGVzdA==');
   });
 
   it('accepts contentType as image', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue('iVBORw0KGgo=');
+    driver.sendCommand.mock.mockImplementation(async () => 'iVBORw0KGgo=');
     const result = await getClipboardBase64.call(driver, 'image');
-    expect(driver.sendCommand).toHaveBeenCalledWith('getClipboardImage', {});
-    expect(result).toBe('iVBORw0KGgo=');
+    assertCalledWith(driver.sendCommand, 'getClipboardImage', {});
+    assert.equal(result, 'iVBORw0KGgo=');
   });
 
   it('accepts contentType as object with contentType property', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue('YmFzZTY0');
+    driver.sendCommand.mock.mockImplementation(async () => 'YmFzZTY0');
     const result = await getClipboardBase64.call(driver, {contentType: 'plaintext'});
-    expect(driver.sendCommand).toHaveBeenCalledWith('getClipboardText', {});
-    expect(result).toBe('YmFzZTY0');
+    assertCalledWith(driver.sendCommand, 'getClipboardText', {});
+    assert.equal(result, 'YmFzZTY0');
   });
 
   it('throws for unsupported content type', async () => {
     const driver = createMockDriver() as any;
-    await expect(getClipboardBase64.call(driver, 'unsupported' as any)).rejects.toThrow(
-      "Unsupported content type 'unsupported'",
+    await assert.rejects(
+      getClipboardBase64.call(driver, 'unsupported' as any),
+      /Unsupported content type 'unsupported'/,
     );
   });
 });
 
 describe('setClipboardFromBase64', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('throws when b64Content is missing', async () => {
     const driver = createMockDriver() as any;
-    await expect(setClipboardFromBase64.call(driver, {} as any)).rejects.toThrow("'b64Content' must be provided.");
-    await expect(setClipboardFromBase64.call(driver, {contentType: 'plaintext'} as any)).rejects.toThrow(
-      "'b64Content' must be provided.",
+    await assert.rejects(setClipboardFromBase64.call(driver, {} as any), /'b64Content' must be provided\./);
+    await assert.rejects(
+      setClipboardFromBase64.call(driver, {contentType: 'plaintext'} as any),
+      /'b64Content' must be provided\./,
     );
   });
 
   it('sets plaintext clipboard by default', async () => {
     const driver = createMockDriver() as any;
     await setClipboardFromBase64.call(driver, {b64Content: 'aGVsbG8='});
-    expect(driver.sendCommand).toHaveBeenCalledWith('setClipboardText', {b64Content: 'aGVsbG8='});
+    assertCalledWith(driver.sendCommand, 'setClipboardText', {b64Content: 'aGVsbG8='});
   });
 
   it('sets plaintext clipboard with explicit contentType', async () => {
     const driver = createMockDriver() as any;
     await setClipboardFromBase64.call(driver, {b64Content: 'dGVzdA==', contentType: 'plaintext'});
-    expect(driver.sendCommand).toHaveBeenCalledWith('setClipboardText', {b64Content: 'dGVzdA=='});
+    assertCalledWith(driver.sendCommand, 'setClipboardText', {b64Content: 'dGVzdA=='});
   });
 
   it('sets image clipboard', async () => {
     const driver = createMockDriver() as any;
     await setClipboardFromBase64.call(driver, {b64Content: 'iVBORw0KGgo=', contentType: 'image'});
-    expect(driver.sendCommand).toHaveBeenCalledWith('setClipboardImage', {b64Content: 'iVBORw0KGgo='});
+    assertCalledWith(driver.sendCommand, 'setClipboardImage', {b64Content: 'iVBORw0KGgo='});
   });
 
   it('throws for unsupported content type', async () => {
     const driver = createMockDriver() as any;
-    await expect(
+    await assert.rejects(
       setClipboardFromBase64.call(driver, {b64Content: 'abc', contentType: 'unsupported' as any}),
-    ).rejects.toThrow("Unsupported content type 'unsupported'");
+      /Unsupported content type 'unsupported'/,
+    );
   });
 });

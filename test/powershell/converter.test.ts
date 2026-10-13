@@ -1,7 +1,8 @@
 /**
  * Unit tests for lib/powershell/converter.ts (convertStringToCondition)
  */
-import {describe, it, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
 import {
   PropertyCondition,
@@ -10,25 +11,25 @@ import {
   NotCondition,
   TrueCondition,
   FalseCondition,
-} from '../../lib/powershell/conditions';
-import {convertStringToCondition} from '../../lib/powershell/converter';
+} from '../../lib/powershell/conditions.js';
+import {convertStringToCondition} from '../../lib/powershell/converter.js';
 
 describe('convertStringToCondition', () => {
   describe('TrueCondition / FalseCondition', () => {
     it('parses PropertyCondition TrueCondition', () => {
       // The TRUE_CONDITION_REGEX matches [PropertyCondition]::TrueCondition
       const condition = convertStringToCondition('[PropertyCondition]::TrueCondition');
-      expect(condition).toBeInstanceOf(TrueCondition);
+      assert.ok(condition instanceof TrueCondition);
     });
 
     it('parses PropertyCondition FalseCondition', () => {
       const condition = convertStringToCondition('[PropertyCondition]::FalseCondition');
-      expect(condition).toBeInstanceOf(FalseCondition);
+      assert.ok(condition instanceof FalseCondition);
     });
 
     it('parses Automation.RawViewCondition as TrueCondition', () => {
       const condition = convertStringToCondition('[Automation]::RawViewCondition');
-      expect(condition).toBeInstanceOf(TrueCondition);
+      assert.ok(condition instanceof TrueCondition);
     });
   });
 
@@ -37,34 +38,34 @@ describe('convertStringToCondition', () => {
       const condition = convertStringToCondition(
         "[PropertyCondition]::new([AutomationElement]::NameProperty, 'Calculator')",
       );
-      expect(condition).toBeInstanceOf(PropertyCondition);
+      assert.ok(condition instanceof PropertyCondition);
     });
 
     it('parses integer property condition (native window handle)', () => {
       const condition = convertStringToCondition(
         '[PropertyCondition]::new([AutomationElement]::NativeWindowHandleProperty, 12345)',
       );
-      expect(condition).toBeInstanceOf(PropertyCondition);
+      assert.ok(condition instanceof PropertyCondition);
     });
 
     it('parses control type property condition', () => {
       const condition = convertStringToCondition(
         '[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::Button)',
       );
-      expect(condition).toBeInstanceOf(PropertyCondition);
+      assert.ok(condition instanceof PropertyCondition);
     });
 
     it('parses automation id property condition', () => {
       const condition = convertStringToCondition(
         "[PropertyCondition]::new([AutomationElement]::AutomationIdProperty, 'btn_ok')",
       );
-      expect(condition).toBeInstanceOf(PropertyCondition);
+      assert.ok(condition instanceof PropertyCondition);
     });
 
     it('throws for unknown property name', () => {
-      expect(() =>
+      assert.throws(() =>
         convertStringToCondition("[PropertyCondition]::new([AutomationElement]::UnknownProp, 'value')"),
-      ).toThrow();
+      );
     });
   });
 
@@ -73,14 +74,14 @@ describe('convertStringToCondition', () => {
       const condition = convertStringToCondition(
         "[AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'Calc'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'Test'))",
       );
-      expect(condition).toBeInstanceOf(AndCondition);
+      assert.ok(condition instanceof AndCondition);
     });
 
     it('parses AND condition with three conditions', () => {
       const condition = convertStringToCondition(
         "[AndCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'C'))",
       );
-      expect(condition).toBeInstanceOf(AndCondition);
+      assert.ok(condition instanceof AndCondition);
     });
   });
 
@@ -89,7 +90,7 @@ describe('convertStringToCondition', () => {
       const condition = convertStringToCondition(
         "[OrCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'A'), [PropertyCondition]::new([AutomationElement]::NameProperty, 'B'))",
       );
-      expect(condition).toBeInstanceOf(OrCondition);
+      assert.ok(condition instanceof OrCondition);
     });
   });
 
@@ -98,19 +99,19 @@ describe('convertStringToCondition', () => {
       const condition = convertStringToCondition(
         "[NotCondition]::new([PropertyCondition]::new([AutomationElement]::NameProperty, 'test'))",
       );
-      expect(condition).toBeInstanceOf(NotCondition);
+      assert.ok(condition instanceof NotCondition);
     });
   });
 
   describe('ControlView / ContentView conditions', () => {
     it('parses ControlViewCondition as NotCondition', () => {
       const condition = convertStringToCondition('[Automation]::ControlViewCondition');
-      expect(condition).toBeInstanceOf(NotCondition);
+      assert.ok(condition instanceof NotCondition);
     });
 
     it('parses ContentViewCondition as NotCondition', () => {
       const condition = convertStringToCondition('[Automation]::ContentViewCondition');
-      expect(condition).toBeInstanceOf(NotCondition);
+      assert.ok(condition instanceof NotCondition);
     });
   });
 
@@ -119,22 +120,22 @@ describe('convertStringToCondition', () => {
       const condition = convertStringToCondition(
         '[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, [int32[]] @(1, 2, 3))',
       );
-      expect(condition).toBeInstanceOf(PropertyCondition);
+      assert.ok(condition instanceof PropertyCondition);
     });
   });
 
   describe('error handling', () => {
     it('throws for an unrecognized selector', () => {
-      expect(() => convertStringToCondition('not a valid selector')).toThrow();
+      assert.throws(() => convertStringToCondition('not a valid selector'));
     });
 
     it('throws for empty string', () => {
-      expect(() => convertStringToCondition('')).toThrow();
+      assert.throws(() => convertStringToCondition(''));
     });
 
     it('throws when result is not a Condition', () => {
       // A plain integer is not a Condition
-      expect(() => convertStringToCondition('42')).toThrow();
+      assert.throws(() => convertStringToCondition('42'));
     });
   });
 
@@ -143,14 +144,14 @@ describe('convertStringToCondition', () => {
       const condition = convertStringToCondition(
         "[PropertyCondition]::new([AutomationElement]::NameProperty, 'it''s')",
       );
-      expect(condition).toBeInstanceOf(PropertyCondition);
+      assert.ok(condition instanceof PropertyCondition);
     });
 
     it('handles string with special characters', () => {
       const condition = convertStringToCondition(
         "[PropertyCondition]::new([AutomationElement]::NameProperty, 'hello world')",
       );
-      expect(condition).toBeInstanceOf(PropertyCondition);
+      assert.ok(condition instanceof PropertyCondition);
     });
   });
 });

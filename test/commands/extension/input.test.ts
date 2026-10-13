@@ -1,116 +1,122 @@
 /**
  * Unit tests for executeKeys, executeClick, executeHover, executeScroll extension commands.
  */
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import assert from 'node:assert/strict';
+import {beforeEach, describe, it, mock} from 'node:test';
 
-import {executeKeys, executeClick, executeHover, executeScroll} from '../../../lib/commands/extension';
-import type * as UtilModule from '../../../lib/util';
-import {createMockDriver} from '../../fixtures/driver';
+import {createMockDriver} from '../../fixtures/driver.js';
+import {
+  assertCalled,
+  assertCalledTimes,
+  assertCalledWith,
+  assertNotCalled,
+  assertNthCalledWith,
+  clearCalls,
+  queueResolved,
+} from '../../helpers/mock.js';
+import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
 
-vi.mock('../../../lib/winapi/user32', () => ({
-  keyDown: vi.fn(),
-  keyUp: vi.fn(),
-  typeKey: vi.fn(),
+const user32 = createUser32Mock({
   // Same rule as the real one: [a-z0-9] go as scan codes unless forceUnicode.
-  sendsAsUnicodePacket: vi.fn((char: string, forceUnicode = false) => forceUnicode || !/[a-z0-9]/.test(char)),
-  mouseDown: vi.fn(),
-  mouseUp: vi.fn(),
-  mouseMoveAbsolute: vi.fn().mockResolvedValue(undefined),
-  mouseScroll: vi.fn(),
-  sendKeyboardEvents: vi.fn(),
-}));
+  sendsAsUnicodePacket: mock.fn((char: string, forceUnicode = false) => forceUnicode || !/[a-z0-9]/.test(char)),
+});
+const utilMocks = {sleep: mock.fn(async () => undefined)};
 
-vi.mock('../../../lib/util', async (importOriginal) => ({
-  ...(await importOriginal<typeof UtilModule>()),
-  sleep: vi.fn().mockResolvedValue(undefined),
-}));
+mockUser32(user32);
+mock.module('../../../lib/util.js', {
+  exports: {...(await import('../../../lib/util.js')), ...utilMocks},
+});
+
+const {executeKeys, executeClick, executeHover, executeScroll} = await import('../../../lib/commands/extension.js');
 
 describe('executeKeys', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    clearCalls(...Object.values(user32), ...Object.values(utilMocks));
   });
 
   it('throws when neither pause, text nor virtualKeyCode is set', async () => {
     const driver = createMockDriver() as any;
-    await expect(executeKeys.call(driver, {actions: {}, forceUnicode: false})).rejects.toThrow(
-      'Either pause, text or virtualKeyCode should be set.',
+    await assert.rejects(
+      executeKeys.call(driver, {actions: {}, forceUnicode: false}),
+      /Either pause, text or virtualKeyCode should be set\./,
     );
   });
 
   it('throws when multiple of pause, text, virtualKeyCode are set', async () => {
     const driver = createMockDriver() as any;
-    await expect(executeKeys.call(driver, {actions: {pause: 100, text: 'a'}, forceUnicode: false})).rejects.toThrow(
-      'Either pause, text or virtualKeyCode should be set.',
+    await assert.rejects(
+      executeKeys.call(driver, {actions: {pause: 100, text: 'a'}, forceUnicode: false}),
+      /Either pause, text or virtualKeyCode should be set\./,
     );
   });
 
   it('handles pause action', async () => {
     const driver = createMockDriver() as any;
     await executeKeys.call(driver, {actions: {pause: 50}, forceUnicode: false});
-    expect(driver.sendPowerShellCommand).not.toHaveBeenCalled();
+    assertNotCalled(driver.sendPowerShellCommand);
   });
 
   it('types each text character as one down+up keystroke', async () => {
     const driver = createMockDriver() as any;
-    const {typeKey, keyDown, keyUp} = await import('../../../lib/winapi/user32');
+    const {typeKey, keyDown, keyUp} = await import('../../../lib/winapi/user32.js');
     await executeKeys.call(driver, {actions: {text: 'ab'}, forceUnicode: false});
-    expect(typeKey).toHaveBeenNthCalledWith(1, 'a', false);
-    expect(typeKey).toHaveBeenNthCalledWith(2, 'b', false);
-    expect(keyDown).not.toHaveBeenCalled();
-    expect(keyUp).not.toHaveBeenCalled();
+    assertNthCalledWith(typeKey, 1, 'a', false);
+    assertNthCalledWith(typeKey, 2, 'b', false);
+    assertNotCalled(keyDown);
+    assertNotCalled(keyUp);
   });
 
   it('sends only key-down for a text action with down: true', async () => {
     const driver = createMockDriver() as any;
-    const {typeKey, keyDown, keyUp} = await import('../../../lib/winapi/user32');
+    const {typeKey, keyDown, keyUp} = await import('../../../lib/winapi/user32.js');
     await executeKeys.call(driver, {actions: {text: 'a', down: true}, forceUnicode: false});
-    expect(keyDown).toHaveBeenCalledWith('a', false);
-    expect(keyUp).not.toHaveBeenCalled();
-    expect(typeKey).not.toHaveBeenCalled();
+    assertCalledWith(keyDown, 'a', false);
+    assertNotCalled(keyUp);
+    assertNotCalled(typeKey);
   });
 
   it('pauses after Unicode-packet characters only (space, punctuation), not scan-code letters', async () => {
     const driver = createMockDriver() as any;
-    const {sleep} = await import('../../../lib/util');
+    const {sleep} = await import('../../../lib/util.js');
     await executeKeys.call(driver, {actions: {text: 'hello world!'}, forceUnicode: false});
     // ' ' and '!' are VK_PACKET keystrokes; the ten letters are scan codes.
-    expect(sleep).toHaveBeenCalledTimes(2);
-    expect(sleep).toHaveBeenCalledWith(30);
+    assertCalledTimes(sleep, 2);
+    assertCalledWith(sleep, 30);
   });
 
   it('pauses after every character with forceUnicode', async () => {
     const driver = createMockDriver() as any;
-    const {sleep} = await import('../../../lib/util');
+    const {sleep} = await import('../../../lib/util.js');
     await executeKeys.call(driver, {actions: {text: 'abc'}, forceUnicode: true});
-    expect(sleep).toHaveBeenCalledTimes(3);
+    assertCalledTimes(sleep, 3);
   });
 
   it('handles virtualKeyCode action', async () => {
     const driver = createMockDriver() as any;
-    const {sendKeyboardEvents} = await import('../../../lib/winapi/user32');
+    const {sendKeyboardEvents} = await import('../../../lib/winapi/user32.js');
     await executeKeys.call(driver, {actions: {virtualKeyCode: 0x41, down: true}, forceUnicode: false});
-    expect(sendKeyboardEvents).toHaveBeenCalled();
+    assertCalled(sendKeyboardEvents);
   });
 });
 
 describe('executeClick', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    clearCalls(...Object.values(user32), ...Object.values(utilMocks));
   });
 
   it('throws when only x is provided without y', async () => {
     const driver = createMockDriver() as any;
-    await expect(executeClick.call(driver, {x: 100})).rejects.toThrow('Both x and y must be provided');
+    await assert.rejects(executeClick.call(driver, {x: 100}), /Both x and y must be provided/);
   });
 
   it('clicks at coordinates when x and y provided', async () => {
     const driver = createMockDriver() as any;
     (driver as any).caps = {};
-    const {mouseMoveAbsolute, mouseDown, mouseUp} = await import('../../../lib/winapi/user32');
+    const {mouseMoveAbsolute, mouseDown, mouseUp} = await import('../../../lib/winapi/user32.js');
     await executeClick.call(driver, {x: 100, y: 200});
-    expect(mouseMoveAbsolute).toHaveBeenCalledWith(100, 200, 0);
-    expect(mouseDown).toHaveBeenCalled();
-    expect(mouseUp).toHaveBeenCalled();
+    assertCalledWith(mouseMoveAbsolute, 100, 200, 0);
+    assertCalled(mouseDown);
+    assertCalled(mouseUp);
   });
 
   it('clicks with elementId when element exists', async () => {
@@ -118,61 +124,63 @@ describe('executeClick', () => {
     (driver as any).caps = {};
     const rect = {x: 10, y: 20, width: 100, height: 50};
     // lookupElement returns true, getRect returns rect object
-    driver.sendCommand.mockResolvedValueOnce(true).mockResolvedValueOnce(rect);
-    const {mouseMoveAbsolute} = await import('../../../lib/winapi/user32');
+    queueResolved(driver.sendCommand, true, rect);
+    const {mouseMoveAbsolute} = await import('../../../lib/winapi/user32.js');
     await executeClick.call(driver, {elementId: '1.2.3.4.5'});
-    expect(mouseMoveAbsolute).toHaveBeenCalledWith(60, 45, 0); // center of rect
+    assertCalledWith(mouseMoveAbsolute, 60, 45, 0); // center of rect
   });
 });
 
 describe('executeHover', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    clearCalls(...Object.values(user32), ...Object.values(utilMocks));
   });
 
   it('throws when only startX is provided without startY', async () => {
     const driver = createMockDriver() as any;
-    await expect(executeHover.call(driver, {startX: 100})).rejects.toThrow('Both startX and startY must be provided');
+    await assert.rejects(executeHover.call(driver, {startX: 100}), /Both startX and startY must be provided/);
   });
 
   it('throws when only endX is provided without endY', async () => {
     const driver = createMockDriver() as any;
-    await expect(executeHover.call(driver, {startX: 0, startY: 0, endX: 100})).rejects.toThrow(
-      'Both endX and endY must be provided',
+    await assert.rejects(
+      executeHover.call(driver, {startX: 0, startY: 0, endX: 100}),
+      /Both endX and endY must be provided/,
     );
   });
 
   it('moves from start to end coordinates', async () => {
     const driver = createMockDriver() as any;
     (driver as any).caps = {};
-    const {mouseMoveAbsolute} = await import('../../../lib/winapi/user32');
+    const {mouseMoveAbsolute} = await import('../../../lib/winapi/user32.js');
     await executeHover.call(driver, {startX: 0, startY: 0, endX: 100, endY: 100});
-    expect(mouseMoveAbsolute).toHaveBeenCalledTimes(2);
+    assertCalledTimes(mouseMoveAbsolute, 2);
   });
 });
 
 describe('executeScroll', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    clearCalls(...Object.values(user32), ...Object.values(utilMocks));
   });
 
   it('throws when elementId and x/y are both provided', async () => {
     const driver = createMockDriver() as any;
-    await expect(executeScroll.call(driver, {elementId: '1.2.3.4.5', x: 100, y: 100})).rejects.toThrow(
-      'Either elementId or x and y must be provided',
+    await assert.rejects(
+      executeScroll.call(driver, {elementId: '1.2.3.4.5', x: 100, y: 100}),
+      /Either elementId or x and y must be provided/,
     );
   });
 
   it('throws when only x is provided without y', async () => {
     const driver = createMockDriver() as any;
-    await expect(executeScroll.call(driver, {x: 100})).rejects.toThrow('Both x and y must be provided');
+    await assert.rejects(executeScroll.call(driver, {x: 100}), /Both x and y must be provided/);
   });
 
   it('scrolls at coordinates when x, y, deltaX, deltaY provided', async () => {
     const driver = createMockDriver() as any;
-    const {mouseMoveAbsolute, mouseScroll} = await import('../../../lib/winapi/user32');
+    const {mouseMoveAbsolute, mouseScroll} = await import('../../../lib/winapi/user32.js');
     await executeScroll.call(driver, {x: 100, y: 200, deltaX: 0, deltaY: 50});
-    expect(mouseMoveAbsolute).toHaveBeenCalledWith(100, 200, 0);
-    expect(mouseScroll).toHaveBeenCalledWith(0, 50);
+    assertCalledWith(mouseMoveAbsolute, 100, 200, 0);
+    assertCalledWith(mouseScroll, 0, 50);
   });
 });

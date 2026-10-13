@@ -1,5 +1,7 @@
-import {describe, it, beforeAll, afterAll, beforeEach, expect} from 'vitest';
-import type {Browser} from 'webdriverio';
+import assert from 'node:assert/strict';
+import {after, before, beforeEach, describe, it} from 'node:test';
+
+import type {Browser, ChainablePromiseElement} from 'webdriverio';
 
 import {
   createCalculatorSession,
@@ -15,7 +17,12 @@ import {
 // is its own KEYEVENTF_UNICODE keystroke, so on a busy runner the last few can still be in
 // Notepad's queue when the command returns. Poll for the expected text instead of reading
 // once; returns the last text seen so a timeout still fails with a readable assertion.
-async function waitForText(element: WebdriverIO.Element, expected: string, timeout = 5000): Promise<string> {
+async function waitForText(
+  target: WebdriverIO.Element | ChainablePromiseElement,
+  expected: string,
+  timeout = 5000,
+): Promise<string> {
+  const element = (await target) as WebdriverIO.Element;
   let text = '';
   try {
     await element.waitUntil(
@@ -26,7 +33,7 @@ async function waitForText(element: WebdriverIO.Element, expected: string, timeo
       {timeout, interval: 100},
     );
   } catch {
-    // fall through — the caller's expect() reports what was actually there
+    // fall through — the caller's assertion reports what was actually there
   }
   return text;
 }
@@ -40,12 +47,12 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
   let calc: Browser;
   let notepad: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     calc = await createCalculatorSession();
     notepad = await createNotepadSession();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(calc);
     await quitSession(notepad);
   });
@@ -59,7 +66,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
       await calc.executeScript('windows: keys', [{actions: [{text: '123'}]}]);
       const display = await calc.$('~CalculatorResults');
       const text = await display.getText();
-      expect(text).toContain('123');
+      assert.ok(text.includes('123'));
     });
 
     it('types multi-character text into Notepad and getText returns it', async () => {
@@ -67,7 +74,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
       const textArea = await getNotepadTextArea(notepad);
       await textArea.click();
       await notepad.executeScript('windows: keys', [{actions: [{text: 'hello world'}, {pause: 100}]}]);
-      expect(await waitForText(textArea, 'hello world')).toContain('hello world');
+      assert.ok((await waitForText(textArea, 'hello world')).includes('hello world'));
     });
 
     it('types text with forceUnicode: true into Notepad', async () => {
@@ -80,7 +87,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
           forceUnicode: true,
         },
       ]);
-      expect(await waitForText(textArea, 'unicodetest')).toContain('unicodetest');
+      assert.ok((await waitForText(textArea, 'unicodetest')).includes('unicodetest'));
     });
 
     it('sends virtualKeyCode for Delete key to clear Notepad input', async () => {
@@ -103,20 +110,20 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
         },
       ]);
       const text = await textArea.getText();
-      expect(text.trim()).toBe('');
+      assert.equal(text.trim(), '');
     });
 
     it('uses pause action to introduce delay between key inputs', async () => {
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: keys', [
           {
             actions: [{text: '1'}, {pause: 200}, {text: '2'}],
           },
         ]),
-      ).resolves.not.toThrow();
+      );
       const display = await calc.$('~CalculatorResults');
       const text = await display.getText();
-      expect(text).toContain('12');
+      assert.ok(text.includes('12'));
     });
 
     it('sends modifier hold to produce uppercase in Notepad', async () => {
@@ -129,7 +136,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
         },
       ]);
       const text = await textArea.getText();
-      expect(text).toContain('A');
+      assert.ok(text.includes('A'));
     });
   });
 
@@ -138,7 +145,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
       const btn = await calc.$('~num5Button');
       await calc.executeScript('windows: click', [{elementId: await btn.elementId}]);
       const display = await calc.$('~CalculatorResults');
-      expect(await display.getText()).toContain('5');
+      assert.ok((await display.getText()).includes('5'));
     });
 
     it('clicks by absolute x/y coordinates on the Nine button', async () => {
@@ -150,19 +157,19 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
       const y = Math.round(windowRect.y + location.y + size.height / 2);
       await calc.executeScript('windows: click', [{x, y}]);
       const display = await calc.$('~CalculatorResults');
-      expect(await display.getText()).toContain('9');
+      assert.ok((await display.getText()).includes('9'));
     });
 
     it('clicks with button: right performs right-click without error', async () => {
       const btn = await calc.$('~num1Button');
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: click', [
           {
             elementId: await btn.elementId,
             button: 'right',
           },
         ]),
-      ).resolves.not.toThrow();
+      );
     });
 
     it('clicks with times: 3 on digit One shows 111', async () => {
@@ -175,19 +182,19 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
         },
       ]);
       const display = await calc.$('~CalculatorResults');
-      expect(await display.getText()).toContain('111');
+      assert.ok((await display.getText()).includes('111'));
     });
 
     it('clicks with durationMs: 200 as a long-press click', async () => {
       const btn = await calc.$('~num2Button');
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: click', [
           {
             elementId: await btn.elementId,
             durationMs: 200,
           },
         ]),
-      ).resolves.not.toThrow();
+      );
     });
   });
 
@@ -195,14 +202,14 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
     it('hovers from one button to another without error', async () => {
       const startBtn = await calc.$('~num1Button');
       const endBtn = await calc.$('~num2Button');
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: hover', [
           {
             startElementId: await startBtn.elementId,
             endElementId: await endBtn.elementId,
           },
         ]),
-      ).resolves.not.toThrow();
+      );
     });
 
     it('hovers with absolute startX/startY and endX/endY coordinates', async () => {
@@ -211,7 +218,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
       const size = await btn.getSize();
       const cx = Math.round(loc.x + size.width / 2);
       const cy = Math.round(loc.y + size.height / 2);
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: hover', [
           {
             startX: cx - 20,
@@ -220,13 +227,13 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
             endY: cy,
           },
         ]),
-      ).resolves.not.toThrow();
+      );
     });
 
     it('hovers with a custom durationMs', async () => {
       const btn = await calc.$('~num4Button');
       const endBtn = await calc.$('~num5Button');
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: hover', [
           {
             startElementId: await btn.elementId,
@@ -234,18 +241,18 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
             durationMs: 500,
           },
         ]),
-      ).resolves.not.toThrow();
+      );
     });
   });
 
   describe('windows: scroll', () => {
     let charmap: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       charmap = await createCharmapSession();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(charmap);
     });
 
@@ -261,10 +268,10 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
       const listContainer = await charmap.$('//List');
 
       const items = await charmap.$$('//ListItem').getElements();
-      expect(items.length).toBeGreaterThan(20);
+      assert.ok(items.length > 20);
       const first = items[0];
       const last = items[items.length - 1];
-      expect(String(await last.getAttribute('IsOffscreen')).toLowerCase()).toBe('true');
+      assert.equal(String(await last.getAttribute('IsOffscreen')).toLowerCase(), 'true');
 
       // Positive deltaY scrolls down (W3C convention — see user32.ts
       // makeMouseWheelEvents).
@@ -298,7 +305,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
 
       const items = await charmap.$$('//ListItem').getElements();
       const last = items[items.length - 1];
-      expect(String(await last.getAttribute('IsOffscreen')).toLowerCase()).toBe('true');
+      assert.equal(String(await last.getAttribute('IsOffscreen')).toLowerCase(), 'true');
 
       // getLocation()/getSize() return coordinates relative to the app's
       // root window (see getElementRect in lib/commands/element.ts),
@@ -334,7 +341,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
       const size1 = await btn1.getSize();
       const loc2 = await btn2.getLocation();
       const size2 = await btn2.getSize();
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: clickAndDrag', [
           {
             startX: Math.round(loc1.x + size1.width / 2),
@@ -344,13 +351,13 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
             durationMs: 300,
           },
         ]),
-      ).resolves.not.toThrow();
+      );
     });
 
     it('drags from startElementId to endElementId center', async () => {
       const startBtn = await calc.$('~num3Button');
       const endBtn = await calc.$('~num4Button');
-      await expect(
+      await assert.doesNotReject(
         calc.executeScript('windows: clickAndDrag', [
           {
             startElementId: await startBtn.elementId,
@@ -358,7 +365,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
             durationMs: 200,
           },
         ]),
-      ).resolves.not.toThrow();
+      );
     });
   });
 });

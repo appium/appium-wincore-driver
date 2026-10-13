@@ -1,10 +1,19 @@
-import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 /**
  * Unit tests for pattern extension commands (invoke, expand, collapse, close, etc.).
  */
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
-import {
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
+
+import {createMockDriver, MOCK_ELEMENT} from '../../fixtures/driver.js';
+import {mockCommonModules} from '../../helpers/common.js';
+import {assertCalledWith, calls, queueRejected} from '../../helpers/mock.js';
+import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
+
+mockUser32(createUser32Mock());
+await mockCommonModules();
+const {
   patternInvoke,
   patternExpand,
   patternCollapse,
@@ -23,17 +32,7 @@ import {
   patternSetValue,
   patternGetValue,
   focusElement,
-} from '../../../lib/commands/extension';
-import {createMockDriver, MOCK_ELEMENT} from '../../fixtures/driver';
-
-vi.mock('../../../lib/winapi/user32', () => ({
-  keyDown: vi.fn(),
-  keyUp: vi.fn(),
-  mouseMoveAbsolute: vi.fn().mockResolvedValue(undefined),
-  mouseDown: vi.fn(),
-  mouseUp: vi.fn(),
-  getCursorPos: vi.fn().mockReturnValue({x: 0, y: 0}),
-}));
+} = await import('../../../lib/commands/extension.js');
 
 const ELEMENT_ID = MOCK_ELEMENT[W3C_ELEMENT_KEY];
 
@@ -51,23 +50,22 @@ const PATTERN_COMMANDS = [
   {name: 'patternToggle', fn: patternToggle, expectedMethod: 'toggleElement'},
 ] as const;
 
-describe('pattern commands', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+// Original `assertNotCalledWith(..., 'setFocus', anything)`: no setFocus call carrying an argument.
+const assertNoSetFocus = (fn: any) =>
+  assert.ok(!calls(fn).some(([method, arg]) => method === 'setFocus' && arg != null), 'unexpected setFocus call');
 
-  it.each(PATTERN_COMMANDS)(
-    '$name sends sendCommand with element id and correct method',
-    async ({fn, expectedMethod}) => {
+describe('pattern commands', () => {
+  for (const {name, fn, expectedMethod} of PATTERN_COMMANDS) {
+    it(`${name} sends sendCommand with element id and correct method`, async () => {
       const driver = createMockDriver() as any;
       await fn.call(driver, MOCK_ELEMENT);
-      expect(driver.sendCommand).toHaveBeenCalledWith(expectedMethod, {elementId: ELEMENT_ID});
-    },
-  );
+      assertCalledWith(driver.sendCommand, expectedMethod, {elementId: ELEMENT_ID});
+    });
+  }
 
   it('patternExpand trusts expandElement when ExpandCollapseState confirms Expanded', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'expandElement') {
         return null;
       }
@@ -77,13 +75,13 @@ describe('pattern commands', () => {
       return null;
     });
     await patternExpand.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('expandElement', {elementId: ELEMENT_ID});
-    expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
+    assertCalledWith(driver.sendCommand, 'expandElement', {elementId: ELEMENT_ID});
+    assertNoSetFocus(driver.sendCommand);
   });
 
   it('patternExpand falls back to ALT+Down for a ComboBox when expandElement throws', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'expandElement') {
         throw new Error('does not support ExpandCollapsePattern');
       }
@@ -99,13 +97,13 @@ describe('pattern commands', () => {
       return null;
     });
     await patternExpand.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
   });
 
   it('patternExpand falls back to ALT+Down when expandElement succeeds but state never confirms', async () => {
     const driver = createMockDriver() as any;
     let expanded = false;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'expandElement') {
         return null;
       }
@@ -122,12 +120,12 @@ describe('pattern commands', () => {
       return null;
     });
     await patternExpand.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
   });
 
   it('patternExpand falls back to a real click when SetFocus does not confirm keyboard focus', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'expandElement') {
         throw new Error('does not support ExpandCollapsePattern');
       }
@@ -146,13 +144,13 @@ describe('pattern commands', () => {
       return null;
     });
     await patternExpand.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
-    expect(driver.sendCommand).toHaveBeenCalledWith('getProperty', {elementId: ELEMENT_ID, property: 'ClickablePoint'});
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
+    assertCalledWith(driver.sendCommand, 'getProperty', {elementId: ELEMENT_ID, property: 'ClickablePoint'});
   });
 
   it('patternExpand resolves without throwing when native and ALT+Down both fail to confirm expansion', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'getProperty' && args.property === 'ExpandCollapseState') {
         return 'Collapsed';
       }
@@ -161,13 +159,13 @@ describe('pattern commands', () => {
       }
       return null;
     });
-    await expect(patternExpand.call(driver, MOCK_ELEMENT)).resolves.toBeUndefined();
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+    assert.equal(await patternExpand.call(driver, MOCK_ELEMENT), undefined);
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
   });
 
   it('patternCollapse trusts collapseElement when ExpandCollapseState confirms Collapsed', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'collapseElement') {
         return null;
       }
@@ -177,13 +175,13 @@ describe('pattern commands', () => {
       return null;
     });
     await patternCollapse.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('collapseElement', {elementId: ELEMENT_ID});
-    expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
+    assertCalledWith(driver.sendCommand, 'collapseElement', {elementId: ELEMENT_ID});
+    assertNoSetFocus(driver.sendCommand);
   });
 
   it('patternCollapse falls back to ALT+Down for a ComboBox when collapseElement throws', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'collapseElement') {
         throw new Error('does not support ExpandCollapsePattern');
       }
@@ -199,13 +197,13 @@ describe('pattern commands', () => {
       return null;
     });
     await patternCollapse.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
   });
 
   it('patternCollapse falls back to ALT+Down when collapseElement succeeds but state never confirms', async () => {
     const driver = createMockDriver() as any;
     let collapsed = false;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'collapseElement') {
         return null;
       }
@@ -222,12 +220,12 @@ describe('pattern commands', () => {
       return null;
     });
     await patternCollapse.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
   });
 
   it('patternCollapse falls back to a real click when SetFocus does not confirm keyboard focus', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'collapseElement') {
         throw new Error('does not support ExpandCollapsePattern');
       }
@@ -246,13 +244,13 @@ describe('pattern commands', () => {
       return null;
     });
     await patternCollapse.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
-    expect(driver.sendCommand).toHaveBeenCalledWith('getProperty', {elementId: ELEMENT_ID, property: 'ClickablePoint'});
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
+    assertCalledWith(driver.sendCommand, 'getProperty', {elementId: ELEMENT_ID, property: 'ClickablePoint'});
   });
 
   it('patternCollapse resolves without throwing when native and ALT+Down both fail to confirm collapse', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'getProperty' && args.property === 'ExpandCollapseState') {
         return 'Expanded';
       }
@@ -261,154 +259,155 @@ describe('pattern commands', () => {
       }
       return null;
     });
-    await expect(patternCollapse.call(driver, MOCK_ELEMENT)).resolves.toBeUndefined();
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+    assert.equal(await patternCollapse.call(driver, MOCK_ELEMENT), undefined);
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
   });
+
+  const EXPAND_COLLAPSE = [
+    {name: 'patternExpand', fn: patternExpand, method: 'expandElement'},
+    {name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement'},
+  ];
 
   // Server-verified expand/collapse failures (InvalidElementState) must reach the caller —
   // ALT+Down sent to a grid row or tree item would do something unrelated and mask it.
   const stateError = () => new errors.InvalidElementStateError('InvalidElementState: expand had no effect');
 
-  it.each([
-    {name: 'patternExpand', fn: patternExpand, method: 'expandElement'},
-    {name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement'},
-  ])('$name rethrows InvalidElementState for a non-ComboBox without sending ALT+Down', async ({fn, method}) => {
-    const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (m: string, args: any) => {
-      if (m === method) {
-        throw stateError();
-      }
-      if (m === 'getProperty' && args.property === 'ControlType') {
-        return 'TreeItem';
-      }
-      return null;
+  for (const {name, fn, method} of EXPAND_COLLAPSE) {
+    it(`${name} rethrows InvalidElementState for a non-ComboBox without sending ALT+Down`, async () => {
+      const driver = createMockDriver() as any;
+      driver.sendCommand.mock.mockImplementation(async (m: string, args: any) => {
+        if (m === method) {
+          throw stateError();
+        }
+        if (m === 'getProperty' && args.property === 'ControlType') {
+          return 'TreeItem';
+        }
+        return null;
+      });
+      await assert.rejects(fn.call(driver, MOCK_ELEMENT), errors.InvalidElementStateError);
+      assertNoSetFocus(driver.sendCommand);
     });
-    await expect(fn.call(driver, MOCK_ELEMENT)).rejects.toBeInstanceOf(errors.InvalidElementStateError);
-    expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
-  });
+  }
 
   // An element with no expand/collapse at all (PatternNotSupported) must surface too —
   // ALT+Down to a button or a tree leaf would silently "succeed".
-  it.each([
-    {name: 'patternExpand', fn: patternExpand, method: 'expandElement'},
-    {name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement'},
-  ])('$name rethrows PatternNotSupported for a non-ComboBox without sending ALT+Down', async ({fn, method}) => {
-    const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (m: string, args: any) => {
-      if (m === method) {
-        throw new errors.UnknownError('PatternNotSupported: collapse is not supported for JButton');
-      }
-      if (m === 'getProperty' && args.property === 'ControlType') {
-        return 'Button';
-      }
-      return null;
+  for (const {name, fn, method} of EXPAND_COLLAPSE) {
+    it(`${name} rethrows PatternNotSupported for a non-ComboBox without sending ALT+Down`, async () => {
+      const driver = createMockDriver() as any;
+      driver.sendCommand.mock.mockImplementation(async (m: string, args: any) => {
+        if (m === method) {
+          throw new errors.UnknownError('PatternNotSupported: collapse is not supported for JButton');
+        }
+        if (m === 'getProperty' && args.property === 'ControlType') {
+          return 'Button';
+        }
+        return null;
+      });
+      await assert.rejects(fn.call(driver, MOCK_ELEMENT), /PatternNotSupported/);
+      assertNoSetFocus(driver.sendCommand);
     });
-    await expect(fn.call(driver, MOCK_ELEMENT)).rejects.toThrow(/PatternNotSupported/);
-    expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
-  });
+  }
 
-  it.each([
-    {name: 'patternExpand', fn: patternExpand, method: 'expandElement'},
-    {name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement'},
-  ])('$name rethrows InvalidElementState when the control type is unreadable', async ({fn, method}) => {
-    const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (m: string, args: any) => {
-      if (m === method) {
-        throw stateError();
-      }
-      if (m === 'getProperty' && args.property === 'ControlType') {
-        throw new Error('gone');
-      }
-      return null;
+  for (const {name, fn, method} of EXPAND_COLLAPSE) {
+    it(`${name} rethrows InvalidElementState when the control type is unreadable`, async () => {
+      const driver = createMockDriver() as any;
+      driver.sendCommand.mock.mockImplementation(async (m: string, args: any) => {
+        if (m === method) {
+          throw stateError();
+        }
+        if (m === 'getProperty' && args.property === 'ControlType') {
+          throw new Error('gone');
+        }
+        return null;
+      });
+      await assert.rejects(fn.call(driver, MOCK_ELEMENT), errors.InvalidElementStateError);
+      assertNoSetFocus(driver.sendCommand);
     });
-    await expect(fn.call(driver, MOCK_ELEMENT)).rejects.toBeInstanceOf(errors.InvalidElementStateError);
-    expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
-  });
+  }
 
-  it.each([
-    {name: 'patternExpand', fn: patternExpand, method: 'expandElement'},
-    {name: 'patternCollapse', fn: patternCollapse, method: 'collapseElement'},
-  ])('$name keeps the ALT+Down fallback for a ComboBox on InvalidElementState', async ({fn, method}) => {
-    const driver = createMockDriver() as any;
-    driver.sendCommand.mockImplementation(async (m: string, args: any) => {
-      if (m === method) {
-        throw stateError();
-      }
-      if (m === 'getProperty' && args.property === 'ControlType') {
-        return 'ComboBox';
-      }
-      if (m === 'getProperty' && args.property === 'HasKeyboardFocus') {
-        return true;
-      }
-      return null;
+  for (const {name, fn, method} of EXPAND_COLLAPSE) {
+    it(`${name} keeps the ALT+Down fallback for a ComboBox on InvalidElementState`, async () => {
+      const driver = createMockDriver() as any;
+      driver.sendCommand.mock.mockImplementation(async (m: string, args: any) => {
+        if (m === method) {
+          throw stateError();
+        }
+        if (m === 'getProperty' && args.property === 'ControlType') {
+          return 'ComboBox';
+        }
+        if (m === 'getProperty' && args.property === 'HasKeyboardFocus') {
+          return true;
+        }
+        return null;
+      });
+      await fn.call(driver, MOCK_ELEMENT);
+      assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
     });
-    await fn.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
-  });
+  }
 
   it('patternIsMultiple returns true when result is true', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue(true);
+    driver.sendCommand.mock.mockImplementation(async () => true);
     const result = await patternIsMultiple.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('isMultipleSelect', {elementId: ELEMENT_ID});
-    expect(result).toBe(true);
+    assertCalledWith(driver.sendCommand, 'isMultipleSelect', {elementId: ELEMENT_ID});
+    assert.equal(result, true);
   });
 
   it('patternIsMultiple returns false when result is false', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue(false);
+    driver.sendCommand.mock.mockImplementation(async () => false);
     const result = await patternIsMultiple.call(driver, MOCK_ELEMENT);
-    expect(result).toBe(false);
+    assert.equal(result, false);
   });
 
   it('patternGetSelectedItem returns element when selection exists', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue(['2.3.4.5.6']);
+    driver.sendCommand.mock.mockImplementation(async () => ['2.3.4.5.6']);
     const result = await patternGetSelectedItem.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('getSelectedElements', {elementId: ELEMENT_ID});
-    expect(result).toEqual({[W3C_ELEMENT_KEY]: '2.3.4.5.6'});
+    assertCalledWith(driver.sendCommand, 'getSelectedElements', {elementId: ELEMENT_ID});
+    assert.deepEqual(result, {[W3C_ELEMENT_KEY]: '2.3.4.5.6'});
   });
 
   it('patternGetSelectedItem throws when no selection', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue([]);
-    await expect(patternGetSelectedItem.call(driver, MOCK_ELEMENT)).rejects.toThrow();
+    driver.sendCommand.mock.mockImplementation(async () => []);
+    await assert.rejects(patternGetSelectedItem.call(driver, MOCK_ELEMENT));
   });
 
   it('patternGetAllSelectedItems returns array of elements', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue(['2.3.4.5.6', '3.4.5.6.7']);
+    driver.sendCommand.mock.mockImplementation(async () => ['2.3.4.5.6', '3.4.5.6.7']);
     const result = await patternGetAllSelectedItems.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('getSelectedElements', {elementId: ELEMENT_ID});
-    expect(result).toHaveLength(2);
-    expect(result[0]).toEqual({[W3C_ELEMENT_KEY]: '2.3.4.5.6'});
-    expect(result[1]).toEqual({[W3C_ELEMENT_KEY]: '3.4.5.6.7'});
+    assertCalledWith(driver.sendCommand, 'getSelectedElements', {elementId: ELEMENT_ID});
+    assert.equal(result.length, 2);
+    assert.deepEqual(result[0], {[W3C_ELEMENT_KEY]: '2.3.4.5.6'});
+    assert.deepEqual(result[1], {[W3C_ELEMENT_KEY]: '3.4.5.6.7'});
   });
 
   it('patternSetValue calls setElementValue first', async () => {
     const driver = createMockDriver() as any;
     await patternSetValue.call(driver, MOCK_ELEMENT, 'test value');
-    expect(driver.sendCommand).toHaveBeenCalledWith('setElementValue', {elementId: ELEMENT_ID, value: 'test value'});
+    assertCalledWith(driver.sendCommand, 'setElementValue', {elementId: ELEMENT_ID, value: 'test value'});
   });
 
   it('patternSetValue falls back to setElementRangeValue when setElementValue throws', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockRejectedValueOnce(new Error('not a value pattern')).mockResolvedValueOnce(undefined);
+    queueRejected(driver.sendCommand, new Error('not a value pattern'));
     await patternSetValue.call(driver, MOCK_ELEMENT, '42');
-    expect(driver.sendCommand).toHaveBeenCalledWith('setElementRangeValue', {elementId: ELEMENT_ID, value: 42});
+    assertCalledWith(driver.sendCommand, 'setElementRangeValue', {elementId: ELEMENT_ID, value: 42});
   });
 
   it('patternGetValue sends getElementValue command', async () => {
     const driver = createMockDriver() as any;
-    driver.sendCommand.mockResolvedValue('some value');
+    driver.sendCommand.mock.mockImplementation(async () => 'some value');
     const result = await patternGetValue.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('getElementValue', {elementId: ELEMENT_ID});
-    expect(result).toBe('some value');
+    assertCalledWith(driver.sendCommand, 'getElementValue', {elementId: ELEMENT_ID});
+    assert.equal(result, 'some value');
   });
 
   it('focusElement sends setFocus command', async () => {
     const driver = createMockDriver() as any;
     await focusElement.call(driver, MOCK_ELEMENT);
-    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+    assertCalledWith(driver.sendCommand, 'setFocus', {elementId: ELEMENT_ID});
   });
 });

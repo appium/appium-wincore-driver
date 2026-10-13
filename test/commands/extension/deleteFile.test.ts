@@ -1,38 +1,39 @@
 /**
  * Unit tests for deleteFile extension command.
  */
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
-import {deleteFile} from '../../../lib/commands/extension';
-import {createMockDriver} from '../../fixtures/driver';
+import {createMockDriver} from '../../fixtures/driver.js';
+import {assertCalledTimes, assertCalledWith, assertNotCalled} from '../../helpers/mock.js';
+import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
+
+mockUser32(createUser32Mock());
+const {deleteFile} = await import('../../../lib/commands/extension.js');
 
 describe('deleteFile', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('throws when path is not provided', async () => {
     const driver = createMockDriver() as any;
-    await expect(deleteFile.call(driver, {} as any)).rejects.toThrow("'path' must be provided");
-    await expect(deleteFile.call(driver, {path: ''})).rejects.toThrow("'path' must be provided");
-    expect(driver.sendCommand).not.toHaveBeenCalled();
+    await assert.rejects(deleteFile.call(driver, {} as any), /'path' must be provided/);
+    await assert.rejects(deleteFile.call(driver, {path: ''}), /'path' must be provided/);
+    assertNotCalled(driver.sendCommand);
   });
 
   it('sends deleteFile command with path', async () => {
     const driver = createMockDriver() as any;
     await deleteFile.call(driver, {path: 'C:\\temp\\file.txt'});
-    expect(driver.sendCommand).toHaveBeenCalledWith('deleteFile', {path: 'C:\\temp\\file.txt'});
+    assertCalledWith(driver.sendCommand, 'deleteFile', {path: 'C:\\temp\\file.txt'});
   });
 
   it('asserts MODIFY_FS_FEATURE before sending command', async () => {
     const driver = createMockDriver() as any;
     await deleteFile.call(driver, {path: 'C:\\temp\\file.txt'});
-    expect(driver.assertFeatureEnabled).toHaveBeenCalledTimes(1);
+    assertCalledTimes(driver.assertFeatureEnabled, 1);
   });
 
   it('passes path with special characters unchanged', async () => {
     const driver = createMockDriver() as any;
     await deleteFile.call(driver, {path: 'C:\\temp\\file[1].txt'});
-    expect(driver.sendCommand).toHaveBeenCalledWith('deleteFile', {path: 'C:\\temp\\file[1].txt'});
+    assertCalledWith(driver.sendCommand, 'deleteFile', {path: 'C:\\temp\\file[1].txt'});
   });
 });

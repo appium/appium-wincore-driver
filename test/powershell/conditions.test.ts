@@ -1,9 +1,10 @@
 /**
  * Unit tests for lib/powershell/conditions.ts
  */
-import {describe, it, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
-import {PSBoolean, PSString, PSInt32, PSInt32Array, PSControlType} from '../../lib/powershell/common';
+import {PSBoolean, PSString, PSInt32, PSInt32Array, PSControlType} from '../../lib/powershell/common.js';
 import {
   PropertyCondition,
   MatchPropertyCondition,
@@ -12,75 +13,75 @@ import {
   NotCondition,
   TrueCondition,
   FalseCondition,
-} from '../../lib/powershell/conditions';
-import {Property} from '../../lib/powershell/types';
-import {conditionToDto} from '../../lib/server/converter-bridge';
+} from '../../lib/powershell/conditions.js';
+import {Property} from '../../lib/powershell/types.js';
+import {conditionToDto} from '../../lib/server/converter-bridge.js';
 
 describe('TrueCondition', () => {
   it('returns TrueCondition PS expression', () => {
     const c = new TrueCondition();
-    expect(c.toString()).toContain('TrueCondition');
+    assert.ok(c.toString().includes('TrueCondition'));
   });
 });
 
 describe('FalseCondition', () => {
   it('returns FalseCondition PS expression', () => {
     const c = new FalseCondition();
-    expect(c.toString()).toContain('FalseCondition');
+    assert.ok(c.toString().includes('FalseCondition'));
   });
 });
 
 describe('PropertyCondition', () => {
   it('creates condition for a boolean property', () => {
     const c = new PropertyCondition(Property.IS_ENABLED, new PSBoolean(true));
-    expect(c.toString()).toContain('isenabled');
-    expect(c.toString()).toContain('$true');
+    assert.ok(c.toString().includes('isenabled'));
+    assert.ok(c.toString().includes('$true'));
   });
 
   it('creates condition for a string property', () => {
     const c = new PropertyCondition(Property.NAME, new PSString('Calculator'));
-    expect(c.toString()).toContain('name');
+    assert.ok(c.toString().includes('name'));
   });
 
   it('creates condition for an int32 property', () => {
     const c = new PropertyCondition(Property.NATIVE_WINDOW_HANDLE, new PSInt32(12345));
-    expect(c.toString()).toContain('nativewindowhandle');
-    expect(c.toString()).toContain('12345');
+    assert.ok(c.toString().includes('nativewindowhandle'));
+    assert.ok(c.toString().includes('12345'));
   });
 
   it('creates condition for a control type property', () => {
     const c = new PropertyCondition(Property.CONTROL_TYPE, new PSControlType('button'));
-    expect(c.toString()).toContain('controltype');
+    assert.ok(c.toString().includes('controltype'));
   });
 
   it('strips trailing "property" suffix from property name', () => {
     // Should still work when passing 'isenabledproperty'
     const c = new PropertyCondition('isenabledproperty' as Property, new PSBoolean(false));
-    expect(c.toString()).toContain('isenabled');
+    assert.ok(c.toString().includes('isenabled'));
   });
 
   it('throws when boolean property receives non-PSBoolean value', () => {
-    expect(() => new PropertyCondition(Property.IS_ENABLED, new PSString('true'))).toThrow();
+    assert.throws(() => new PropertyCondition(Property.IS_ENABLED, new PSString('true')));
   });
 
   it('throws when string property receives non-PSString value', () => {
-    expect(() => new PropertyCondition(Property.NAME, new PSInt32(42))).toThrow();
+    assert.throws(() => new PropertyCondition(Property.NAME, new PSInt32(42)));
   });
 
   it('throws when int32 property receives non-PSInt32 value', () => {
-    expect(() => new PropertyCondition(Property.NATIVE_WINDOW_HANDLE, new PSBoolean(true))).toThrow();
+    assert.throws(() => new PropertyCondition(Property.NATIVE_WINDOW_HANDLE, new PSBoolean(true)));
   });
 
   it('creates condition for int32 array property (RUNTIME_ID)', () => {
     const c = new PropertyCondition(Property.RUNTIME_ID, new PSInt32Array([1, 2, 3]));
-    expect(c.toString()).toContain('runtimeid');
+    assert.ok(c.toString().includes('runtimeid'));
   });
 });
 
 describe('MatchPropertyCondition', () => {
   it('serializes contains() to a property DTO with match: "contains" and a normalized property name', () => {
     const c = new MatchPropertyCondition('name', 'שורות', 'contains');
-    expect(conditionToDto(c)).toEqual({
+    assert.deepEqual(conditionToDto(c), {
       type: 'property',
       property: 'Name',
       value: 'שורות',
@@ -90,7 +91,7 @@ describe('MatchPropertyCondition', () => {
 
   it('serializes starts-with() to match: "startsWith"', () => {
     const c = new MatchPropertyCondition('AutomationId', 'first', 'startsWith');
-    expect(conditionToDto(c)).toEqual({
+    assert.deepEqual(conditionToDto(c), {
       type: 'property',
       property: 'AutomationId',
       value: 'first',
@@ -103,7 +104,7 @@ describe('MatchPropertyCondition', () => {
       new TrueCondition(),
       new MatchPropertyCondition('JavaSimpleClass', 'Cell', 'contains'),
     );
-    expect(conditionToDto(and)).toEqual({
+    assert.deepEqual(conditionToDto(and), {
       type: 'and',
       conditions: [{type: 'true'}, {type: 'property', property: 'JavaSimpleClass', value: 'Cell', match: 'contains'}],
     });
@@ -115,7 +116,7 @@ describe('AndCondition', () => {
     const c1 = new PropertyCondition(Property.IS_ENABLED, new PSBoolean(true));
     const c2 = new PropertyCondition(Property.NAME, new PSString('Calc'));
     const and = new AndCondition(c1, c2);
-    expect(and.toString()).toContain('AndCondition');
+    assert.ok(and.toString().includes('AndCondition'));
   });
 
   it('creates AND condition from three conditions', () => {
@@ -123,18 +124,18 @@ describe('AndCondition', () => {
     const c2 = new TrueCondition();
     const c3 = new FalseCondition();
     const and = new AndCondition(c1, c2, c3);
-    expect(and.toString()).toContain('AndCondition');
+    assert.ok(and.toString().includes('AndCondition'));
   });
 
   it('throws when fewer than 2 conditions provided', () => {
     const c1 = new TrueCondition();
-    expect(() => new AndCondition(c1)).toThrow('at least 2 conditions');
-    expect(() => new AndCondition()).toThrow('at least 2 conditions');
+    assert.throws(() => new AndCondition(c1), /at least 2 conditions/);
+    assert.throws(() => new AndCondition(), /at least 2 conditions/);
   });
 
   it('throws when non-Condition argument is passed', () => {
     const c1 = new TrueCondition();
-    expect(() => new AndCondition(c1, 'not-a-condition' as any)).toThrow();
+    assert.throws(() => new AndCondition(c1, 'not-a-condition' as any));
   });
 });
 
@@ -143,17 +144,17 @@ describe('OrCondition', () => {
     const c1 = new TrueCondition();
     const c2 = new FalseCondition();
     const or = new OrCondition(c1, c2);
-    expect(or.toString()).toContain('OrCondition');
+    assert.ok(or.toString().includes('OrCondition'));
   });
 
   it('throws when fewer than 2 conditions provided', () => {
     const c1 = new TrueCondition();
-    expect(() => new OrCondition(c1)).toThrow('at least 2 conditions');
+    assert.throws(() => new OrCondition(c1), /at least 2 conditions/);
   });
 
   it('throws when non-Condition argument is passed', () => {
     const c1 = new TrueCondition();
-    expect(() => new OrCondition(c1, {} as any)).toThrow();
+    assert.throws(() => new OrCondition(c1, {} as any));
   });
 });
 
@@ -161,10 +162,10 @@ describe('NotCondition', () => {
   it('creates NOT condition from a condition', () => {
     const c = new TrueCondition();
     const not = new NotCondition(c);
-    expect(not.toString()).toContain('NotCondition');
+    assert.ok(not.toString().includes('NotCondition'));
   });
 
   it('throws when non-Condition argument is passed', () => {
-    expect(() => new NotCondition('not-a-condition' as any)).toThrow();
+    assert.throws(() => new NotCondition('not-a-condition' as any));
   });
 });

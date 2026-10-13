@@ -1,4 +1,6 @@
-import {describe, it, beforeAll, afterAll, afterEach, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, afterEach, before, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {
@@ -20,18 +22,18 @@ describe('windows: pattern extension commands', () => {
   let notepad: Browser;
   let todo: Browser;
 
-  // beforeAll(async () => {
+  // before(async () => {
   //     calc = await createCalculatorSession();
   //     notepad = await createNotepadSession();
   // });
 
-  // afterAll(async () => {
+  // after(async () => {
   //     await quitSession(calc);
   //     await quitSession(notepad);
   // });
 
   describe('windows: invoke', () => {
-    beforeAll(async () => {
+    before(async () => {
       calc = await createCalculatorSession();
       // Calculator (UWP) finishes building its keypad UIA subtree a beat after
       // the window is up. Without this, the first `$('~num1Button')` in the
@@ -40,7 +42,7 @@ describe('windows: pattern extension commands', () => {
       await calc.$('~num1Button').waitForExist({timeout: 15_000});
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(calc);
     });
 
@@ -73,11 +75,11 @@ describe('windows: pattern extension commands', () => {
   });
 
   describe('windows: maximize / minimize / restore', () => {
-    beforeAll(async () => {
+    before(async () => {
       calc = await createCalculatorSession();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(calc);
     });
 
@@ -131,16 +133,16 @@ describe('windows: pattern extension commands', () => {
       await calc.executeScript('windows: restore', [windowEl]);
 
       const rectAfter = await calc.getWindowRect();
-      expect(rectAfter).toEqual(rectBefore);
+      assert.deepEqual(rectAfter, rectBefore);
     });
   });
 
   describe('windows: setFocus', () => {
-    beforeAll(async () => {
+    before(async () => {
       calc = await createCalculatorSession();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(calc);
     });
 
@@ -169,11 +171,11 @@ describe('windows: pattern extension commands', () => {
   describe('windows: scrollIntoView', () => {
     let charmap: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       charmap = await createCharmapSession();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(charmap);
     });
 
@@ -192,7 +194,7 @@ describe('windows: pattern extension commands', () => {
           if (all.length <= 20) {
             return false;
           }
-          offscreen = await charmap.$$('//ListItem[@IsOffscreen="true"]').getElements();
+          offscreen = [...(await charmap.$$('//ListItem[@IsOffscreen="true"]').getElements())];
           return offscreen.length > 0;
         },
         {timeout: 10_000, timeoutMsg: 'font list never reported an off-screen item'},
@@ -200,7 +202,7 @@ describe('windows: pattern extension commands', () => {
 
       const target = offscreen[offscreen.length - 1];
       const wasOffscreen = await target.getAttribute('IsOffscreen');
-      expect(String(wasOffscreen).toLowerCase()).toBe('true');
+      assert.equal(String(wasOffscreen).toLowerCase(), 'true');
 
       await charmap.executeScript('windows: scrollIntoView', [target]);
       await charmap.waitUntil(
@@ -214,12 +216,12 @@ describe('windows: pattern extension commands', () => {
   });
 
   describe('windows: setValue / getValue (ValuePattern)', () => {
-    beforeAll(async () => {
+    before(async () => {
       notepad = await createNotepadSession();
       await clearNotepad(notepad);
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(notepad);
     });
 
@@ -227,18 +229,18 @@ describe('windows: pattern extension commands', () => {
       const textArea = await getNotepadTextArea(notepad);
       await notepad.executeScript('windows: setValue', [textArea, 'pattern value test']);
       const result = await notepad.executeScript('windows: getValue', [textArea]);
-      expect(result).toContain('pattern value test');
+      assert.ok(result.includes('pattern value test'));
     });
   });
 
   describe('windows: expand / collapse', () => {
     let explorer: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       explorer = await createExplorerSession();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(explorer);
     });
 
@@ -250,8 +252,8 @@ describe('windows: pattern extension commands', () => {
       await explorer.executeScript('windows: expand', [thisPC]);
       await explorer.pause(300);
 
-      const children = await explorer.$$('//TreeItem[@Name="This PC"]/TreeItem');
-      expect(children.length).toBeGreaterThan(0);
+      const children = await explorer.$$('//TreeItem[@Name="This PC"]/TreeItem').getElements();
+      assert.ok(children.length > 0);
     });
 
     it('collapses This PC and child drives are no longer visible', async () => {
@@ -262,19 +264,19 @@ describe('windows: pattern extension commands', () => {
       await explorer.executeScript('windows: collapse', [thisPC]);
       await explorer.pause(300);
 
-      const children = await explorer.$$('//TreeItem[@Name="This PC"]/TreeItem');
-      expect(children.length).toBe(0);
+      const children = await explorer.$$('//TreeItem[@Name="This PC"]/TreeItem').getElements();
+      assert.equal(children.length, 0);
     });
   });
 
   describe('windows: expand / collapse (ComboBox)', () => {
     let charmap: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       charmap = await createCharmapSession();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(charmap);
     });
 
@@ -314,52 +316,52 @@ describe('windows: pattern extension commands', () => {
       await charmap.executeScript('windows: expand', [comboBox]);
       await charmap.pause(200);
 
-      const items = await charmap.$$('//ListItem');
-      expect(items.length).toBeGreaterThan(0);
+      const items = await charmap.$$('//ListItem').getElements();
+      assert.ok(items.length > 0);
 
       const item = items[0];
       const fontName = await item.getAttribute('Name');
 
-      await expect(charmap.executeScript('windows: select', [item])).resolves.not.toThrow();
+      await assert.doesNotReject(charmap.executeScript('windows: select', [item]));
 
       await charmap.pause(200);
       const value = await charmap.executeScript('windows: getValue', [comboBox]);
-      expect(value).toContain(fontName);
+      assert.ok(value.includes(fontName));
     });
   });
 
   describe('windows: select / allSelectedItems / isMultiple / toggle', () => {
-    beforeAll(async () => {
+    before(async () => {
       todo = await createTodoSession();
       await createTodoTask(todo, 'First task');
       await createTodoTask(todo, 'Second task');
     });
 
-    afterAll(async () => {
+    after(async () => {
       await deleteTasks(todo);
       await quitSession(todo);
     });
 
     it('toggles a task checkbox in To-Do', async () => {
       const checkbox = await todo.$('~CompleteTodoCheckBox');
-      await expect(todo.executeScript('windows: toggle', [checkbox])).resolves.not.toThrow();
+      await assert.doesNotReject(todo.executeScript('windows: toggle', [checkbox]));
     });
 
     it('select selects a task item in the To-Do list', async () => {
       const item = await todo.$('//Custom/Group/List/ListItem[1]');
-      await expect(todo.executeScript('windows: select', [item])).resolves.not.toThrow();
+      await assert.doesNotReject(todo.executeScript('windows: select', [item]));
     });
 
     it('isMultiple returns a boolean for the To-Do task list container', async () => {
       const list = await todo.$('~TodosListView');
       const result = await todo.executeScript('windows: isMultiple', [list]);
-      expect(typeof result).toBe('boolean');
+      assert.equal(typeof result, 'boolean');
     });
 
     it('allSelectedItems returns an array for the To-Do task list container', async () => {
       const list = await todo.$('~TodosListView');
       const result = await todo.executeScript('windows: allSelectedItems', [list]);
-      expect(Array.isArray(result)).toBe(true);
+      assert.equal(Array.isArray(result), true);
     });
   });
 });
