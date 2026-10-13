@@ -5,6 +5,8 @@
  */
 import {mock} from 'node:test';
 
+import {mockModule} from './mock.js';
+
 type AnyFn = (...args: any[]) => any;
 
 export function createUser32Mock<T extends Record<string, AnyFn> = {}>(overrides?: T) {
@@ -40,5 +42,5 @@ export function createUser32Mock<T extends Record<string, AnyFn> = {}>(overrides
 
 /** Registers the stub for `lib/winapi/user32.js`. Call before importing the code under test. */
 export function mockUser32(user32: ReturnType<typeof createUser32Mock>) {
-  return mock.module(new URL('../../lib/winapi/user32.js', import.meta.url).href, {exports: user32});
+  return mockModule(new URL('../../lib/winapi/user32.js', import.meta.url).href, user32);
 }
