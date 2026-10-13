@@ -1,8 +1,9 @@
+import assert from 'node:assert/strict';
 import {existsSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {after, afterEach, before, describe, it} from 'node:test';
 
-import {describe, it, beforeAll, afterAll, afterEach, expect} from 'vitest';
 import type {Browser} from 'webdriverio';
 
 import {createCalculatorSession, quitSession} from './helpers/session.js';
@@ -13,11 +14,11 @@ import {createCalculatorSession, quitSession} from './helpers/session.js';
 describe('pushFile / pullFile', () => {
   let driver: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     driver = await createCalculatorSession();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(driver);
   });
 
@@ -40,7 +41,7 @@ describe('pushFile / pullFile', () => {
     it('writes a base64-encoded text file to disk', async () => {
       cleanup = join(tmpdir(), `desktop-push-${Date.now()}.txt`);
       await driver.pushFile(cleanup, Buffer.from('Hello, AppiumDesktop!').toString('base64'));
-      expect(existsSync(cleanup)).toBe(true);
+      assert.equal(existsSync(cleanup), true);
     });
 
     it('round-trips text content via pushFile → pullFile', async () => {
@@ -48,7 +49,7 @@ describe('pushFile / pullFile', () => {
       const content = 'round-trip test content';
       await driver.pushFile(cleanup, Buffer.from(content, 'utf8').toString('base64'));
       const pulled = await driver.pullFile(cleanup);
-      expect(Buffer.from(pulled, 'base64').toString('utf8')).toBe(content);
+      assert.equal(Buffer.from(pulled, 'base64').toString('utf8'), content);
     });
 
     it('round-trips binary data without corruption', async () => {
@@ -56,7 +57,7 @@ describe('pushFile / pullFile', () => {
       const bytes = Buffer.from([0x00, 0x01, 0x02, 0xff, 0xfe, 0xfd]);
       await driver.pushFile(cleanup, bytes.toString('base64'));
       const pulled = await driver.pullFile(cleanup);
-      expect(Buffer.from(pulled, 'base64')).toEqual(bytes);
+      assert.deepEqual(Buffer.from(pulled, 'base64'), bytes);
     });
 
     it('creates missing parent directories automatically', async () => {
@@ -64,7 +65,7 @@ describe('pushFile / pullFile', () => {
       const filePath = join(parentDir, 'sub', 'dir', 'file.txt');
       cleanup = parentDir;
       await driver.pushFile(filePath, Buffer.from('nested').toString('base64'));
-      expect(existsSync(filePath)).toBe(true);
+      assert.equal(existsSync(filePath), true);
     });
 
     it('overwrites an existing file', async () => {
@@ -72,7 +73,7 @@ describe('pushFile / pullFile', () => {
       writeFileSync(cleanup, 'old content', 'utf8');
       await driver.pushFile(cleanup, Buffer.from('new content').toString('base64'));
       const pulled = await driver.pullFile(cleanup);
-      expect(Buffer.from(pulled, 'base64').toString('utf8')).toBe('new content');
+      assert.equal(Buffer.from(pulled, 'base64').toString('utf8'), 'new content');
     });
   });
 
@@ -97,19 +98,19 @@ describe('pushFile / pullFile', () => {
       const content = 'pull this!';
       writeFileSync(cleanup, content, 'utf8');
       const result = await driver.pullFile(cleanup);
-      expect(Buffer.from(result, 'base64').toString('utf8')).toBe(content);
+      assert.equal(Buffer.from(result, 'base64').toString('utf8'), content);
     });
 
     it('result is a valid base64 string', async () => {
       cleanup = join(tmpdir(), `desktop-b64-${Date.now()}.txt`);
       writeFileSync(cleanup, 'base64 check', 'utf8');
       const result = await driver.pullFile(cleanup);
-      expect(() => Buffer.from(result, 'base64')).not.toThrow();
+      assert.doesNotThrow(() => Buffer.from(result, 'base64'));
     });
 
     it('throws when the file does not exist', async () => {
       const missing = join(tmpdir(), `desktop-missing-${Date.now()}.txt`);
-      await expect(driver.pullFile(missing)).rejects.toThrow();
+      await assert.rejects(driver.pullFile(missing));
     });
   });
 });

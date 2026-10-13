@@ -1,4 +1,6 @@
-import {describe, it, beforeAll, afterAll, beforeEach, afterEach, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, afterEach, before, beforeEach, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {Key} from '../../lib/enums.js';
@@ -27,11 +29,11 @@ describe('extended-key SendInput flag (WM_KEYDOWN lParam bit 24)', () => {
   let app: Browser;
   let wasNumLockOn: boolean;
 
-  beforeAll(() => {
+  before(() => {
     wasNumLockOn = isNumLockOn();
   });
 
-  afterAll(() => {
+  after(() => {
     setNumLockState(wasNumLockOn);
   });
 
@@ -54,7 +56,7 @@ describe('extended-key SendInput flag (WM_KEYDOWN lParam bit 24)', () => {
     await app.pause(200);
 
     const counter = await app.$('~lblRealDownCount');
-    expect(await counter.getText()).toBe('Real Down received: 1');
+    assert.equal(await counter.getText(), 'Real Down received: 1');
   });
 
   it('raw unflagged VK_DOWN + NumLock ON: reproduces the bug — Down never registers', async () => {
@@ -70,7 +72,7 @@ describe('extended-key SendInput flag (WM_KEYDOWN lParam bit 24)', () => {
     await app.pause(200);
 
     const counter = await app.$('~lblRealDownCount');
-    expect(await counter.getText()).toBe('Real Down received: 0');
+    assert.equal(await counter.getText(), 'Real Down received: 0');
   });
 
   it('driver Down key (fixed, extended flag set) + NumLock ON: registers as a real key', async () => {
@@ -83,6 +85,6 @@ describe('extended-key SendInput flag (WM_KEYDOWN lParam bit 24)', () => {
     await app.pause(200);
 
     const counter = await app.$('~lblRealDownCount');
-    expect(await counter.getText()).toBe('Real Down received: 1');
+    assert.equal(await counter.getText(), 'Real Down received: 1');
   });
 });

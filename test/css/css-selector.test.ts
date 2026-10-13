@@ -1,59 +1,60 @@
-import {describe, it, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
-import {cssToNativeLocator, UIA_CONDITION_STRATEGY} from '../../lib/css';
-import {AndCondition, PropertyCondition} from '../../lib/powershell/conditions';
-import {convertStringToCondition} from '../../lib/powershell/converter';
+import {cssToNativeLocator, UIA_CONDITION_STRATEGY} from '../../lib/css/index.js';
+import {AndCondition, PropertyCondition} from '../../lib/powershell/conditions.js';
+import {convertStringToCondition} from '../../lib/powershell/converter.js';
 
 describe('cssToNativeLocator', () => {
   it('converts #id to an AutomationId equality condition', async () => {
     const {strategy, selector} = await cssToNativeLocator('#btn_ok');
-    expect(strategy).toBe(UIA_CONDITION_STRATEGY);
-    expect(selector).toBe(`[PropertyCondition]::new([AutomationElement]::AutomationIdProperty, 'btn_ok')`);
-    expect(convertStringToCondition(selector)).toBeInstanceOf(PropertyCondition);
+    assert.equal(strategy, UIA_CONDITION_STRATEGY);
+    assert.equal(selector, `[PropertyCondition]::new([AutomationElement]::AutomationIdProperty, 'btn_ok')`);
+    assert.ok(convertStringToCondition(selector) instanceof PropertyCondition);
   });
 
   it('converts .class to a ClassName equality condition', async () => {
     const {selector} = await cssToNativeLocator('.MyClass');
-    expect(selector).toBe(`[PropertyCondition]::new([AutomationElement]::ClassNameProperty, 'MyClass')`);
-    expect(convertStringToCondition(selector)).toBeInstanceOf(PropertyCondition);
+    assert.equal(selector, `[PropertyCondition]::new([AutomationElement]::ClassNameProperty, 'MyClass')`);
+    assert.ok(convertStringToCondition(selector) instanceof PropertyCondition);
   });
 
   it('converts [name="x"] to a Name equality condition', async () => {
     const {selector} = await cssToNativeLocator('*[name="OK"]');
-    expect(selector).toBe(`[PropertyCondition]::new([AutomationElement]::NameProperty, 'OK')`);
+    assert.equal(selector, `[PropertyCondition]::new([AutomationElement]::NameProperty, 'OK')`);
   });
 
   it('converts a tag name to a ControlType condition', async () => {
     const {selector} = await cssToNativeLocator('button');
-    expect(selector).toBe(`[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::button)`);
-    expect(convertStringToCondition(selector)).toBeInstanceOf(PropertyCondition);
+    assert.equal(selector, `[PropertyCondition]::new([AutomationElement]::ControlTypeProperty, [ControlType]::button)`);
+    assert.ok(convertStringToCondition(selector) instanceof PropertyCondition);
   });
 
   it('combines multiple attributes with AndCondition', async () => {
     const {selector} = await cssToNativeLocator('button[name="OK"]');
     const condition = convertStringToCondition(selector);
-    expect(condition).toBeInstanceOf(AndCondition);
+    assert.ok(condition instanceof AndCondition);
   });
 
   it('escapes single quotes in attribute values', async () => {
     const {selector} = await cssToNativeLocator(`[name="O'Brien"]`);
-    expect(selector).toBe(`[PropertyCondition]::new([AutomationElement]::NameProperty, 'O''Brien')`);
-    expect(convertStringToCondition(selector)).toBeInstanceOf(PropertyCondition);
+    assert.equal(selector, `[PropertyCondition]::new([AutomationElement]::NameProperty, 'O''Brien')`);
+    assert.ok(convertStringToCondition(selector) instanceof PropertyCondition);
   });
 
   it('rejects unsupported operators (no partial match on UIA conditions)', async () => {
-    await expect(cssToNativeLocator('[name^="OK"]')).rejects.toThrow();
+    await assert.rejects(cssToNativeLocator('[name^="OK"]'));
   });
 
   it('rejects combinators', async () => {
-    await expect(cssToNativeLocator('window button')).rejects.toThrow();
+    await assert.rejects(cssToNativeLocator('window button'));
   });
 
   it('rejects unknown attributes', async () => {
-    await expect(cssToNativeLocator('[bogus="x"]')).rejects.toThrow();
+    await assert.rejects(cssToNativeLocator('[bogus="x"]'));
   });
 
   it('rejects unknown control types', async () => {
-    await expect(cssToNativeLocator('not-a-real-control')).rejects.toThrow();
+    await assert.rejects(cssToNativeLocator('not-a-real-control'));
   });
 });

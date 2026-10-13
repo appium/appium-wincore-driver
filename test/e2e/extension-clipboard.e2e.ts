@@ -1,4 +1,6 @@
-import {describe, it, beforeAll, afterAll, beforeEach, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, before, beforeEach, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {createNotepadSession, getNotepadTextArea, quitSession, clearNotepad} from './helpers/session.js';
@@ -10,11 +12,11 @@ const TINY_PNG_BASE64 =
 describe('windows: clipboard extension commands', () => {
   let notepad: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     notepad = await createNotepadSession();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(notepad);
   });
 
@@ -29,7 +31,7 @@ describe('windows: clipboard extension commands', () => {
       await notepad.executeScript('windows: setClipboard', [{contentType: 'plaintext', b64Content: b64In}]);
       const b64Out = (await notepad.executeScript('windows: getClipboard', [{contentType: 'plaintext'}])) as string;
       const textOut = Buffer.from(b64Out, 'base64').toString();
-      expect(textOut).toContain(text);
+      assert.ok(textOut.includes(text));
     });
 
     it('sets clipboard with explicit contentType: plaintext and getClipboard reads it back', async () => {
@@ -38,7 +40,7 @@ describe('windows: clipboard extension commands', () => {
       await notepad.executeScript('windows: setClipboard', [{contentType: 'plaintext', b64Content: b64}]);
 
       const b64Out = (await notepad.executeScript('windows: getClipboard', [{contentType: 'plaintext'}])) as string;
-      expect(Buffer.from(b64Out, 'base64').toString()).toContain(text);
+      assert.ok(Buffer.from(b64Out, 'base64').toString().includes(text));
     });
 
     it('clipboard value survives between get calls (unchanged)', async () => {
@@ -47,7 +49,7 @@ describe('windows: clipboard extension commands', () => {
       await notepad.executeScript('windows: setClipboard', [{contentType: 'plaintext', b64Content: b64}]);
       const first = (await notepad.executeScript('windows: getClipboard', [{contentType: 'plaintext'}])) as string;
       const second = (await notepad.executeScript('windows: getClipboard', [{contentType: 'plaintext'}])) as string;
-      expect(first).toBe(second);
+      assert.equal(first, second);
     });
   });
 
@@ -60,8 +62,8 @@ describe('windows: clipboard extension commands', () => {
         },
       ]);
       const result = (await notepad.executeScript('windows: getClipboard', [{contentType: 'image'}])) as string;
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
+      assert.equal(typeof result, 'string');
+      assert.ok(result.length > 0);
     });
   });
 
@@ -77,7 +79,7 @@ describe('windows: clipboard extension commands', () => {
       await notepad.keys(['Control', 'v']);
 
       const text = await textArea.getText();
-      expect(text).toContain(pasteText);
+      assert.ok(text.includes(pasteText));
     });
   });
 });

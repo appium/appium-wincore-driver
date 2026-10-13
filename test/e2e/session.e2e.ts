@@ -1,8 +1,8 @@
+import assert from 'node:assert/strict';
 import {existsSync, unlinkSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, it} from 'node:test';
 
 import {
   CALCULATOR_APP_ID,
@@ -21,8 +21,8 @@ describe('Session creation and capabilities', () => {
     const driver = await createCalculatorSession();
     try {
       const sessionId = driver.sessionId;
-      expect(typeof sessionId).toBe('string');
-      expect(sessionId.length).toBeGreaterThan(0);
+      assert.equal(typeof sessionId, 'string');
+      assert.ok(sessionId.length > 0);
       // Display should be accessible
       const display = await driver.$('~CalculatorResults');
       await display.waitForExist({timeout: 1000});
@@ -41,7 +41,7 @@ describe('Session creation and capabilities', () => {
     const root = await createRootSession();
     try {
       const handles = await root.getWindowHandles();
-      expect(handles).toContain(handle);
+      assert.ok(handles.includes(handle));
     } finally {
       await quitSession(root);
     }
@@ -50,7 +50,7 @@ describe('Session creation and capabilities', () => {
   it('creates a session with ms:waitForAppLaunch capability without error', async () => {
     const driver = await createCalculatorSession({'ms:waitForAppLaunch': 2});
     try {
-      expect(driver.sessionId).toBeTruthy();
+      assert.ok(driver.sessionId);
     } finally {
       await quitSession(driver);
     }
@@ -62,7 +62,7 @@ describe('Session creation and capabilities', () => {
       'ms:forcequit': true,
     });
     try {
-      expect(driver.sessionId).toBeTruthy();
+      assert.ok(driver.sessionId);
     } finally {
       await quitSession(driver);
     }
@@ -71,7 +71,7 @@ describe('Session creation and capabilities', () => {
   it('creates a session with isolatedScriptExecution: true without error', async () => {
     const driver = await createCalculatorSession({'appium:isolatedScriptExecution': true});
     try {
-      expect(driver.sessionId).toBeTruthy();
+      assert.ok(driver.sessionId);
     } finally {
       await quitSession(driver);
     }
@@ -80,9 +80,9 @@ describe('Session creation and capabilities', () => {
   it('creates a Root session (app: Root) for the desktop root element', async () => {
     const driver = await createRootSession();
     try {
-      expect(driver.sessionId).toBeTruthy();
+      assert.ok(driver.sessionId);
       const handles = await driver.getWindowHandles();
-      expect(handles.length).toBeGreaterThanOrEqual(1);
+      assert.ok(handles.length >= 1);
     } finally {
       await quitSession(driver);
     }
@@ -102,9 +102,9 @@ describe('Session creation and capabilities', () => {
       'appium:appTopLevelWindow': numericHandle.toString(),
     });
     try {
-      expect(attachedDriver.sessionId).toBeTruthy();
+      assert.ok(attachedDriver.sessionId);
       const display = await attachedDriver.$('~CalculatorResults');
-      expect(await display.isExisting()).toBe(true);
+      assert.equal(await display.isExisting(), true);
     } finally {
       await quitSession(attachedDriver);
     }
@@ -118,7 +118,7 @@ describe('Session creation and capabilities', () => {
       },
     });
     try {
-      expect(existsSync(markerPath)).toBe(true);
+      assert.equal(existsSync(markerPath), true);
     } finally {
       await quitSession(driver);
       if (existsSync(markerPath)) {
@@ -136,7 +136,7 @@ describe('Session creation and capabilities', () => {
     });
     await driver.deleteSession();
     await new Promise((resolve) => setTimeout(resolve, 500));
-    expect(existsSync(markerPath)).toBe(true);
+    assert.equal(existsSync(markerPath), true);
     if (existsSync(markerPath)) {
       unlinkSync(markerPath);
     }
@@ -144,7 +144,7 @@ describe('Session creation and capabilities', () => {
 
   it('throws when an unknown automationName is specified', async () => {
     const {remote} = await import('webdriverio');
-    await expect(
+    await assert.rejects(
       remote({
         hostname: '127.0.0.1',
         port: 4723,
@@ -155,6 +155,6 @@ describe('Session creation and capabilities', () => {
           'appium:app': CALCULATOR_APP_ID,
         },
       }),
-    ).rejects.toThrow();
+    );
   });
 });

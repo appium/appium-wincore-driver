@@ -1,8 +1,9 @@
+import assert from 'node:assert/strict';
 import {existsSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {afterEach, beforeEach, describe, it} from 'node:test';
 
-import {describe, expect, it, beforeEach, afterEach} from 'vitest';
 import type {Browser} from 'webdriverio';
 
 import {createCalculatorSession, quitSession, resetCalculator} from './helpers/session.js';
@@ -26,36 +27,32 @@ describe('windows: screen recording', () => {
 
   describe('startRecordingScreen', () => {
     it('starts screen recording without options and does not throw', async () => {
-      await expect(driver.executeScript('windows: startRecordingScreen', [{}])).resolves.not.toThrow();
+      await assert.doesNotReject(driver.executeScript('windows: startRecordingScreen', [{}]));
       // Stop to clean up
       await driver.executeScript('windows: stopRecordingScreen', [{}]);
     });
 
     it('starts recording with fps: 15 and timeLimit: 10', async () => {
-      await expect(
+      await assert.doesNotReject(
         driver.executeScript('windows: startRecordingScreen', [
           {
             videoFps: 15,
             timeLimit: 10,
           },
         ]),
-      ).resolves.not.toThrow();
+      );
       await driver.executeScript('windows: stopRecordingScreen', [{}]);
     });
 
     it('calling startRecordingScreen twice with forceRestart: true restarts recording', async () => {
       await driver.executeScript('windows: startRecordingScreen', [{}]);
-      await expect(
-        driver.executeScript('windows: startRecordingScreen', [{forceRestart: true}]),
-      ).resolves.not.toThrow();
+      await assert.doesNotReject(driver.executeScript('windows: startRecordingScreen', [{forceRestart: true}]));
       await driver.executeScript('windows: stopRecordingScreen', [{}]);
     });
 
     it('calling startRecordingScreen twice with forceRestart: false is a no-op', async () => {
       await driver.executeScript('windows: startRecordingScreen', [{}]);
-      await expect(
-        driver.executeScript('windows: startRecordingScreen', [{forceRestart: false}]),
-      ).resolves.not.toThrow();
+      await assert.doesNotReject(driver.executeScript('windows: startRecordingScreen', [{forceRestart: false}]));
       await driver.executeScript('windows: stopRecordingScreen', [{}]);
     });
   });
@@ -66,8 +63,8 @@ describe('windows: screen recording', () => {
       // Interact briefly to generate some frames
       await resetCalculator(driver);
       const result = (await driver.executeScript('windows: stopRecordingScreen', [{}])) as string;
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
+      assert.equal(typeof result, 'string');
+      assert.ok(result.length > 0);
     });
 
     it('decoded video data starts with MP4/video file magic bytes (ftyp box)', async () => {
@@ -77,13 +74,13 @@ describe('windows: screen recording', () => {
       const buffer = Buffer.from(result, 'base64');
       // MP4 files contain "ftyp" at bytes 4-8
       const marker = buffer.slice(4, 8).toString('ascii');
-      expect(marker).toBe('ftyp');
+      assert.equal(marker, 'ftyp');
     });
 
     it('stopRecordingScreen when no recording was started returns empty string', async () => {
       // No recording started
       const result = (await driver.executeScript('windows: stopRecordingScreen', [{}])) as string;
-      expect(result).toBe('');
+      assert.equal(result, '');
     });
 
     it('full cycle: start, interact with Calculator, stop, returns valid video data', async () => {
@@ -96,12 +93,12 @@ describe('windows: screen recording', () => {
       await (await driver.$('~equalButton')).click();
 
       const result = (await driver.executeScript('windows: stopRecordingScreen', [{}])) as string;
-      expect(result.length).toBeGreaterThan(100);
+      assert.ok(result.length > 100);
     });
 
     it('rejects outputPath with a non-mp4 extension with an explanatory error', async () => {
       const outputPath = join(tmpdir(), `appiumdesktop-test-recording-${Date.now()}.avi`);
-      await expect(driver.executeScript('windows: startRecordingScreen', [{outputPath}])).rejects.toThrow(/\.mp4/);
+      await assert.rejects(driver.executeScript('windows: startRecordingScreen', [{outputPath}]), /\.mp4/);
     });
 
     it('recording is saved to the specified outputPath', async () => {
@@ -111,7 +108,7 @@ describe('windows: screen recording', () => {
         await resetCalculator(driver);
         await driver.executeScript('windows: stopRecordingScreen', [{}]);
 
-        expect(existsSync(outputPath)).toBe(true);
+        assert.equal(existsSync(outputPath), true);
       } finally {
         if (existsSync(outputPath)) {
           rmSync(outputPath);

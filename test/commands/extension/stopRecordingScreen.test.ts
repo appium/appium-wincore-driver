@@ -1,24 +1,29 @@
 /**
  * Unit tests for stopRecordingScreen extension command.
  */
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import assert from 'node:assert/strict';
+import {beforeEach, describe, it, mock} from 'node:test';
 
-import {stopRecordingScreen} from '../../../lib/commands/extension';
-import {uploadRecordedMedia} from '../../../lib/commands/screen-recorder';
-import {createMockDriver} from '../../fixtures/driver';
+import {createMockDriver} from '../../fixtures/driver.js';
+import {assertCalledWith, assertNotCalled, calls, clearCalls} from '../../helpers/mock.js';
+import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
 
-vi.mock('../../../lib/commands/screen-recorder', () => ({
-  ScreenRecorder: vi.fn(),
-  DEFAULT_EXT: 'mp4',
-  uploadRecordedMedia: vi.fn(),
-}));
+const mockUploadRecordedMedia = mock.fn(async (..._args: any[]): Promise<any> => undefined);
 
-const mockUploadRecordedMedia = vi.mocked(uploadRecordedMedia);
+mockUser32(createUser32Mock());
+mock.module('../../../lib/commands/screen-recorder.js', {
+  exports: {
+    ScreenRecorder: mock.fn(),
+    DEFAULT_EXT: 'mp4',
+    uploadRecordedMedia: mockUploadRecordedMedia,
+  },
+});
+const {stopRecordingScreen} = await import('../../../lib/commands/extension.js');
 
 describe('stopRecordingScreen', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    mockUploadRecordedMedia.mockResolvedValue('base64data');
+    clearCalls(mockUploadRecordedMedia);
+    mockUploadRecordedMedia.mock.mockImplementation(async () => 'base64data');
   });
 
   it('returns empty string when no recording in progress', async () => {
@@ -27,36 +32,40 @@ describe('stopRecordingScreen', () => {
 
     const result = await stopRecordingScreen.call(driver);
 
-    expect(result).toBe('');
+    assert.equal(result, '');
   });
 
   it('returns base64 video content', async () => {
     const driver = createMockDriver() as any;
-    const mockRecorder = {stop: vi.fn().mockResolvedValue('C:\\temp\\rec.mp4')};
+    const mockRecorder = {stop: mock.fn(async () => 'C:\\temp\\rec.mp4')};
     driver._screenRecorder = mockRecorder;
-    mockUploadRecordedMedia.mockResolvedValue('dmlkZW8tZGF0YQ==');
+    mockUploadRecordedMedia.mock.mockImplementation(async () => 'dmlkZW8tZGF0YQ==');
 
     const result = await stopRecordingScreen.call(driver);
 
-    expect(mockRecorder.stop).toHaveBeenCalledWith();
-    expect(mockUploadRecordedMedia).toHaveBeenCalledWith('C:\\temp\\rec.mp4', undefined, expect.any(Object));
-    expect(result).toBe('dmlkZW8tZGF0YQ==');
+    assertCalledWith(mockRecorder.stop);
+    const [[path, remotePath, opts]] = calls(mockUploadRecordedMedia);
+    assert.equal(path, 'C:\\temp\\rec.mp4');
+    assert.equal(remotePath, undefined);
+    assert.equal(typeof opts, 'object');
+    assert.notEqual(opts, null);
+    assert.equal(result, 'dmlkZW8tZGF0YQ==');
   });
 
   it('returns empty string when stop() returns no file path', async () => {
     const driver = createMockDriver() as any;
-    const mockRecorder = {stop: vi.fn().mockResolvedValue('')};
+    const mockRecorder = {stop: mock.fn(async () => '')};
     driver._screenRecorder = mockRecorder;
 
     const result = await stopRecordingScreen.call(driver);
 
-    expect(result).toBe('');
-    expect(mockUploadRecordedMedia).not.toHaveBeenCalled();
+    assert.equal(result, '');
+    assertNotCalled(mockUploadRecordedMedia);
   });
 
   it('passes remotePath and upload options to uploadRecordedMedia', async () => {
     const driver = createMockDriver() as any;
-    const mockRecorder = {stop: vi.fn().mockResolvedValue('C:\\temp\\rec.mp4')};
+    const mockRecorder = {stop: mock.fn(async () => 'C:\\temp\\rec.mp4')};
     driver._screenRecorder = mockRecorder;
 
     await stopRecordingScreen.call(driver, {
@@ -65,10 +74,9 @@ describe('stopRecordingScreen', () => {
       pass: 'secret',
     });
 
-    expect(mockUploadRecordedMedia).toHaveBeenCalledWith(
-      'C:\\temp\\rec.mp4',
-      'https://example.com/upload',
-      expect.objectContaining({user: 'admin', pass: 'secret'}),
-    );
+    const [[path, remotePath, opts]] = calls(mockUploadRecordedMedia);
+    assert.equal(path, 'C:\\temp\\rec.mp4');
+    assert.equal(remotePath, 'https://example.com/upload');
+    assert.partialDeepStrictEqual(opts, {user: 'admin', pass: 'secret'});
   });
 });

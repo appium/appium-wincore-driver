@@ -1,12 +1,13 @@
 /**
  * Unit tests for propertyCondition name normalisation (lib/server/conditions.ts).
  */
-import {describe, it, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
-import {propertyCondition} from '../../lib/server/conditions';
+import {propertyCondition} from '../../lib/server/conditions.js';
 
 describe('propertyCondition', () => {
-  it.each([
+  const cases: [string, string][] = [
     ['legacyvalue', 'LegacyValue'],
     ['LEGACYVALUE', 'LegacyValue'],
     ['LegacyValueProperty', 'LegacyValue'],
@@ -17,11 +18,14 @@ describe('propertyCondition', () => {
     ['legacydefaultaction', 'LegacyDefaultAction'],
     ['value', 'Value'],
     ['providerdescription', 'ProviderDescription'],
-  ])('normalises %s to %s', (input, expected) => {
-    expect(propertyCondition(input, 'x')).toEqual({type: 'property', property: expected, value: 'x'});
-  });
+  ];
+  for (const [input, expected] of cases) {
+    it(`normalises ${input} to ${expected}`, () => {
+      assert.deepEqual(propertyCondition(input, 'x'), {type: 'property', property: expected, value: 'x'});
+    });
+  }
 
   it('passes unknown names through unchanged (the server validates them)', () => {
-    expect(propertyCondition('LegacyIAccessible.Value', 'x').property).toBe('LegacyIAccessible.Value');
+    assert.equal(propertyCondition('LegacyIAccessible.Value', 'x').property, 'LegacyIAccessible.Value');
   });
 });

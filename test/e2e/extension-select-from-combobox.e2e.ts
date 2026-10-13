@@ -1,4 +1,6 @@
-import {describe, it, beforeAll, afterAll, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, before, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {createCharmapSession, createMsaaLegacyControlsSession, quitSession} from './helpers/session.js';
@@ -33,7 +35,7 @@ async function expectNoSuchElement(call: Promise<unknown>): Promise<void> {
     (err: unknown) => err,
   );
   const text = outcome instanceof Error ? outcome.message : JSON.stringify(outcome);
-  expect(text).toMatch(/no such element/i);
+  assert.match(text, /no such element/i);
 }
 
 async function comboValue(driver: Browser, selector: string): Promise<string> {
@@ -45,39 +47,39 @@ describe('windows: selectFromCombobox', () => {
     const COMBO = '~cmbCategories';
     let app: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       app = await createMsaaLegacyControlsSession();
     });
-    afterAll(async () => {
+    after(async () => {
       await quitSession(app);
     });
 
     it('selects an entry from the closed combo box and closes it again', async () => {
-      expect(await statusText(app)).toContain('Combo: closed');
+      assert.ok(String(await statusText(app)).includes('Combo: closed'));
 
       const combo = await app.$(COMBO);
       await app.executeScript('windows: selectFromCombobox', [{elementId: await combo.elementId, value: 'Groceries'}]);
 
-      expect(await comboValue(app, COMBO)).toBe('Groceries');
-      expect(await statusText(app)).toContain('Combo: closed');
+      assert.equal(await comboValue(app, COMBO), 'Groceries');
+      assert.ok(String(await statusText(app)).includes('Combo: closed'));
     });
 
     it('accepts (element, value) as two arguments', async () => {
       await app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Toys']);
-      expect(await comboValue(app, COMBO)).toBe('Toys');
+      assert.equal(await comboValue(app, COMBO), 'Toys');
     });
 
     it('selects the entry above the current selection', async () => {
       await app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Books']);
-      expect(await comboValue(app, COMBO)).toBe('Books');
+      assert.equal(await comboValue(app, COMBO), 'Books');
     });
 
     it('fails with no such element for text that only partly matches, leaving the value and closing the popup', async () => {
       await app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Electronics']);
 
       await expectNoSuchElement(app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Grocer']));
-      expect(await comboValue(app, COMBO)).toBe('Electronics');
-      expect(await statusText(app)).toContain('Combo: closed');
+      assert.equal(await comboValue(app, COMBO), 'Electronics');
+      assert.ok(String(await statusText(app)).includes('Combo: closed'));
     });
 
     it('matches case-sensitively', async () => {
@@ -95,10 +97,10 @@ describe('windows: selectFromCombobox', () => {
       return /WpfCombo: (.*)$/.exec(await statusText(app))?.[1] ?? '';
     }
 
-    beforeAll(async () => {
+    before(async () => {
       app = await createMsaaLegacyControlsSession();
     });
-    afterAll(async () => {
+    after(async () => {
       await quitSession(app);
     });
 
@@ -107,9 +109,9 @@ describe('windows: selectFromCombobox', () => {
       await app.executeScript('windows: expand', [combo]);
       try {
         const items = await combo.$$('.//ListItem');
-        expect(items.length).toBeGreaterThan(5);
-        expect(items.length).toBeLessThan(60);
-        expect(await combo.$$('.//ListItem[@Name="Item 290"]')).toHaveLength(0);
+        assert.ok((await items.length) > 5);
+        assert.ok((await items.length) < 60);
+        assert.equal((await combo.$$('.//ListItem[@Name="Item 290"]')).length, 0);
       } finally {
         await app.executeScript('windows: collapse', [combo]);
         await app.waitUntil(async () => (await combo.getAttribute('ExpandCollapseState')) === 'Collapsed', {
@@ -119,36 +121,36 @@ describe('windows: selectFromCombobox', () => {
     });
 
     it('selects an entry far below the realized ones', async () => {
-      expect(await wpfComboValue()).toBe('Item 001');
+      assert.equal(await wpfComboValue(), 'Item 001');
 
       await app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Item 290']);
 
-      expect(await wpfComboValue()).toBe('Item 290');
-      expect(await (await app.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
+      assert.equal(await wpfComboValue(), 'Item 290');
+      assert.equal(await (await app.$(COMBO)).getAttribute('ExpandCollapseState'), 'Collapsed');
     });
 
     it('selects an entry far above the current selection', async () => {
       await app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Item 002']);
 
-      expect(await wpfComboValue()).toBe('Item 002');
-      expect(await (await app.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
+      assert.equal(await wpfComboValue(), 'Item 002');
+      assert.equal(await (await app.$(COMBO)).getAttribute('ExpandCollapseState'), 'Collapsed');
     });
 
     it('fails with no such element for an entry past the end', async () => {
       await expectNoSuchElement(app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Item 301']));
 
-      expect(await wpfComboValue()).toBe('Item 002');
-      expect(await (await app.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
+      assert.equal(await wpfComboValue(), 'Item 002');
+      assert.equal(await (await app.$(COMBO)).getAttribute('ExpandCollapseState'), 'Collapsed');
     });
   });
 
   describe('container without ExpandCollapsePattern (TreeView)', () => {
     let app: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       app = await createMsaaLegacyControlsSession();
     });
-    afterAll(async () => {
+    after(async () => {
       await quitSession(app);
     });
 
@@ -157,7 +159,7 @@ describe('windows: selectFromCombobox', () => {
       await app.executeScript('windows: selectFromCombobox', [tree, 'Datacenters']);
 
       const node = await app.$('//TreeItem[@Name="Datacenters"]');
-      expect(String(await node.getAttribute('SelectionItem.IsSelected'))).toBe('true');
+      assert.equal(String(await node.getAttribute('SelectionItem.IsSelected')), 'true');
     });
   });
 
@@ -166,7 +168,7 @@ describe('windows: selectFromCombobox', () => {
     let charmap: Browser;
     let fonts: string[];
 
-    beforeAll(async () => {
+    before(async () => {
       charmap = await createCharmapSession();
 
       // Read the font names once, with the list open, then close it again.
@@ -183,27 +185,27 @@ describe('windows: selectFromCombobox', () => {
       });
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(charmap);
     });
 
     it('lists enough fonts that the last one starts off screen', () => {
-      expect(fonts.length).toBeGreaterThan(20);
+      assert.ok(fonts.length > 20);
     });
 
     it('selects the last font in the list', async () => {
       const last = fonts[fonts.length - 1];
       await charmap.executeScript('windows: selectFromCombobox', [await charmap.$(COMBO), last]);
 
-      expect(await comboValue(charmap, COMBO)).toBe(last);
-      expect(await (await charmap.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
+      assert.equal(await comboValue(charmap, COMBO), last);
+      assert.equal(await (await charmap.$(COMBO)).getAttribute('ExpandCollapseState'), 'Collapsed');
     });
 
     it('selects the first font, above the current selection', async () => {
       const first = fonts[0];
       await charmap.executeScript('windows: selectFromCombobox', [await charmap.$(COMBO), first]);
 
-      expect(await comboValue(charmap, COMBO)).toBe(first);
+      assert.equal(await comboValue(charmap, COMBO), first);
     });
 
     it('fails with no such element for a font that is not installed', async () => {
@@ -212,8 +214,8 @@ describe('windows: selectFromCombobox', () => {
         charmap.executeScript('windows: selectFromCombobox', [await charmap.$(COMBO), 'No Such Font 12345']),
       );
 
-      expect(await comboValue(charmap, COMBO)).toBe(before);
-      expect(await (await charmap.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
+      assert.equal(await comboValue(charmap, COMBO), before);
+      assert.equal(await (await charmap.$(COMBO)).getAttribute('ExpandCollapseState'), 'Collapsed');
     });
   });
 });

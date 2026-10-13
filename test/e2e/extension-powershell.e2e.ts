@@ -1,4 +1,6 @@
-import {describe, it, beforeAll, afterAll, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, before, describe, it} from 'node:test';
+
 import type {Browser} from 'webdriverio';
 
 import {createCalculatorSession, quitSession} from './helpers/session.js';
@@ -7,18 +9,18 @@ describe('windows: powerShell and executePowerShellScript', () => {
   describe('powerShell script execution (isolatedScriptExecution: false)', () => {
     let driver: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       driver = await createCalculatorSession({'appium:isolatedScriptExecution': false});
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(driver);
     });
 
     it('executes a simple Get-Date command and returns non-empty output', async () => {
       const result = (await driver.executeScript('powerShell', [{script: 'Get-Date'}])) as string;
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
+      assert.equal(typeof result, 'string');
+      assert.ok(result.length > 0);
     });
 
     it('executes a multi-line script and returns final output', async () => {
@@ -27,22 +29,22 @@ describe('windows: powerShell and executePowerShellScript', () => {
           script: '$a = 1 + 1\n$a',
         },
       ])) as string;
-      expect(result.trim()).toBe('2');
+      assert.equal(result.trim(), '2');
     });
 
     it('returns empty string for a script with no output', async () => {
       const result = (await driver.executeScript('powerShell', [{script: '$null | Out-Null'}])) as string;
-      expect(result.trim()).toBe('');
+      assert.equal(result.trim(), '');
     });
 
     it('accepts an object with a script property', async () => {
       const result = (await driver.executeScript('powerShell', [{script: '"script-prop-test"'}])) as string;
-      expect(result.trim()).toBe('script-prop-test');
+      assert.equal(result.trim(), 'script-prop-test');
     });
 
     it('accepts an object with a command property', async () => {
       const result = (await driver.executeScript('powerShell', [{command: '"command-prop-test"'}])) as string;
-      expect(result.trim()).toBe('command-prop-test');
+      assert.equal(result.trim(), 'command-prop-test');
     });
 
     it('executes powerShell alias', async () => {
@@ -51,18 +53,18 @@ describe('windows: powerShell and executePowerShellScript', () => {
           script: '"alias-test"',
         },
       ])) as string;
-      expect(result.trim()).toBe('alias-test');
+      assert.equal(result.trim(), 'alias-test');
     });
   });
 
   describe('powerShell script execution (isolatedScriptExecution: true)', () => {
     let driver: Browser;
 
-    beforeAll(async () => {
+    before(async () => {
       driver = await createCalculatorSession({'appium:isolatedScriptExecution': true});
     });
 
-    afterAll(async () => {
+    after(async () => {
       await quitSession(driver);
     });
 
@@ -70,15 +72,15 @@ describe('windows: powerShell and executePowerShellScript', () => {
       const result = (await driver.executeScript('powerShell', [
         {script: 'Get-Process | Select-Object -First 1 | Select-Object -ExpandProperty Name'},
       ])) as string;
-      expect(typeof result).toBe('string');
-      expect(result.length).toBeGreaterThan(0);
+      assert.equal(typeof result, 'string');
+      assert.ok(result.length > 0);
     });
 
     it('variables do NOT persist between isolated powerShell calls', async () => {
       await driver.executeScript('powerShell', [{script: '$isolatedVar = "should-not-persist"'}]);
       const result = (await driver.executeScript('powerShell', [{script: '$isolatedVar'}])) as string;
       // In isolated mode each execution is fresh — variable is not defined
-      expect(result.trim()).toBe('');
+      assert.equal(result.trim(), '');
     });
   });
 });

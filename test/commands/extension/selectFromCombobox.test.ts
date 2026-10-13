@@ -1,21 +1,23 @@
-import {W3C_ELEMENT_KEY, errors} from 'appium/driver';
 /**
  * Unit tests for `windows: selectFromCombobox`, run against a simulated dropdown: a list
  * of entries of which only the first few are realized (virtualized) or all are (plain
  * list), optionally with UIA ItemContainerPattern on the server side.
  */
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import assert from 'node:assert/strict';
+import {describe, it} from 'node:test';
 
-import * as executeMethods from '../../../lib/commands/execute-methods';
-import * as extension from '../../../lib/commands/extension';
-import {selectFromCombobox} from '../../../lib/commands/extension';
-import type * as UtilModule from '../../../lib/util';
-import {createMockDriver, withExecuteMethodDispatch} from '../../fixtures/driver';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 
-vi.mock('../../../lib/util', async (importOriginal) => ({
-  ...(await importOriginal<typeof UtilModule>()),
-  sleep: vi.fn().mockResolvedValue(undefined),
-}));
+import {createMockDriver, withExecuteMethodDispatch} from '../../fixtures/driver.js';
+import {mockCommonModules} from '../../helpers/common.js';
+import {assertCalledWith} from '../../helpers/mock.js';
+import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
+
+mockUser32(createUser32Mock());
+await mockCommonModules();
+const executeMethods = await import('../../../lib/commands/execute-methods.js');
+const extension = await import('../../../lib/commands/extension.js');
+const {selectFromCombobox} = extension;
 
 const COMBO = 'combo';
 
@@ -47,7 +49,7 @@ function createDropdownDriver({
   const itemIds = () => (expanded || !expandable ? names.slice(0, window) : []).map((name) => `item:${name}`);
 
   const driver = createMockDriver() as any;
-  driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+  const send = async (method: string, args: any) => {
     switch (method) {
       case 'expandElement':
         if (!expandable) {
@@ -95,96 +97,95 @@ function createDropdownDriver({
       default:
         return null;
     }
-  });
-  return {driver, selected, isExpanded: () => expanded};
+  };
+  driver.sendCommand.mock.mockImplementation(send);
+  return {driver, send, selected, isExpanded: () => expanded};
 }
 
 const NAMES = Array.from({length: 30}, (_, i) => `Option ${i + 1}`);
 
 describe('windows: selectFromCombobox', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('opens the combo box, selects the exact match and closes it again', async () => {
     const {driver, selected, isExpanded} = createDropdownDriver({names: NAMES});
     await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 12'});
-    expect(driver.sendCommand).toHaveBeenCalledWith('expandElement', {elementId: COMBO});
-    expect(selected).toEqual(['item:Option 12']);
-    expect(isExpanded()).toBe(false);
+    assertCalledWith(driver.sendCommand, 'expandElement', {elementId: COMBO});
+    assert.deepEqual(selected, ['item:Option 12']);
+    assert.equal(isExpanded(), false);
   });
 
   it('matches exactly, not by prefix', async () => {
     const {driver, selected} = createDropdownDriver({names: ['Option 1', 'Option 10']});
     await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 1'});
-    expect(selected).toEqual(['item:Option 1']);
+    assert.deepEqual(selected, ['item:Option 1']);
   });
 
   it('prefers a list entry over other elements carrying the same text', async () => {
     const {driver, selected} = createDropdownDriver({names: NAMES, texts: ['Option 3']});
     await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 3'});
-    expect(selected).toEqual(['item:Option 3']);
+    assert.deepEqual(selected, ['item:Option 3']);
   });
 
   it('finds an entry a virtualized list has not realized through ItemContainerPattern', async () => {
     const {driver, selected, isExpanded} = createDropdownDriver({names: NAMES, window: 5, itemContainer: true});
     await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 29'});
-    expect(driver.sendCommand).toHaveBeenCalledWith('findItemInContainer', {elementId: COMBO, name: 'Option 29'});
-    expect(selected).toEqual(['item:Option 29']);
-    expect(isExpanded()).toBe(false);
+    assertCalledWith(driver.sendCommand, 'findItemInContainer', {elementId: COMBO, name: 'Option 29'});
+    assert.deepEqual(selected, ['item:Option 29']);
+    assert.equal(isExpanded(), false);
   });
 
   it('searches the descendants when the container cannot look entries up itself', async () => {
     const {driver, selected} = createDropdownDriver({names: NAMES, itemContainer: 'unsupported'});
     await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 12'});
-    expect(selected).toEqual(['item:Option 12']);
+    assert.deepEqual(selected, ['item:Option 12']);
   });
 
   it('does not swallow other lookup errors', async () => {
-    const {driver} = createDropdownDriver({names: NAMES});
-    const send = driver.sendCommand.getMockImplementation();
-    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+    const {driver, send} = createDropdownDriver({names: NAMES});
+    driver.sendCommand.mock.mockImplementation(async (method: string, args: any) => {
       if (method === 'findItemInContainer') {
         throw new errors.NoSuchElementError('ElementNotFound: stale container');
       }
       return send(method, args);
     });
-    await expect(selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 12'})).rejects.toThrow(
-      errors.NoSuchElementError,
+    await assert.rejects(
+      selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 12'}),
+      (err) => err instanceof errors.NoSuchElementError,
     );
   });
 
   it('throws NoSuchElementError for a missing entry and closes the popup', async () => {
     for (const itemContainer of [true, false]) {
       const {driver, selected, isExpanded} = createDropdownDriver({names: NAMES, itemContainer});
-      await expect(selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 99'})).rejects.toThrow(
-        errors.NoSuchElementError,
+      await assert.rejects(
+        selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 99'}),
+        (err) => err instanceof errors.NoSuchElementError,
       );
-      expect(selected).toEqual([]);
-      expect(isExpanded()).toBe(false);
+      assert.deepEqual(selected, []);
+      assert.equal(isExpanded(), false);
     }
   });
 
   it('searches a container that cannot be expanded (list box) as it is', async () => {
     const {driver, selected} = createDropdownDriver({names: NAMES, expandable: false});
     await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 5'});
-    expect(selected).toEqual(['item:Option 5']);
+    assert.deepEqual(selected, ['item:Option 5']);
   });
 
   it('rejects a call without a value', async () => {
     const {driver} = createDropdownDriver({names: NAMES});
-    await expect(selectFromCombobox.call(driver, {elementId: COMBO} as any)).rejects.toThrow(
-      errors.InvalidArgumentError,
+    await assert.rejects(
+      selectFromCombobox.call(driver, {elementId: COMBO} as any),
+      (err) => err instanceof errors.InvalidArgumentError,
     );
   });
 
   it('accepts both { elementId, value } and (element, value) through execute', async () => {
     for (const args of [[{elementId: COMBO, value: 'Option 4'}], [{[W3C_ELEMENT_KEY]: COMBO}, 'Option 4']]) {
       const {driver, selected} = createDropdownDriver({names: NAMES});
-      withExecuteMethodDispatch(driver);
+      await withExecuteMethodDispatch(driver);
       Object.assign(driver, extension, executeMethods);
       await extension.execute.call(driver, 'windows: selectFromCombobox', args);
-      expect(selected).toEqual(['item:Option 4']);
+      assert.deepEqual(selected, ['item:Option 4']);
     }
   });
 });

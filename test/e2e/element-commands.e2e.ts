@@ -1,4 +1,6 @@
-import {describe, it, beforeAll, afterAll, beforeEach, expect} from 'vitest';
+import assert from 'node:assert/strict';
+import {after, before, beforeEach, describe, it} from 'node:test';
+
 import type {Browser, Selector} from 'webdriverio';
 
 import {
@@ -14,12 +16,12 @@ describe('W3C element commands', () => {
   let calc: Browser;
   let notepad: Browser;
 
-  beforeAll(async () => {
+  before(async () => {
     calc = await createCalculatorSession();
     notepad = await createNotepadSession();
   });
 
-  afterAll(async () => {
+  after(async () => {
     await quitSession(calc);
     await quitSession(notepad);
   });
@@ -31,22 +33,22 @@ describe('W3C element commands', () => {
   describe('getProperty / getAttribute', () => {
     it('gets the Name property of the result display element', async () => {
       const name = await calc.$('~CalculatorResults').getAttribute('Name');
-      expect(name).toBeTruthy();
+      assert.ok(name);
     });
 
     it('gets the AutomationId property of a button', async () => {
       const automationId = await calc.$('~num1Button').getAttribute('AutomationId');
-      expect(automationId).toBe('num1Button');
+      assert.equal(automationId, 'num1Button');
     });
 
     it('gets the IsEnabled property of a button', async () => {
       const isEnabled = await calc.$('~equalButton').getAttribute('IsEnabled');
-      expect(isEnabled).toBeTruthy();
+      assert.ok(isEnabled);
     });
 
     it('gets the ControlType property of a button', async () => {
       const controlType = await calc.$('~num1Button').getAttribute('ControlType');
-      expect(controlType).toBeTruthy();
+      assert.ok(controlType);
     });
   });
 
@@ -54,45 +56,45 @@ describe('W3C element commands', () => {
     it('returns text content of the result display after pressing a digit', async () => {
       await calc.$('~num5Button').click();
       const text = await calc.$('~CalculatorResults').getText();
-      expect(text).toContain('5');
+      assert.ok(text.includes('5'));
     });
 
     it('returns a string for an element', async () => {
       const text = await calc.$('~num1Button').getText();
-      expect(typeof text).toBe('string');
+      assert.equal(typeof text, 'string');
     });
   });
 
   describe('getName', () => {
     it('returns the control type name for a Button element', async () => {
       const name = await calc.$('~num1Button').getTagName();
-      expect(name).toBeTruthy();
+      assert.ok(name);
     });
   });
 
   describe('getElementRect', () => {
     it('returns a rect with positive width and height for a visible button', async () => {
       const rect = await calc.$('~num1Button').getSize();
-      expect(rect.width).toBeGreaterThan(0);
-      expect(rect.height).toBeGreaterThan(0);
+      assert.ok(rect.width > 0);
+      assert.ok(rect.height > 0);
     });
 
     it('returns x and y coordinates', async () => {
       const location = await calc.$('~num1Button').getLocation();
-      expect(typeof location.x).toBe('number');
-      expect(typeof location.y).toBe('number');
+      assert.equal(typeof location.x, 'number');
+      assert.equal(typeof location.y, 'number');
     });
   });
 
   describe('elementDisplayed', () => {
     it('returns true for a visible button', async () => {
-      expect(await calc.$('~num1Button').isDisplayed()).toBe(true);
+      assert.equal(await calc.$('~num1Button').isDisplayed(), true);
     });
   });
 
   describe('elementEnabled', () => {
     it('returns true for an enabled button', async () => {
-      expect(await calc.$('~equalButton').isEnabled()).toBe(true);
+      assert.equal(await calc.$('~equalButton').isEnabled(), true);
     });
   });
 
@@ -100,7 +102,7 @@ describe('W3C element commands', () => {
     it('returns true for the active navigation mode item (Standard)', async () => {
       await calc.$('~TogglePaneButton').click();
       try {
-        expect(await calc.$('~Standard').isSelected()).toBe(true);
+        assert.equal(await calc.$('~Standard').isSelected(), true);
       } finally {
         await calc.$('~TogglePaneButton').click();
       }
@@ -112,15 +114,15 @@ describe('W3C element commands', () => {
       await calc.$('~num3Button').click();
       const activeRef = await calc.getActiveElement();
       const active = await calc.$(activeRef as unknown as Selector);
-      expect(await active.getAttribute('AutomationId')).toBe('num3Button');
-      expect(await active.getAttribute('ControlType')).not.toMatch(/Window|Pane/);
+      assert.equal(await active.getAttribute('AutomationId'), 'num3Button');
+      assert.doesNotMatch((await active.getAttribute('ControlType')) as string, /Window|Pane/);
     });
 
     it('tracks focus moving to a different button', async () => {
       await calc.$('~num7Button').click();
       const activeRef = await calc.getActiveElement();
       const active = await calc.$(activeRef as unknown as Selector);
-      expect(await active.getAttribute('AutomationId')).toBe('num7Button');
+      assert.equal(await active.getAttribute('AutomationId'), 'num7Button');
     });
   });
 
@@ -128,7 +130,7 @@ describe('W3C element commands', () => {
     it('clicking digit buttons produces the expected result in the display', async () => {
       await calc.$('~num7Button').click();
       const text = await calc.$('~CalculatorResults').getText();
-      expect(text).toContain('7');
+      assert.ok(text.includes('7'));
     });
 
     it('performs addition: 1 + 1 = 2', async () => {
@@ -137,7 +139,7 @@ describe('W3C element commands', () => {
       await calc.$('~num1Button').click();
       await calc.$('~equalButton').click();
       const text = await calc.$('~CalculatorResults').getText();
-      expect(text).toContain('2');
+      assert.ok(text.includes('2'));
     });
   });
 
@@ -150,7 +152,7 @@ describe('W3C element commands', () => {
       const textArea = await getNotepadTextArea(notepad);
       await textArea.setValue('Hello World');
       const text = await textArea.getText();
-      expect(text).toContain('Hello World');
+      assert.ok(text.includes('Hello World'));
     });
 
     it('clear empties the Notepad text area', async () => {
@@ -158,7 +160,7 @@ describe('W3C element commands', () => {
       await textArea.setValue('some text');
       await textArea.clearValue();
       const text = await textArea.getText();
-      expect(text.trim()).toBe('');
+      assert.equal(text.trim(), '');
     });
   });
 });
