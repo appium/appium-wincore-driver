@@ -201,9 +201,11 @@ describe('standard accessibility values (MSAA-only fixture)', () => {
 
     it("never exposes a protected legacy control's value in page source or XPath", async () => {
       // The MSAA Proxy reports pinBox as IsPassword but still returns its PIN (4721)
-      // from both Value and LegacyValue — the driver must blank them.
+      // from both Value and LegacyValue — the driver must blank them. Matched as a whole
+      // attribute value: a bare '4721' also turns up inside HWND-derived RuntimeIds and
+      // AutomationIds (e.g. RuntimeId="42.4721360"), which change on every run.
       const source = await app.getPageSource();
-      expect(source).not.toContain('4721');
+      expect(source).not.toMatch(/Value="4721"/);
       expect(await app.$$('//Edit[@Name="pinBox" and @Value="" and @LegacyValue=""]').length).toBe(1);
     });
 
