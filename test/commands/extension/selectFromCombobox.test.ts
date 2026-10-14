@@ -1,40 +1,19 @@
 import {W3C_ELEMENT_KEY, errors} from 'appium/driver';
 /**
  * Unit tests for `windows: selectFromCombobox`, run against a simulated dropdown: a list
- * of entries of which only a window is realized (virtualized) or all are (plain list),
- * scrolled by the mocked mouse wheel.
+ * of entries of which only the first few are realized (virtualized) or all are (plain
+ * list), optionally with UIA ItemContainerPattern on the server side.
  */
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 
 import * as executeMethods from '../../../lib/commands/execute-methods';
 import * as extension from '../../../lib/commands/extension';
 import {selectFromCombobox} from '../../../lib/commands/extension';
+import type * as UtilModule from '../../../lib/util';
 import {createMockDriver, withExecuteMethodDispatch} from '../../fixtures/driver';
 
-const list = vi.hoisted(() => ({
-  names: [] as string[],
-  top: 0,
-  /** Entries realized at once; Infinity for a list that exposes every entry. */
-  window: Infinity,
-  scroll(ticks: number) {
-    // Negative ticks scroll toward the end of the list, one entry per tick.
-    const maxTop = Math.max(0, list.names.length - list.window);
-    list.top = Math.min(maxTop, Math.max(0, list.top - ticks));
-  },
-}));
-
-vi.mock('../../../lib/winapi/user32', () => ({
-  keyDown: vi.fn(),
-  keyUp: vi.fn(),
-  mouseMoveAbsolute: vi.fn().mockResolvedValue(undefined),
-  mouseScroll: vi.fn((_x: number, y: number) => list.scroll(y)),
-  mouseDown: vi.fn(),
-  mouseUp: vi.fn(),
-  getCursorPos: vi.fn().mockReturnValue({x: 0, y: 0}),
-}));
-
 vi.mock('../../../lib/util', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../../../lib/util')>()),
+  ...(await importOriginal<typeof UtilModule>()),
   sleep: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -42,22 +21,26 @@ const COMBO = 'combo';
 
 type Options = {
   names: string[];
+  /** Entries realized while open; Infinity for a list that exposes every entry. */
   window?: number;
-  top?: number;
   /** Extra non-item descendants, by name (e.g. the combo's selection-box text). */
   texts?: string[];
   expandable?: boolean;
+  /** The combo has ItemContainerPattern, which finds any entry, realized or not. */
+  itemContainer?: boolean;
 };
 
-function createDropdownDriver({names, window = Infinity, top = 0, texts = [], expandable = true}: Options) {
-  list.names = names;
-  list.window = window;
-  list.top = top;
+function createDropdownDriver({
+  names,
+  window = Infinity,
+  texts = [],
+  expandable = true,
+  itemContainer = false,
+}: Options) {
   let expanded = false;
   const selected: string[] = [];
 
-  const realized = () => (expanded || !expandable ? list.names.slice(list.top, list.top + list.window) : []);
-  const itemIds = () => realized().map((name) => `item:${name}`);
+  const itemIds = () => (expanded || !expandable ? names.slice(0, window) : []).map((name) => `item:${name}`);
 
   const driver = createMockDriver() as any;
   driver.sendCommand.mockImplementation(async (method: string, args: any) => {
@@ -74,10 +57,8 @@ function createDropdownDriver({names, window = Infinity, top = 0, texts = [], ex
       case 'selectElement':
         selected.push(args.elementId);
         return null;
-      case 'lookupElement':
-        return true;
-      case 'getRect':
-        return {x: 0, y: 0, width: 10, height: 10};
+      case 'findItemInContainer':
+        return itemContainer && names.includes(args.name) ? `item:${args.name}` : null;
       case 'findElements': {
         const {condition} = args;
         if (condition.type === 'property' && condition.property === 'Name') {
@@ -100,9 +81,6 @@ function createDropdownDriver({names, window = Infinity, top = 0, texts = [], ex
         }
         if (args.property === 'ControlType') {
           return args.elementId.startsWith('item:') ? 'ListItem' : 'Text';
-        }
-        if (args.property === 'Name') {
-          return args.elementId.slice(args.elementId.indexOf(':') + 1);
         }
         return null;
       default:
@@ -139,35 +117,23 @@ describe('windows: selectFromCombobox', () => {
     expect(selected).toEqual(['item:Option 3']);
   });
 
-  it('scrolls a virtualized list down until the entry is realized', async () => {
-    const {driver, selected} = createDropdownDriver({names: NAMES, window: 5});
-    await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 27'});
-    expect(selected).toEqual(['item:Option 27']);
-  });
-
-  it('scrolls back up when the list opened below the entry', async () => {
-    const {driver, selected} = createDropdownDriver({names: NAMES, window: 5, top: 15});
-    await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 2'});
-    expect(selected).toEqual(['item:Option 2']);
-  });
-
-  it('throws NoSuchElementError at the end of the list and closes the popup', async () => {
-    const {driver, selected, isExpanded} = createDropdownDriver({names: NAMES, window: 5});
-    await expect(selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 99'})).rejects.toThrow(
-      errors.NoSuchElementError,
-    );
-    expect(selected).toEqual([]);
+  it('finds an entry a virtualized list has not realized through ItemContainerPattern', async () => {
+    const {driver, selected, isExpanded} = createDropdownDriver({names: NAMES, window: 5, itemContainer: true});
+    await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 29'});
+    expect(driver.sendCommand).toHaveBeenCalledWith('findItemInContainer', {elementId: COMBO, name: 'Option 29'});
+    expect(selected).toEqual(['item:Option 29']);
     expect(isExpanded()).toBe(false);
   });
 
-  it('does not scroll a list that exposes every entry more than once', async () => {
-    const {driver} = createDropdownDriver({names: NAMES});
-    await expect(selectFromCombobox.call(driver, {elementId: COMBO, value: 'Missing'})).rejects.toThrow(
-      errors.NoSuchElementError,
-    );
-    // One tick down and one up, each leaving the entries unchanged.
-    const user32 = await import('../../../lib/winapi/user32');
-    expect(user32.mouseScroll).toHaveBeenCalledTimes(2);
+  it('throws NoSuchElementError for a missing entry and closes the popup', async () => {
+    for (const itemContainer of [true, false]) {
+      const {driver, selected, isExpanded} = createDropdownDriver({names: NAMES, itemContainer});
+      await expect(selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 99'})).rejects.toThrow(
+        errors.NoSuchElementError,
+      );
+      expect(selected).toEqual([]);
+      expect(isExpanded()).toBe(false);
+    }
   });
 
   it('searches a container that cannot be expanded (list box) as it is', async () => {

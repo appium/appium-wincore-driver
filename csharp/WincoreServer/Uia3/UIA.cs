@@ -182,6 +182,8 @@ public static class UIA
     public const int TransformPatternId = 10016;
     public const int ScrollItemPatternId = 10017;
     public const int LegacyIAccessiblePatternId = 10018;
+    public const int ItemContainerPatternId = 10019;
+    public const int VirtualizedItemPatternId = 10020;
 
     // Control Type IDs
     public const int ButtonControlTypeId = 50000;
@@ -634,6 +636,22 @@ public interface IUIAutomationExpandCollapsePattern
 public interface IUIAutomationScrollItemPattern
 {
     void ScrollIntoView();
+}
+
+[ComImport, Guid("C690FDB2-27A8-423C-812D-429773C9084E"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IUIAutomationItemContainerPattern
+{
+    [return: MarshalAs(UnmanagedType.Interface)]
+    IUIAutomationElement? FindItemByProperty(
+        [MarshalAs(UnmanagedType.Interface)] IUIAutomationElement? pStartAfter,
+        int propertyId,
+        [MarshalAs(UnmanagedType.Struct)] object value);
+}
+
+[ComImport, Guid("6BA3D7A6-04CF-4F11-8793-A8D1CDE9969F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IUIAutomationVirtualizedItemPattern
+{
+    void Realize();
 }
 
 [ComImport, Guid("A8EFA66A-0FDA-421A-9194-38021F3578EA"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]

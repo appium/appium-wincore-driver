@@ -11,7 +11,7 @@ import type {AppiumWincoreDriver} from '../driver';
 import type {Enum} from '../enums';
 import {ClickType, Key} from '../enums';
 import {convertStringToCondition} from '../powershell/converter';
-import {andCondition, orCondition, propertyCondition} from '../server/conditions';
+import {orCondition, propertyCondition} from '../server/conditions';
 import {conditionToDto} from '../server/converter-bridge';
 import type {RectResult} from '../server/protocol';
 import {sleep} from '../util';
@@ -429,12 +429,6 @@ const ITEM_CONTROL_TYPES = ['ListItem', 'DataItem', 'TreeItem', 'MenuItem'];
 const ITEM_CONDITION = orCondition(...ITEM_CONTROL_TYPES.map((type) => propertyCondition('ControlType', type)));
 /** How long to wait for the opened popup to report its entries. */
 const SELECT_FROM_COMBOBOX_OPEN_TIMEOUT_MS = 1000;
-/** Pause after each wheel tick so a virtualized list can realize the next entries. */
-const SELECT_FROM_COMBOBOX_SCROLL_SETTLE_MS = 150;
-/** Upper bound on wheel ticks per direction, in case the list never reports an end. */
-const SELECT_FROM_COMBOBOX_MAX_SCROLLS = 500;
-
-type ItemSnapshot = {items: string[]; signature: string};
 
 async function findItemsNamed(this: AppiumWincoreDriver, containerId: string, value: string): Promise<string[]> {
   const matches = ((await this.sendCommand('findElements', {
@@ -457,39 +451,13 @@ async function findItemsNamed(this: AppiumWincoreDriver, containerId: string, va
   return [...items, ...others];
 }
 
-// The entries the container currently exposes, plus a signature of that set. A
-// virtualized list realizes a different window of entries after each scroll; once a
-// scroll leaves the signature unchanged, the list is at its end. A list that exposes
-// every entry up front (WinForms, Win32, Swing) never changes, so it ends after one tick.
-async function snapshotItems(this: AppiumWincoreDriver, containerId: string): Promise<ItemSnapshot> {
-  const items = ((await this.sendCommand('findElements', {
+async function hasItems(this: AppiumWincoreDriver, containerId: string): Promise<boolean> {
+  const items = (await this.sendCommand('findElements', {
     scope: 'descendants',
     condition: ITEM_CONDITION,
     contextElementId: containerId,
-  })) ?? []) as string[];
-  if (items.length === 0) {
-    return {items, signature: ''};
-  }
-  const nameOf = async (id: string) => {
-    try {
-      return String(await this.sendCommand('getProperty', {elementId: id, property: 'Name'}));
-    } catch {
-      return '';
-    }
-  };
-  const [first, last] = await Promise.all([nameOf(items[0]), nameOf(items[items.length - 1])]);
-  return {items, signature: `${items.length}\u0000${first}\u0000${last}`};
-}
-
-// Wheel over an entry that is on screen: wheeling over the closed combo box itself
-// changes its selection (WPF, Win32), and an off-screen entry's rect is outside the popup.
-async function findWheelTarget(this: AppiumWincoreDriver, containerId: string): Promise<string | undefined> {
-  const visible = ((await this.sendCommand('findElements', {
-    scope: 'descendants',
-    condition: andCondition(ITEM_CONDITION, propertyCondition('IsOffscreen', false)),
-    contextElementId: containerId,
-  })) ?? []) as string[];
-  return visible[Math.trunc(visible.length / 2)];
+  })) as string[] | null;
+  return (items?.length ?? 0) > 0;
 }
 
 async function openContainer(this: AppiumWincoreDriver, containerId: string): Promise<void> {
@@ -521,45 +489,13 @@ async function closeContainer(this: AppiumWincoreDriver, containerId: string): P
 }
 
 /**
- * Scrolls the open list one wheel tick at a time in one direction, looking for an
- * entry named `value` after each tick, until it is found or the list stops changing.
- * @returns The matching entry, or undefined when the end of the list was reached.
- */
-async function scrollForItem(
-  this: AppiumWincoreDriver,
-  containerId: string,
-  value: string,
-  ticks: number,
-  snapshot: ItemSnapshot,
-): Promise<string | undefined> {
-  for (let i = 0; i < SELECT_FROM_COMBOBOX_MAX_SCROLLS; i++) {
-    const target = await findWheelTarget.call(this, containerId);
-    if (!target) {
-      return undefined;
-    }
-    await executeScroll.call(this, {elementId: target, deltaY: ticks});
-    await sleep(SELECT_FROM_COMBOBOX_SCROLL_SETTLE_MS);
-
-    const [match] = await findItemsNamed.call(this, containerId, value);
-    if (match) {
-      return match;
-    }
-    const next = await snapshotItems.call(this, containerId);
-    if (next.signature === snapshot.signature) {
-      return undefined;
-    }
-    snapshot = next;
-  }
-  return undefined;
-}
-
-/**
  * `windows: selectFromCombobox` handler: opens a combo box (or any container), finds the
- * entry whose Name is exactly `value`, scrolling the list when it is virtualized, and
- * selects it. The popup is closed again afterwards if it is still open.
+ * entry whose Name is exactly `value`, and selects it. The popup is closed again
+ * afterwards if it is still open.
  *
- * Scrolls down to the end of the list first, then up to the top, since a dropdown often
- * opens scrolled to its current selection.
+ * A virtualized list (WPF) is asked for the entry through UIA ItemContainerPattern, which
+ * also reaches entries not on screen. Otherwise the container's descendants are searched:
+ * WinForms, Win32 and MSAA lists expose every entry once open.
  * @param args.elementId - The combo box or container element.
  * @param args.value - The exact text of the entry to select.
  * @returns Resolves once the entry has been selected.
@@ -579,26 +515,18 @@ export async function selectFromCombobox(
 
   await openContainer.call(this, containerId);
 
+  let match = ((await this.sendCommand('findItemInContainer', {elementId: containerId, name: value})) ?? undefined) as
+    | string
+    | undefined;
+
   // The popup may still be animating open: wait until it reports entries.
-  let match: string | undefined;
-  let snapshot: ItemSnapshot = {items: [], signature: ''};
   const deadline = Date.now() + SELECT_FROM_COMBOBOX_OPEN_TIMEOUT_MS;
-  do {
+  while (!match) {
     [match] = await findItemsNamed.call(this, containerId, value);
-    if (match) {
-      break;
-    }
-    snapshot = await snapshotItems.call(this, containerId);
-    if (snapshot.items.length > 0) {
+    if (match || Date.now() >= deadline || (await hasItems.call(this, containerId))) {
       break;
     }
     await sleep(100);
-  } while (Date.now() < deadline);
-
-  if (!match && snapshot.items.length > 0) {
-    match =
-      (await scrollForItem.call(this, containerId, value, -1, snapshot)) ??
-      (await scrollForItem.call(this, containerId, value, 1, await snapshotItems.call(this, containerId)));
   }
 
   if (!match) {

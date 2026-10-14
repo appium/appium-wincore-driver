@@ -357,24 +357,22 @@ Steps:
 1. Expands the container unless it is already open. A container
    without `ExpandCollapsePattern` (a list box, a tree) is searched as
    it is.
-1. Looks for a descendant whose `Name` equals `value` (case-sensitive,
-   no partial match). List, data, tree and menu items win over other
-   elements with the same text, such as the combo's selection box.
-1. If none is found, scrolls the list with the mouse wheel one tick at a
-   time, searching after each tick, until the list stops changing. It
-   scrolls down to the end first, then up to the top, because a dropdown
-   often opens at its current selection.
+1. Asks the container for the entry through UI Automation's
+   `ItemContainerPattern`. This reaches entries a virtualized list (WPF)
+   has not created yet; the entry is realized (`VirtualizedItemPattern`)
+   so it can be selected.
+1. Otherwise looks for a descendant whose `Name` equals `value`. List,
+   data, tree and menu items win over other elements with the same text,
+   such as the combo's selection box. WinForms, Win32 and MSAA lists
+   expose every entry once open.
 1. Selects the entry as `windows: select` does, then closes the popup
    if it is still open.
 
-If no entry matches, the popup is closed and the command fails with
-`no such element`.
-
-Scrolling matters only for virtualized lists (WPF), which expose just
-the entries on screen. WinForms, Win32 and Swing dropdowns expose every
-entry once open, so the entry is found without scrolling. The popup's
-entries must be descendants of the container element; a dropdown that
-opens as a separate top-level window is not searched.
+Name matching is exact (case-sensitive, no partial match). If no entry
+matches, the popup is closed and the command fails with
+`no such element`. The popup's entries must be descendants of the
+container element; a dropdown that opens as a separate top-level window
+is not searched.
 
 #### windows: setValue
 

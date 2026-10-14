@@ -140,6 +140,7 @@ public class CommandDispatcher
         AddElement("moveWindow", PatternCommands.MoveWindow, provider: null);
         AddElement("resizeWindow", PatternCommands.ResizeWindow, provider: null);
         AddElement("setRootElementFromElementId", SessionCommands.SetRootElementFromElementId, provider: null);
+        AddElement("findItemInContainer", ContainerCommands.FindItemInContainer, provider: null);
     }
 
     private readonly Dictionary<string, bool> _elementRoutes = new(StringComparer.OrdinalIgnoreCase);

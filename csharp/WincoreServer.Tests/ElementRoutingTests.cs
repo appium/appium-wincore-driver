@@ -19,6 +19,7 @@ public class ElementRoutingTests
     {
         "maximizeWindow", "minimizeWindow", "restoreWindow", "closeWindow",
         "moveWindow", "resizeWindow", "setRootElementFromElementId",
+        "findItemInContainer",
     };
 
     private readonly CommandDispatcher _dispatcher = new();
