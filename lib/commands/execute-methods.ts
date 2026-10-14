@@ -23,6 +23,7 @@ import {
   patternAddToSelection,
   patternRemoveFromSelection,
   patternSelect,
+  selectFromCombobox,
   patternToggle,
   patternSetValue,
   patternGetValue,
@@ -142,6 +143,16 @@ export async function emRemoveFromSelection(this: AppiumWincoreDriver, elementId
  */
 export async function emSelect(this: AppiumWincoreDriver, elementId: string): Promise<void> {
   return await patternSelect.call(this, toElement(elementId));
+}
+
+/**
+ * `executeMethod` wrapper for {@link selectFromCombobox}.
+ * @param elementId - The id of the combo box or container to pick from.
+ * @param value - The exact text of the entry to select.
+ * @returns Resolves once the entry has been selected.
+ */
+export async function emSelectFromCombobox(this: AppiumWincoreDriver, elementId: string, value: string): Promise<void> {
+  return await selectFromCombobox.call(this, {elementId, value});
 }
 
 /**

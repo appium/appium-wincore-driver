@@ -11,7 +11,7 @@ import type {AppiumWincoreDriver} from '../driver';
 import type {Enum} from '../enums';
 import {ClickType, Key} from '../enums';
 import {convertStringToCondition} from '../powershell/converter';
-import {propertyCondition} from '../server/conditions';
+import {andCondition, orCondition, propertyCondition} from '../server/conditions';
 import {conditionToDto} from '../server/converter-bridge';
 import type {RectResult} from '../server/protocol';
 import {sleep} from '../util';
@@ -62,9 +62,9 @@ type KeyAction = {
  * understands.
  */
 function coerceExecuteMethodArgs(script: string, args: any[]): any[] | null {
-  // `patternSetValue(element, value)` is the only handler taking two separate
-  // positional args instead of one options object.
-  if (script === 'windows: setValue' && args.length === 2) {
+  // `windows: setValue` and `windows: selectFromCombobox` also accept two separate
+  // positional args, `(element, value)`, instead of one options object.
+  if ((script === 'windows: setValue' || script === 'windows: selectFromCombobox') && args.length === 2) {
     const [element, value] = args;
     if (element && typeof element === 'object' && W3C_ELEMENT_KEY in element) {
       return [{elementId: element[W3C_ELEMENT_KEY], value}];
@@ -420,6 +420,194 @@ export async function patternRemoveFromSelection(this: AppiumWincoreDriver, elem
  */
 export async function patternSelect(this: AppiumWincoreDriver, element: Element): Promise<void> {
   await this.sendCommand('selectElement', {elementId: element[W3C_ELEMENT_KEY]});
+}
+
+// Control types a dropdown / list / tree exposes its entries as. The value is matched
+// against these first so the combo's own edit or selection-box text (which often
+// carries the currently selected value) is never picked over the real entry.
+const ITEM_CONTROL_TYPES = ['ListItem', 'DataItem', 'TreeItem', 'MenuItem'];
+const ITEM_CONDITION = orCondition(...ITEM_CONTROL_TYPES.map((type) => propertyCondition('ControlType', type)));
+/** How long to wait for the opened popup to report its entries. */
+const SELECT_FROM_COMBOBOX_OPEN_TIMEOUT_MS = 1000;
+/** Pause after each wheel tick so a virtualized list can realize the next entries. */
+const SELECT_FROM_COMBOBOX_SCROLL_SETTLE_MS = 150;
+/** Upper bound on wheel ticks per direction, in case the list never reports an end. */
+const SELECT_FROM_COMBOBOX_MAX_SCROLLS = 500;
+
+type ItemSnapshot = {items: string[]; signature: string};
+
+async function findItemsNamed(this: AppiumWincoreDriver, containerId: string, value: string): Promise<string[]> {
+  const matches = ((await this.sendCommand('findElements', {
+    scope: 'descendants',
+    condition: propertyCondition('Name', value),
+    contextElementId: containerId,
+  })) ?? []) as string[];
+
+  const items: string[] = [];
+  const others: string[] = [];
+  for (const id of matches) {
+    let controlType: unknown;
+    try {
+      controlType = await this.sendCommand('getProperty', {elementId: id, property: 'ControlType'});
+    } catch {
+      // Unreadable control type: still a candidate, after the real entries.
+    }
+    (ITEM_CONTROL_TYPES.includes(String(controlType)) ? items : others).push(id);
+  }
+  return [...items, ...others];
+}
+
+// The entries the container currently exposes, plus a signature of that set. A
+// virtualized list realizes a different window of entries after each scroll; once a
+// scroll leaves the signature unchanged, the list is at its end. A list that exposes
+// every entry up front (WinForms, Win32, Swing) never changes, so it ends after one tick.
+async function snapshotItems(this: AppiumWincoreDriver, containerId: string): Promise<ItemSnapshot> {
+  const items = ((await this.sendCommand('findElements', {
+    scope: 'descendants',
+    condition: ITEM_CONDITION,
+    contextElementId: containerId,
+  })) ?? []) as string[];
+  if (items.length === 0) {
+    return {items, signature: ''};
+  }
+  const nameOf = async (id: string) => {
+    try {
+      return String(await this.sendCommand('getProperty', {elementId: id, property: 'Name'}));
+    } catch {
+      return '';
+    }
+  };
+  const [first, last] = await Promise.all([nameOf(items[0]), nameOf(items[items.length - 1])]);
+  return {items, signature: `${items.length}\u0000${first}\u0000${last}`};
+}
+
+// Wheel over an entry that is on screen: wheeling over the closed combo box itself
+// changes its selection (WPF, Win32), and an off-screen entry's rect is outside the popup.
+async function findWheelTarget(this: AppiumWincoreDriver, containerId: string): Promise<string | undefined> {
+  const visible = ((await this.sendCommand('findElements', {
+    scope: 'descendants',
+    condition: andCondition(ITEM_CONDITION, propertyCondition('IsOffscreen', false)),
+    contextElementId: containerId,
+  })) ?? []) as string[];
+  return visible[Math.trunc(visible.length / 2)];
+}
+
+async function openContainer(this: AppiumWincoreDriver, containerId: string): Promise<void> {
+  if ((await isExpanded.call(this, containerId)) === true) {
+    return;
+  }
+  try {
+    await patternExpand.call(this, {[W3C_ELEMENT_KEY]: containerId} as Element);
+  } catch (err: any) {
+    // A list box or tree is already open: nothing to expand, search it as it is.
+    if (!/PatternNotSupported/.test(String(err?.message ?? err))) {
+      throw err;
+    }
+    this.log.debug(`[selectFromCombobox] '${containerId}' cannot be expanded, searching it as is.`);
+  }
+}
+
+async function closeContainer(this: AppiumWincoreDriver, containerId: string): Promise<void> {
+  if ((await isExpanded.call(this, containerId)) !== true) {
+    return;
+  }
+  try {
+    await patternCollapse.call(this, {[W3C_ELEMENT_KEY]: containerId} as Element);
+  } catch (err) {
+    this.log.debug(
+      `[selectFromCombobox] could not close '${containerId}': ${err instanceof Error ? err.message : err}`,
+    );
+  }
+}
+
+/**
+ * Scrolls the open list one wheel tick at a time in one direction, looking for an
+ * entry named `value` after each tick, until it is found or the list stops changing.
+ * @returns The matching entry, or undefined when the end of the list was reached.
+ */
+async function scrollForItem(
+  this: AppiumWincoreDriver,
+  containerId: string,
+  value: string,
+  ticks: number,
+  snapshot: ItemSnapshot,
+): Promise<string | undefined> {
+  for (let i = 0; i < SELECT_FROM_COMBOBOX_MAX_SCROLLS; i++) {
+    const target = await findWheelTarget.call(this, containerId);
+    if (!target) {
+      return undefined;
+    }
+    await executeScroll.call(this, {elementId: target, deltaY: ticks});
+    await sleep(SELECT_FROM_COMBOBOX_SCROLL_SETTLE_MS);
+
+    const [match] = await findItemsNamed.call(this, containerId, value);
+    if (match) {
+      return match;
+    }
+    const next = await snapshotItems.call(this, containerId);
+    if (next.signature === snapshot.signature) {
+      return undefined;
+    }
+    snapshot = next;
+  }
+  return undefined;
+}
+
+/**
+ * `windows: selectFromCombobox` handler: opens a combo box (or any container), finds the
+ * entry whose Name is exactly `value`, scrolling the list when it is virtualized, and
+ * selects it. The popup is closed again afterwards if it is still open.
+ *
+ * Scrolls down to the end of the list first, then up to the top, since a dropdown often
+ * opens scrolled to its current selection.
+ * @param args.elementId - The combo box or container element.
+ * @param args.value - The exact text of the entry to select.
+ * @returns Resolves once the entry has been selected.
+ * @throws NoSuchElementError when no entry with that text exists.
+ */
+export async function selectFromCombobox(
+  this: AppiumWincoreDriver,
+  args: {elementId: string; value: string},
+): Promise<void> {
+  const {elementId: containerId, value} = args ?? ({} as any);
+  if (!containerId) {
+    throw new errors.InvalidArgumentError("'elementId' of the combo box or container is required.");
+  }
+  if (typeof value !== 'string') {
+    throw new errors.InvalidArgumentError("'value' must be the exact text of the entry to select.");
+  }
+
+  await openContainer.call(this, containerId);
+
+  // The popup may still be animating open: wait until it reports entries.
+  let match: string | undefined;
+  let snapshot: ItemSnapshot = {items: [], signature: ''};
+  const deadline = Date.now() + SELECT_FROM_COMBOBOX_OPEN_TIMEOUT_MS;
+  do {
+    [match] = await findItemsNamed.call(this, containerId, value);
+    if (match) {
+      break;
+    }
+    snapshot = await snapshotItems.call(this, containerId);
+    if (snapshot.items.length > 0) {
+      break;
+    }
+    await sleep(100);
+  } while (Date.now() < deadline);
+
+  if (!match && snapshot.items.length > 0) {
+    match =
+      (await scrollForItem.call(this, containerId, value, -1, snapshot)) ??
+      (await scrollForItem.call(this, containerId, value, 1, await snapshotItems.call(this, containerId)));
+  }
+
+  if (!match) {
+    await closeContainer.call(this, containerId);
+    throw new errors.NoSuchElementError(`No entry with the text '${value}' was found in the list.`);
+  }
+
+  await patternSelect.call(this, {[W3C_ELEMENT_KEY]: match} as Element);
+  await closeContainer.call(this, containerId);
 }
 
 /**

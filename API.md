@@ -334,6 +334,48 @@ Behaviour changes from earlier versions:
   have both Invoke and SelectionItem it now invokes instead of
   selecting.
 
+#### windows: selectFromCombobox
+
+Opens a combo box (or any list / tree container), finds the entry whose
+text is exactly `value`, and selects it.
+
+| Param | Type | Required | Description |
+| --- | --- | --- | --- |
+| `elementId` | string | yes | The combo box or container element |
+| `value` | string | yes | Exact text (`Name`) of the entry to select |
+
+```javascript
+await driver.executeScript('windows: selectFromCombobox', [
+  {elementId: await combo.elementId, value: 'Finance'},
+]);
+// or, like windows: setValue, as two arguments:
+await driver.executeScript('windows: selectFromCombobox', [combo, 'Finance']);
+```
+
+Steps:
+
+1. Expands the container unless it is already open. A container
+   without `ExpandCollapsePattern` (a list box, a tree) is searched as
+   it is.
+1. Looks for a descendant whose `Name` equals `value` (case-sensitive,
+   no partial match). List, data, tree and menu items win over other
+   elements with the same text, such as the combo's selection box.
+1. If none is found, scrolls the list with the mouse wheel one tick at a
+   time, searching after each tick, until the list stops changing. It
+   scrolls down to the end first, then up to the top, because a dropdown
+   often opens at its current selection.
+1. Selects the entry as `windows: select` does, then closes the popup
+   if it is still open.
+
+If no entry matches, the popup is closed and the command fails with
+`no such element`.
+
+Scrolling matters only for virtualized lists (WPF), which expose just
+the entries on screen. WinForms, Win32 and Swing dropdowns expose every
+entry once open, so the entry is found without scrolling. The popup's
+entries must be descendants of the container element; a dropdown that
+opens as a separate top-level window is not searched.
+
 #### windows: setValue
 
 Sets the element value via ValuePattern. Arg 0: element. Arg 1: value string.

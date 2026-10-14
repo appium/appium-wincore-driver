@@ -23,6 +23,7 @@ export const executeMethodMap: ExecuteMethodMap<AppiumWincoreDriver> = {
   'windows: addToSelection': {command: 'emAddToSelection', params: {required: ['elementId']}},
   'windows: removeFromSelection': {command: 'emRemoveFromSelection', params: {required: ['elementId']}},
   'windows: select': {command: 'emSelect', params: {required: ['elementId']}},
+  'windows: selectFromCombobox': {command: 'emSelectFromCombobox', params: {required: ['elementId', 'value']}},
   'windows: toggle': {command: 'emToggle', params: {required: ['elementId']}},
   'windows: setValue': {command: 'emSetValue', params: {required: ['elementId', 'value']}},
   'windows: getValue': {command: 'emGetValue', params: {required: ['elementId']}},
