@@ -460,6 +460,27 @@ async function hasItems(this: AppiumWincoreDriver, containerId: string): Promise
   return (items?.length ?? 0) > 0;
 }
 
+// The container's own lookup of the entry (findItemInContainer), or undefined when it
+// finds none or has none: a tree provider that does not implement it answers
+// PatternNotSupported, and the caller then searches the descendants.
+async function findItemInContainer(
+  this: AppiumWincoreDriver,
+  containerId: string,
+  value: string,
+): Promise<string | undefined> {
+  try {
+    return ((await this.sendCommand('findItemInContainer', {elementId: containerId, name: value})) ?? undefined) as
+      | string
+      | undefined;
+  } catch (err: any) {
+    if (!/PatternNotSupported/.test(String(err?.message ?? err))) {
+      throw err;
+    }
+    this.log.debug(`[selectFromCombobox] '${containerId}' cannot look entries up itself, searching its descendants.`);
+    return undefined;
+  }
+}
+
 async function openContainer(this: AppiumWincoreDriver, containerId: string): Promise<void> {
   if ((await isExpanded.call(this, containerId)) === true) {
     return;
@@ -493,9 +514,10 @@ async function closeContainer(this: AppiumWincoreDriver, containerId: string): P
  * entry whose Name is exactly `value`, and selects it. The popup is closed again
  * afterwards if it is still open.
  *
- * A virtualized list (WPF) is asked for the entry through UIA ItemContainerPattern, which
- * also reaches entries not on screen. Otherwise the container's descendants are searched:
- * WinForms, Win32 and MSAA lists expose every entry once open.
+ * The container is asked for the entry first: UIA ItemContainerPattern for a virtualized
+ * list (WPF), or the owning tree provider's FindItemInContainer. Both also reach entries
+ * not on screen. Otherwise the container's descendants are searched: WinForms, Win32 and
+ * MSAA lists expose every entry once open.
  * @param args.elementId - The combo box or container element.
  * @param args.value - The exact text of the entry to select.
  * @returns Resolves once the entry has been selected.
@@ -515,9 +537,7 @@ export async function selectFromCombobox(
 
   await openContainer.call(this, containerId);
 
-  let match = ((await this.sendCommand('findItemInContainer', {elementId: containerId, name: value})) ?? undefined) as
-    | string
-    | undefined;
+  let match = await findItemInContainer.call(this, containerId, value);
 
   // The popup may still be animating open: wait until it reports entries.
   const deadline = Date.now() + SELECT_FROM_COMBOBOX_OPEN_TIMEOUT_MS;

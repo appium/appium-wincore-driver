@@ -26,8 +26,12 @@ type Options = {
   /** Extra non-item descendants, by name (e.g. the combo's selection-box text). */
   texts?: string[];
   expandable?: boolean;
-  /** The combo has ItemContainerPattern, which finds any entry, realized or not. */
-  itemContainer?: boolean;
+  /**
+   * The combo looks entries up itself (ItemContainerPattern, or a tree provider's
+   * FindItemInContainer) and finds any entry, realized or not. 'unsupported' answers
+   * like a tree provider that does not implement it.
+   */
+  itemContainer?: boolean | 'unsupported';
 };
 
 function createDropdownDriver({
@@ -58,6 +62,11 @@ function createDropdownDriver({
         selected.push(args.elementId);
         return null;
       case 'findItemInContainer':
+        if (itemContainer === 'unsupported') {
+          throw new errors.UnknownError(
+            "PatternNotSupported: The 'fake' tree provider does not support FindItemInContainer.",
+          );
+        }
         return itemContainer && names.includes(args.name) ? `item:${args.name}` : null;
       case 'findElements': {
         const {condition} = args;
@@ -123,6 +132,26 @@ describe('windows: selectFromCombobox', () => {
     expect(driver.sendCommand).toHaveBeenCalledWith('findItemInContainer', {elementId: COMBO, name: 'Option 29'});
     expect(selected).toEqual(['item:Option 29']);
     expect(isExpanded()).toBe(false);
+  });
+
+  it('searches the descendants when the container cannot look entries up itself', async () => {
+    const {driver, selected} = createDropdownDriver({names: NAMES, itemContainer: 'unsupported'});
+    await selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 12'});
+    expect(selected).toEqual(['item:Option 12']);
+  });
+
+  it('does not swallow other lookup errors', async () => {
+    const {driver} = createDropdownDriver({names: NAMES});
+    const send = driver.sendCommand.getMockImplementation();
+    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+      if (method === 'findItemInContainer') {
+        throw new errors.NoSuchElementError('ElementNotFound: stale container');
+      }
+      return send(method, args);
+    });
+    await expect(selectFromCombobox.call(driver, {elementId: COMBO, value: 'Option 12'})).rejects.toThrow(
+      errors.NoSuchElementError,
+    );
   });
 
   it('throws NoSuchElementError for a missing entry and closes the popup', async () => {

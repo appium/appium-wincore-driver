@@ -137,6 +137,17 @@ public interface ITreeProvider : IDisposable
     /// <summary>Sets the value of a range control (slider, spinner, progress bar).</summary>
     void SetRangeValue(string elementId, double value) => throw Unsupported(nameof(SetRangeValue));
 
+    /// <summary>
+    /// Finds the entry of a list-like container (combo box, list, tree) whose text is
+    /// exactly <paramref name="name"/> (case-sensitive), including entries the container
+    /// has not created or loaded yet, and makes it ready to select (realized / scrolled
+    /// into view). Only list, data, tree or menu items count as entries. Backs
+    /// <c>windows: selectFromCombobox</c>; when unsupported, or when it returns null,
+    /// the driver searches the container's current descendants instead.
+    /// </summary>
+    /// <returns>The entry's id (minted by this provider), or null when there is no such entry.</returns>
+    string? FindItemInContainer(string containerId, string name) => throw Unsupported(nameof(FindItemInContainer));
+
     private NotSupportedException Unsupported(string operation) =>
         new($"The '{Name}' tree provider does not support {operation}.");
 

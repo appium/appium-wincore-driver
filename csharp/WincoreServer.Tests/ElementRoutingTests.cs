@@ -19,7 +19,6 @@ public class ElementRoutingTests
     {
         "maximizeWindow", "minimizeWindow", "restoreWindow", "closeWindow",
         "moveWindow", "resizeWindow", "setRootElementFromElementId",
-        "findItemInContainer",
     };
 
     private readonly CommandDispatcher _dispatcher = new();
@@ -57,6 +56,26 @@ public class ElementRoutingTests
 
         Assert.Equal("text-of-fake:1", result);
         Assert.Equal(["GetText:fake:1"], _fake.Calls);
+    }
+
+    [Fact]
+    public void FindItemInContainer_ProviderElement_ReachesProviderWithName()
+    {
+        var result = Execute("findItemInContainer", """{"elementId":"fake:1","name":"Item 290"}""");
+
+        Assert.Equal("fake:item:Item 290", result);
+        Assert.Equal(["FindItemInContainer:fake:1"], _fake.Calls);
+    }
+
+    [Fact]
+    public void FindItemInContainer_NotOverridden_ThrowsSdkDefaultNotSupported()
+    {
+        _state.Providers.Register(new MinimalTreeProvider());
+
+        var ex = Assert.Throws<NotSupportedException>(() =>
+            Execute("findItemInContainer", """{"elementId":"min:1","name":"Item 290"}"""));
+
+        Assert.Contains("'min' tree provider does not support FindItemInContainer", ex.Message);
     }
 
     [Fact]
@@ -110,7 +129,7 @@ public class ElementRoutingTests
 
             var value = method == "setElementValue" ? "\"x\"" : "1.5";
             var ex = Record.Exception(() => Execute(method,
-                $$"""{"elementId":"fake:1","property":"Name","value":{{value}}}"""));
+                $$"""{"elementId":"fake:1","property":"Name","name":"x","value":{{value}}}"""));
 
             var reached = _fake.Calls.Count > 0
                 || ex is NotSupportedException nse && nse.Message.Contains("'fake' tree provider does not support");
@@ -119,8 +138,9 @@ public class ElementRoutingTests
     }
 
     /// <summary>
-    /// Records every call. Overrides only <see cref="ITreeProvider.Collapse"/> among the
-    /// optional capabilities, so the rest exercise the SDK default bodies.
+    /// Records every call. Overrides only <see cref="ITreeProvider.Collapse"/> and
+    /// <see cref="ITreeProvider.FindItemInContainer"/> among the optional capabilities, so
+    /// the rest exercise the SDK default bodies.
     /// </summary>
     private sealed class FakeTreeProvider : ITreeProvider
     {
@@ -160,9 +180,41 @@ public class ElementRoutingTests
         public void RequestFocus(string elementId) => Record(nameof(RequestFocus), elementId);
         public void Expand(string elementId) => Record(nameof(Expand), elementId);
         public void Collapse(string elementId) => Record(nameof(Collapse), elementId);
+        public string? FindItemInContainer(string containerId, string name) =>
+            (string?)Record(nameof(FindItemInContainer), containerId, $"fake:item:{name}");
 
         public void BuildPageSourceXml(string rootElementId, XmlDocument doc, XmlElement? parent) { }
 
+        public void Dispose() { }
+    }
+
+    /// <summary>Implements only the required members: every optional capability is the SDK default.</summary>
+    private sealed class MinimalTreeProvider : ITreeProvider
+    {
+        public string Name => "min";
+        public IReadOnlyList<string> ElementIdPrefixes { get; } = ["min:"];
+        public bool OwnsElementId(string elementId) => elementId.StartsWith("min:", StringComparison.Ordinal);
+        public bool IsAttached => true;
+        public bool OwnsWindow(IntPtr hwnd, string windowTitle) => false;
+        public string? GetWindowRootId(IntPtr hwnd, string windowTitle) => null;
+        public bool AutoRouteStandardFind => false;
+        public bool AutoSwapsPageSource => false;
+        public string? FindFirst(string rootElementId, ConditionDto condition, string scope) => null;
+        public IReadOnlyList<string> FindAll(string rootElementId, ConditionDto condition, string scope) => [];
+        public object? EvaluateXPath(string rootElementId, string expression, bool multiple) => null;
+        public object? GetProperty(string elementId, string propertyName) => null;
+        public string GetText(string elementId) => "";
+        public string GetTagName(string elementId) => "";
+        public object GetRect(string elementId) => new { x = 0.0, y = 0.0, width = 0.0, height = 0.0 };
+        public string GetToggleState(string elementId) => "Off";
+        public bool IsSelected(string elementId) => false;
+        public bool IsAlive(string elementId) => true;
+        public void Invoke(string elementId) { }
+        public void SetValue(string elementId, string value) { }
+        public void Select(string elementId) { }
+        public void RequestFocus(string elementId) { }
+        public void Expand(string elementId) { }
+        public void BuildPageSourceXml(string rootElementId, XmlDocument doc, XmlElement? parent) { }
         public void Dispose() { }
     }
 }

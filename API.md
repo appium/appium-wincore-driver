@@ -360,7 +360,9 @@ Steps:
 1. Asks the container for the entry through UI Automation's
    `ItemContainerPattern`. This reaches entries a virtualized list (WPF)
    has not created yet; the entry is realized (`VirtualizedItemPattern`)
-   so it can be selected.
+   so it can be selected. A container from a
+   [server plugin](#server-plugins) is asked through its tree provider's
+   `FindItemInContainer` instead, when the plugin implements it.
 1. Otherwise looks for a descendant whose `Name` equals `value`. List,
    data, tree and menu items win over other elements with the same text,
    such as the combo's selection box. WinForms, Win32 and MSAA lists

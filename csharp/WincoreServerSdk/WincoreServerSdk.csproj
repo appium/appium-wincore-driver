@@ -12,7 +12,7 @@
     <!-- Packed to NuGet and consumed by out-of-repo server plugins. The major
          version is the plugin contract version: PluginLoader refuses a plugin
          whose declared SdkVersion has a different major. -->
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <PackageId>WincoreServerSdk</PackageId>
     <Description>Plugin contract for WincoreServer (appium-wincore-driver): ITreeProvider, IServerPlugin, and the shared locator/xpath types a server plugin compiles against.</Description>
     <Authors>verisoft-ai, Yuri Schwab</Authors>

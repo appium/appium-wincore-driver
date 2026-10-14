@@ -130,6 +130,8 @@ public class CommandDispatcher
         AddElement("isMultipleSelect", PatternCommands.IsMultipleSelect, (tp, id, _) => tp.IsMultipleSelect(id));
         AddElement("getSelectedElements", PatternCommands.GetSelectedElements,
             (tp, id, _) => tp.GetSelectedElements(id).ToArray());
+        AddElement("findItemInContainer", ContainerCommands.FindItemInContainer,
+            (tp, id, p) => tp.FindItemInContainer(id, ContainerCommands.ReadName(p)));
 
         // UIA-only: window operations are performed by Windows itself, never by a
         // tree provider; the session root is always a real UIA element.
@@ -140,7 +142,6 @@ public class CommandDispatcher
         AddElement("moveWindow", PatternCommands.MoveWindow, provider: null);
         AddElement("resizeWindow", PatternCommands.ResizeWindow, provider: null);
         AddElement("setRootElementFromElementId", SessionCommands.SetRootElementFromElementId, provider: null);
-        AddElement("findItemInContainer", ContainerCommands.FindItemInContainer, provider: null);
     }
 
     private readonly Dictionary<string, bool> _elementRoutes = new(StringComparer.OrdinalIgnoreCase);

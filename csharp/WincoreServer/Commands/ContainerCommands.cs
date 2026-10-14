@@ -7,6 +7,12 @@ namespace WincoreServer.Commands;
 /// <summary>Entry lookup inside a list-like container, for `windows: selectFromCombobox`.</summary>
 public static class ContainerCommands
 {
+    /// <summary>The exact entry text to look for (the <c>name</c> parameter).</summary>
+    public static string ReadName(JsonElement parameters) =>
+        parameters.TryGetProperty("name", out var name) && name.ValueKind == JsonValueKind.String
+            ? name.GetString()!
+            : throw new ArgumentException("'name' must be a string.");
+
     private static readonly HashSet<int> ItemControlTypes =
     [
         UIA.ListItemControlTypeId,
@@ -24,8 +30,7 @@ public static class ContainerCommands
     /// or no list / data / tree / menu item named exactly <c>name</c>.</returns>
     public static object? FindItemInContainer(SessionState state, IUIAutomationElement element, JsonElement parameters)
     {
-        var name = parameters.GetProperty("name").GetString()
-                   ?? throw new ArgumentException("'name' must be a string.");
+        var name = ReadName(parameters);
 
         if (element.GetCurrentPattern(UIA.ItemContainerPatternId) is not IUIAutomationItemContainerPattern container)
             return null;
