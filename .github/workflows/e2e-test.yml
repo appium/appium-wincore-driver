@@ -101,7 +101,8 @@ jobs:
 
           dotnet publish (Join-Path $testAppsDir 'winform-combo\WinformCombo.csproj') -c Release -o (Join-Path $testAppsDir 'winform-combo\bin')
 
-          # msaa-legacy-controls: MSAA-only fixture for standard-accessibility-values.e2e.ts.
+          # msaa-legacy-controls: MSAA-only fixture for standard-accessibility-values.e2e.ts
+          # and extension-select-from-combobox.e2e.ts.
           # .NET Framework 4.7.2 WinForms + hosted WPF, no third-party dependency or licence.
           dotnet build (Join-Path $testAppsDir 'msaa-legacy-controls\MsaaLegacyControls.csproj') -c Debug -p:Platform=x64
 
@@ -164,6 +165,7 @@ jobs:
             test/e2e/find-element.e2e.ts `
             test/e2e/extension-winform-combo.e2e.ts `
             test/e2e/extension-patterns.e2e.ts `
+            test/e2e/extension-select-from-combobox.e2e.ts `
             test/e2e/extension-filesystem.e2e.ts `
             test/e2e/extension-input.e2e.ts `
             test/e2e/navigation-window.e2e.ts `
