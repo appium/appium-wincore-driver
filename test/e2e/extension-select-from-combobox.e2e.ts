@@ -11,6 +11,10 @@ import {createCharmapSession, createMsaaLegacyControlsSession, quitSession} from
  * Fixtures:
  * - msaa-legacy-controls `cmbCategories`: stock WinForms DropDownList ComboBox
  *   (Books / Electronics / Groceries / Toys); the status label reports "Combo: open/closed".
+ * - msaa-legacy-controls `wpfVirtualCombo`: hosted WPF ComboBox with 300 entries
+ *   ("Item 001".."Item 300") on a VirtualizingStackPanel, so only the rows on screen exist
+ *   in UIA; the rest are reached through ItemContainerPattern and realized. The status
+ *   label reports "WpfCombo: <item>".
  * - msaa-legacy-controls `nativeTree`: stock TreeView, a container with no
  *   ExpandCollapsePattern of its own, searched as it is.
  * - Charmap's font ComboBox (`~105`): Win32 combo with hundreds of entries, most of
@@ -78,6 +82,63 @@ describe('windows: selectFromCombobox', () => {
 
     it('matches case-sensitively', async () => {
       await expectNoSuchElement(app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'toys']));
+    });
+  });
+
+  describe('virtualized WPF ComboBox (hosted in msaa-legacy-controls)', () => {
+    const COMBO = '~wpfVirtualCombo';
+    let app: Browser;
+
+    // A non-editable WPF ComboBox has no ValuePattern: the fixture's status label reports
+    // the selection instead.
+    async function wpfComboValue(): Promise<string> {
+      return /WpfCombo: (.*)$/.exec(await statusText(app))?.[1] ?? '';
+    }
+
+    beforeAll(async () => {
+      app = await createMsaaLegacyControlsSession();
+    });
+    afterAll(async () => {
+      await quitSession(app);
+    });
+
+    it('realizes only part of its 300 entries while open', async () => {
+      const combo = await app.$(COMBO);
+      await app.executeScript('windows: expand', [combo]);
+      try {
+        const items = await combo.$$('.//ListItem');
+        expect(items.length).toBeGreaterThan(5);
+        expect(items.length).toBeLessThan(60);
+        expect(await combo.$$('.//ListItem[@Name="Item 290"]')).toHaveLength(0);
+      } finally {
+        await app.executeScript('windows: collapse', [combo]);
+        await app.waitUntil(async () => (await combo.getAttribute('ExpandCollapseState')) === 'Collapsed', {
+          timeoutMsg: 'WPF ComboBox did not close',
+        });
+      }
+    });
+
+    it('selects an entry far below the realized ones', async () => {
+      expect(await wpfComboValue()).toBe('Item 001');
+
+      await app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Item 290']);
+
+      expect(await wpfComboValue()).toBe('Item 290');
+      expect(await (await app.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
+    });
+
+    it('selects an entry far above the current selection', async () => {
+      await app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Item 002']);
+
+      expect(await wpfComboValue()).toBe('Item 002');
+      expect(await (await app.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
+    });
+
+    it('fails with no such element for an entry past the end', async () => {
+      await expectNoSuchElement(app.executeScript('windows: selectFromCombobox', [await app.$(COMBO), 'Item 301']));
+
+      expect(await wpfComboValue()).toBe('Item 002');
+      expect(await (await app.$(COMBO)).getAttribute('ExpandCollapseState')).toBe('Collapsed');
     });
   });
 
