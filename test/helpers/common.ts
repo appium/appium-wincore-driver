@@ -6,15 +6,15 @@
  */
 import {mock} from 'node:test';
 
+import {mockModule} from './mock.js';
+
 export async function mockCommonModules() {
   const utilUrl = new URL('../../lib/util.js', import.meta.url).href;
   const sleep = mock.fn(async (..._args: any[]): Promise<void> => {});
-  mock.module(utilUrl, {exports: {...(await import(utilUrl)), sleep}});
+  mockModule(utilUrl, {...(await import(utilUrl)), sleep});
 
   const actualPath = await import('node:path');
   const normalize = (p: string) => p;
-  mock.module('node:path', {
-    exports: {...actualPath, default: {...actualPath.default, normalize}, normalize},
-  });
+  mockModule('node:path', {...actualPath, default: {...actualPath.default, normalize}, normalize});
   return {sleep};
 }

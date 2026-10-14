@@ -5,18 +5,16 @@ import assert from 'node:assert/strict';
 import {beforeEach, describe, it, mock} from 'node:test';
 
 import {createMockDriver} from '../../fixtures/driver.js';
-import {assertCalledWith, assertNotCalled, calls, clearCalls} from '../../helpers/mock.js';
+import {assertCalledWith, assertNotCalled, calls, clearCalls, mockModule} from '../../helpers/mock.js';
 import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
 
 const mockUploadRecordedMedia = mock.fn(async (..._args: any[]): Promise<any> => undefined);
 
 mockUser32(createUser32Mock());
-mock.module('../../../lib/commands/screen-recorder.js', {
-  exports: {
-    ScreenRecorder: mock.fn(),
-    DEFAULT_EXT: 'mp4',
-    uploadRecordedMedia: mockUploadRecordedMedia,
-  },
+mockModule(new URL('../../../lib/commands/screen-recorder.js', import.meta.url).href, {
+  ScreenRecorder: mock.fn(),
+  DEFAULT_EXT: 'mp4',
+  uploadRecordedMedia: mockUploadRecordedMedia,
 });
 const {stopRecordingScreen} = await import('../../../lib/commands/extension.js');
 

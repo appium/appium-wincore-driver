@@ -12,6 +12,7 @@ import {
   assertNotCalled,
   assertNthCalledWith,
   clearCalls,
+  mockModule,
   queueResolved,
 } from '../../helpers/mock.js';
 import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
@@ -23,8 +24,9 @@ const user32 = createUser32Mock({
 const utilMocks = {sleep: mock.fn(async () => undefined)};
 
 mockUser32(user32);
-mock.module('../../../lib/util.js', {
-  exports: {...(await import('../../../lib/util.js')), ...utilMocks},
+mockModule(new URL('../../../lib/util.js', import.meta.url).href, {
+  ...(await import('../../../lib/util.js')),
+  ...utilMocks,
 });
 
 const {executeKeys, executeClick, executeHover, executeScroll} = await import('../../../lib/commands/extension.js');

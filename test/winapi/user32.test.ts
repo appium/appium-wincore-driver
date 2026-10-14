@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
-import {describe, it, mock} from 'node:test';
+import {describe, it} from 'node:test';
 
 import {VirtualKey} from '../../lib/winapi/types/virtualkey.js';
+import {mockModule} from '../helpers/mock.js';
 
 // Off-Windows the DLLs can't load; stub only koffi's `load` so the real pure functions still run.
 if (process.platform !== 'win32') {
   const {default: koffi} = await import('koffi');
   const lib = {func: () => () => 0};
-  mock.module('koffi', {exports: {default: {...koffi, load: () => lib}}});
+  mockModule('koffi', {default: {...koffi, load: () => lib}});
 }
 const {isExtendedKeyVk, sendsAsUnicodePacket} = await import('../../lib/winapi/user32.js');
 

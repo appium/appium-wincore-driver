@@ -3,12 +3,23 @@
  * Argument matching is exact (deepStrictEqual), like vitest's `toHaveBeenCalledWith`.
  */
 import assert from 'node:assert/strict';
+import {mock} from 'node:test';
 
 interface MockState {
   calls: {arguments: any[]}[];
   callCount(): number;
   resetCalls(): void;
   mockImplementationOnce(impl: (...args: any[]) => any, onCall?: number): void;
+}
+
+/**
+ * `mock.module()` taking an ES-namespace-like `exports` object. Node 22 lacks the `exports` option
+ * (it silently yields an empty module), so split into `defaultExport`/`namedExports`, valid on 22 and 24.
+ * Relative specifiers resolve against this file, so pass an absolute URL for project modules.
+ */
+export function mockModule(specifier: string, exports: Record<string, unknown>) {
+  const {default: defaultExport, ...namedExports} = exports;
+  return mock.module(specifier, {namedExports, ...(defaultExport === undefined ? {} : {defaultExport})});
 }
 
 /** Any function: modules under test export real function types, but the mocked ones carry `.mock`. */

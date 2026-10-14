@@ -12,18 +12,17 @@ import {
   assertNotCalled,
   calls,
   clearCalls,
+  mockModule,
 } from '../../helpers/mock.js';
 import {createUser32Mock, mockUser32} from '../../helpers/user32.js';
 
 const MockScreenRecorder = mock.fn();
 
 mockUser32(createUser32Mock());
-mock.module('../../../lib/commands/screen-recorder.js', {
-  exports: {
-    ScreenRecorder: MockScreenRecorder,
-    DEFAULT_EXT: 'mp4',
-    uploadRecordedMedia: mock.fn(),
-  },
+mockModule(new URL('../../../lib/commands/screen-recorder.js', import.meta.url).href, {
+  ScreenRecorder: MockScreenRecorder,
+  DEFAULT_EXT: 'mp4',
+  uploadRecordedMedia: mock.fn(),
 });
 const {startRecordingScreen} = await import('../../../lib/commands/extension.js');
 
