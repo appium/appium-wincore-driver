@@ -3,21 +3,27 @@ import {beforeEach, describe, it, mock} from 'node:test';
 
 import * as support from 'appium/support.js';
 
-import {assertCalled, assertCalledWith, assertNotCalled, calls, clearCalls, queueResolved} from '../helpers/mock.js';
+import {
+  assertCalled,
+  assertCalledWith,
+  assertNotCalled,
+  calls,
+  clearCalls,
+  mockModule,
+  queueResolved,
+} from '../helpers/mock.js';
 
 const utilUrl = new URL('../../lib/util.js', import.meta.url).href;
 const actualUtil = await import(utilUrl);
 const cdpRequest = mock.fn(async (..._args: any[]): Promise<any> => undefined);
 const downloadFile = mock.fn(async (..._args: any[]) => undefined);
-mock.module(utilUrl, {
-  exports: {
-    ...actualUtil,
-    cdpRequest,
-    downloadFile,
-    sleep: mock.fn(async () => undefined),
-    MODULE_NAME: 'appium-wincore-driver',
-    currentFilename: '/mock/root/build/lib/util.js',
-  },
+mockModule(utilUrl, {
+  ...actualUtil,
+  cdpRequest,
+  downloadFile,
+  sleep: mock.fn(async () => undefined),
+  MODULE_NAME: 'appium-wincore-driver',
+  currentFilename: '/mock/root/build/lib/util.js',
 });
 
 const Chromedriver = mock.fn(function () {
@@ -29,35 +35,33 @@ const Chromedriver = mock.fn(function () {
     sessionId: mock.fn(() => 'mock-session-id'),
   };
 });
-mock.module('appium-chromedriver', {exports: {Chromedriver}});
+mockModule('appium-chromedriver', {Chromedriver});
 
-mock.module('appium/support.js', {
-  exports: {
-    ...support,
-    fs: {
-      ...support.fs,
-      exists: mock.fn(async (..._args: any[]) => true),
-      mkdir: mock.fn(async () => undefined),
-      mv: mock.fn(async () => undefined),
-      rimraf: mock.fn(async () => undefined),
-      walkDir: mock.fn(async () => '/tmp/chromedriver.exe'),
-    },
-    node: {
-      ...support.node,
-      getModuleRootSync: mock.fn(() => '/mock/root'),
-    },
-    system: {
-      ...support.system,
-      arch: mock.fn(async () => '64'),
-    },
-    zip: {
-      ...support.zip,
-      extractAllTo: mock.fn(async () => undefined),
-    },
-    tempDir: {
-      ...support.tempDir,
-      openDir: mock.fn(async () => '/tmp/mock-dir'),
-    },
+mockModule('appium/support.js', {
+  ...support,
+  fs: {
+    ...support.fs,
+    exists: mock.fn(async (..._args: any[]) => true),
+    mkdir: mock.fn(async () => undefined),
+    mv: mock.fn(async () => undefined),
+    rimraf: mock.fn(async () => undefined),
+    walkDir: mock.fn(async () => '/tmp/chromedriver.exe'),
+  },
+  node: {
+    ...support.node,
+    getModuleRootSync: mock.fn(() => '/mock/root'),
+  },
+  system: {
+    ...support.system,
+    arch: mock.fn(async () => '64'),
+  },
+  zip: {
+    ...support.zip,
+    extractAllTo: mock.fn(async () => undefined),
+  },
+  tempDir: {
+    ...support.tempDir,
+    openDir: mock.fn(async () => '/tmp/mock-dir'),
   },
 });
 
