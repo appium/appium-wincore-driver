@@ -82,15 +82,33 @@ jobs:
     # run handle it. Tagging a stale commit whose workflow files differ from main's
     # is rejected for GITHUB_TOKEN (no `workflows` permission), which left 1.1.0 on
     # NuGet without its sdk-v tag.
+    #
+    # Commits whose message carries a skip-ci marker never start a run of their own,
+    # so they don't count as main moving on. The one that matters is the build job's
+    # semantic-release commit ("chore(release): x.y.z [skip ci]"), pushed by this
+    # same run before this job gets here: counting it skipped the SDK 1.2.0 publish
+    # with no newer run to pick it up. It only touches CHANGELOG/package.json, so
+    # tagging this run's commit is still allowed.
     - name: Decide whether to publish this SDK version
       id: sdkver
       shell: bash
       run: |
         VERSION=$(grep -oPm1 "(?<=<Version>)[^<]+" csharp/WincoreServerSdk/WincoreServerSdk.csproj)
         echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-        git fetch --depth=1 origin main
-        if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
-          echo "::notice::main has moved past $GITHUB_SHA; skipping SDK publish (a newer run will handle it)"
+        git fetch --quiet --depth=50 origin main
+        NEWER=""
+        if git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD; then
+          for c in $(git rev-list "$GITHUB_SHA..FETCH_HEAD"); do
+            if ! git log -1 --format=%B "$c" | grep -qiE '\[(skip ci|ci skip|no ci|skip actions|actions skip)\]'; then
+              NEWER="$NEWER $c"
+            fi
+          done
+        else
+          # Not within main's last 50 commits (or history was rewritten): main moved on.
+          NEWER="$(git rev-parse FETCH_HEAD)"
+        fi
+        if [ -n "$NEWER" ]; then
+          echo "::notice::main has moved past $GITHUB_SHA (newer:$NEWER); skipping SDK publish (a newer run will handle it)"
           echo "publish=false" >> "$GITHUB_OUTPUT"
           exit 0
         fi
