@@ -610,18 +610,19 @@ export async function setWindowRect(
   await this.sendCommand('restoreWindow', {elementId});
 
   // TransformPattern.Move/Resize take both values of a pair, so a value that wasn't given
-  // keeps the window's current one (read after the restore above).
+  // keeps the window's current one (read after the restore above). As in the spec, the
+  // dimensions are set before the position.
   const isPartial = (x == null) !== (y == null) || (width == null) !== (height == null);
   const current = isPartial ? await this.getWindowRect() : undefined;
-  if (x != null || y != null) {
-    await this.sendCommand('moveWindow', {elementId, x: x ?? current!.x, y: y ?? current!.y});
-  }
   if (width != null || height != null) {
     await this.sendCommand('resizeWindow', {
       elementId,
       width: width ?? current!.width,
       height: height ?? current!.height,
     });
+  }
+  if (x != null || y != null) {
+    await this.sendCommand('moveWindow', {elementId, x: x ?? current!.x, y: y ?? current!.y});
   }
 
   return await this.getWindowRect();

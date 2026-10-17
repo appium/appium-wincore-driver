@@ -207,6 +207,15 @@ describe('setWindowRect', () => {
     expect(driver.sendCommand).toHaveBeenCalledWith('resizeWindow', {elementId: ELEMENT_ID, width: 1024, height: 600});
   });
 
+  it('sets the size before the position, in the order W3C lists them', async () => {
+    const driver = createDriverWithRect();
+
+    await setWindowRect.call(driver, 10, 20, 800, 600);
+
+    const commands = driver.sendCommand.mock.calls.map(([command]: [string]) => command);
+    expect(commands.indexOf('resizeWindow')).toBeLessThan(commands.indexOf('moveWindow'));
+  });
+
   it('reads the current rect after restoring the window, not before', async () => {
     const driver = createDriverWithRect();
     const calls: string[] = [];
