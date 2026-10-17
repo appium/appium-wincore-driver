@@ -174,6 +174,12 @@ export class WincoreServerClient {
             case 'InvalidElementState':
               pending.reject(new errors.InvalidElementStateError(errorMessage));
               break;
+            case 'NoSuchWindow':
+              pending.reject(new errors.NoSuchWindowError(errorMessage));
+              break;
+            case 'ElementNotAvailable':
+              pending.reject(new errors.StaleElementReferenceError(errorMessage));
+              break;
             default:
               pending.reject(new errors.UnknownError(errorMessage));
           }
