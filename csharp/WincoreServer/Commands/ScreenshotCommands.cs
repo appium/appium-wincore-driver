@@ -11,6 +11,7 @@ public static class ScreenshotCommands
 {
     public static object? GetScreenshot(SessionState state, JsonElement? parameters)
     {
+        state.ThrowIfRootWindowClosed();
         var root = state.GetLiveRoot();
 
         if (root == null)

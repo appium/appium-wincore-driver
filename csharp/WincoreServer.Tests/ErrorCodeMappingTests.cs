@@ -12,6 +12,12 @@ namespace WincoreServer.Tests;
 public class ErrorCodeMappingTests
 {
     [Fact]
+    public void NoSuchWindowException_MapsToNoSuchWindow()
+    {
+        Assert.Equal(ErrorCodes.NoSuchWindow, JsonRpcServer.ToErrorCode(new NoSuchWindowException("closed"), () => false));
+    }
+
+    [Fact]
     public void ElementNotAvailable_WhenRootWindowIsGone_MapsToNoSuchWindow()
     {
         Assert.Equal(ErrorCodes.NoSuchWindow, JsonRpcServer.ToErrorCode(FakeElement.ElementNotAvailable(), () => true));

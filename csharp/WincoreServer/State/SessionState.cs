@@ -1,5 +1,7 @@
+using System.Runtime.InteropServices;
 using WincoreServer.Diagnostics;
 using WincoreServer.Plugins;
+using WincoreServer.Protocol;
 using WincoreServer.Uia3;
 using Wincore.ServerSdk;
 
@@ -62,6 +64,28 @@ public class SessionState : ISessionContext
     {
         RootElement = element;
         RootNativeWindowHandle = element?.CurrentNativeWindowHandle ?? IntPtr.Zero;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindow(IntPtr hWnd);
+
+    /// <summary>
+    /// True when the session is attached to a native window (tracked by HWND) that has been
+    /// destroyed, e.g. a dialog the session switched to was closed. <see cref="GetLiveRoot"/>
+    /// then falls back to the cached element of the dead window, which UIA may still answer
+    /// with empty values instead of failing, so callers check this explicitly. Sessions rooted
+    /// at the desktop (no HWND) are never "closed".
+    /// </summary>
+    public bool IsRootWindowClosed() => RootNativeWindowHandle != IntPtr.Zero && !IsWindow(RootNativeWindowHandle);
+
+    /// <summary>Throws <see cref="NoSuchWindowException"/> when <see cref="IsRootWindowClosed"/>.</summary>
+    public void ThrowIfRootWindowClosed()
+    {
+        if (IsRootWindowClosed())
+        {
+            throw new NoSuchWindowException("The window this session is attached to has been closed.");
+        }
     }
 
     /// <summary>

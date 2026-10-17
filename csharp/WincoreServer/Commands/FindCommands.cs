@@ -33,6 +33,11 @@ public static class FindCommands
         // routinely rebuild their automation-peer tree after navigation (splash
         // → main, logout → login), invalidating any cached IUIAutomationElement.
         // Fresh resolution is a sub-ms COM call and gives us the live tree.
+        if (contextElementId == null)
+        {
+            state.ThrowIfRootWindowClosed();
+        }
+
         var searchRoot = contextElementId != null
             ? state.GetElement(contextElementId)
             : (state.GetLiveRoot() ?? state.Automation.GetRootElement());
@@ -102,6 +107,11 @@ public static class FindCommands
         // routinely rebuild their automation-peer tree after navigation (splash
         // → main, logout → login), invalidating any cached IUIAutomationElement.
         // Fresh resolution is a sub-ms COM call and gives us the live tree.
+        if (contextElementId == null)
+        {
+            state.ThrowIfRootWindowClosed();
+        }
+
         var searchRoot = contextElementId != null
             ? state.GetElement(contextElementId)
             : (state.GetLiveRoot() ?? state.Automation.GetRootElement());
@@ -150,6 +160,12 @@ public static class FindCommands
 
     public static object? SaveRootElementToTable(SessionState state, JsonElement? parameters)
     {
+        // No id when the attached window was closed: the driver answers W3C "no such window".
+        if (state.IsRootWindowClosed())
+        {
+            return null;
+        }
+
         var root = state.GetLiveRoot() ?? state.Automation.GetRootElement();
         return state.SaveElementAndReturnId(root);
     }

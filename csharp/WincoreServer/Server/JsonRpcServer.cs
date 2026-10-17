@@ -177,6 +177,7 @@ public class JsonRpcServer
     /// </summary>
     internal static string ToErrorCode(Exception ex, Func<bool> isRootWindowGone) => ex switch
     {
+        NoSuchWindowException => ErrorCodes.NoSuchWindow,
         InvalidSelectorException => ErrorCodes.InvalidSelector,
         InvalidElementStateException => ErrorCodes.InvalidElementState,
         KeyNotFoundException => ErrorCodes.ElementNotFound,

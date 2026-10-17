@@ -11,6 +11,7 @@ public static class PageSourceCommands
 {
     public static object? GetPageSource(SessionState state, JsonElement? parameters)
     {
+        state.ThrowIfRootWindowClosed();
         var root = state.GetLiveRoot();
         if (root == null)
         {
