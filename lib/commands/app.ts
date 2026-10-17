@@ -552,23 +552,25 @@ export async function minimizeWindow(this: AppiumWincoreDriver): Promise<Rect> {
 /**
  * Moves and/or resizes the session's root window, restoring it from a maximized/minimized
  * state first since TransformPattern.Move/Resize require the normal window state.
- * @param x - The new x position, or `null` to leave the position unchanged.
- * @param y - The new y position, or `null` to leave the position unchanged.
- * @param width - The new width (must be non-negative), or `null` to leave the size unchanged.
- * @param height - The new height (must be non-negative), or `null` to leave the size unchanged.
+ * A value that is `null` or omitted from the request (which the protocol layer passes as
+ * `undefined`) leaves that part of the rect unchanged, as in the W3C Set Window Rect command.
+ * @param x - The new x position, or `null`/omitted to leave the position unchanged.
+ * @param y - The new y position, or `null`/omitted to leave the position unchanged.
+ * @param width - The new width (must be non-negative), or `null`/omitted to leave the size unchanged.
+ * @param height - The new height (must be non-negative), or `null`/omitted to leave the size unchanged.
  * @returns The window's rect after the move/resize.
  */
 export async function setWindowRect(
   this: AppiumWincoreDriver,
-  x: number | null,
-  y: number | null,
-  width: number | null,
-  height: number | null,
+  x?: number | null,
+  y?: number | null,
+  width?: number | null,
+  height?: number | null,
 ): Promise<Rect> {
-  if (width !== null && width < 0) {
+  if (width != null && width < 0) {
     throw new errors.InvalidArgumentError('width must be a non-negative integer.');
   }
-  if (height !== null && height < 0) {
+  if (height != null && height < 0) {
     throw new errors.InvalidArgumentError('height must be a non-negative integer.');
   }
 
@@ -580,10 +582,10 @@ export async function setWindowRect(
   // TransformPattern.Move/Resize fail when window is maximized or minimized;
   // restore to normal state first so CanMove/CanResize are true.
   await this.sendCommand('restoreWindow', {elementId});
-  if (x !== null && y !== null) {
+  if (x != null && y != null) {
     await this.sendCommand('moveWindow', {elementId, x, y});
   }
-  if (width !== null && height !== null) {
+  if (width != null && height != null) {
     await this.sendCommand('resizeWindow', {elementId, width, height});
   }
 

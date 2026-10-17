@@ -149,6 +149,35 @@ describe('setWindowRect', () => {
     expect(driver.sendCommand).not.toHaveBeenCalledWith('moveWindow', expect.anything());
   });
 
+  // The protocol layer passes fields that are missing from the request body as `undefined`,
+  // so `{"x": 700, "y": 300}` arrives as (700, 300, undefined, undefined).
+  it('only moves when width and height are omitted from the request', async () => {
+    const driver = createDriverWithRect();
+
+    await setWindowRect.call(driver, 700, 300, undefined, undefined);
+
+    expect(driver.sendCommand).toHaveBeenCalledWith('moveWindow', {elementId: ELEMENT_ID, x: 700, y: 300});
+    expect(driver.sendCommand).not.toHaveBeenCalledWith('resizeWindow', expect.anything());
+  });
+
+  it('only resizes when x and y are omitted from the request', async () => {
+    const driver = createDriverWithRect();
+
+    await setWindowRect.call(driver, undefined, undefined, 1024, 768);
+
+    expect(driver.sendCommand).toHaveBeenCalledWith('resizeWindow', {elementId: ELEMENT_ID, width: 1024, height: 768});
+    expect(driver.sendCommand).not.toHaveBeenCalledWith('moveWindow', expect.anything());
+  });
+
+  it('skips move and resize when every field is omitted from the request', async () => {
+    const driver = createDriverWithRect();
+
+    await setWindowRect.call(driver, undefined, undefined, undefined, undefined);
+
+    expect(driver.sendCommand).not.toHaveBeenCalledWith('moveWindow', expect.anything());
+    expect(driver.sendCommand).not.toHaveBeenCalledWith('resizeWindow', expect.anything());
+  });
+
   it('skips move and resize when all arguments are null', async () => {
     const driver = createDriverWithRect();
 
