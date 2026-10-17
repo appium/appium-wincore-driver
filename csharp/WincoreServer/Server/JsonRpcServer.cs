@@ -1,9 +1,11 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WincoreServer.Logging;
 using WincoreServer.Protocol;
 using WincoreServer.State;
+using WincoreServer.Uia3;
 
 namespace WincoreServer.Server;
 
@@ -151,17 +153,7 @@ public class JsonRpcServer
         catch (Exception ex)
         {
             sw.Stop();
-            var errorCode = ex switch
-            {
-                InvalidSelectorException => ErrorCodes.InvalidSelector,
-                InvalidElementStateException => ErrorCodes.InvalidElementState,
-                KeyNotFoundException => ErrorCodes.ElementNotFound,
-                ArgumentException => ErrorCodes.InvalidArgument,
-                NotSupportedException => ErrorCodes.PatternNotSupported,
-                InvalidOperationException when ex.Message.Contains("Pattern") => ErrorCodes.PatternNotSupported,
-                InvalidOperationException => ErrorCodes.InternalError,
-                _ => ErrorCodes.InternalError,
-            };
+            var errorCode = ToErrorCode(ex, IsRootWindowGone);
 
             var errorResponse = new Response
             {
@@ -174,6 +166,46 @@ public class JsonRpcServer
             var fullChain = GetExceptionChain(ex);
             LogToStderr($"[{request?.Id}] ERROR {request?.Method}: {fullChain}");
             WriteResponse(errorResponse);
+        }
+    }
+
+    /// <summary>
+    /// Maps a command handler's exception to a protocol error code. UIA reports an element
+    /// that no longer exists as UIA_E_ELEMENTNOTAVAILABLE; when the session's root window is
+    /// the thing that is gone (e.g. a dialog the session switched to was closed) that is
+    /// <see cref="ErrorCodes.NoSuchWindow"/>, otherwise the element itself is stale.
+    /// </summary>
+    internal static string ToErrorCode(Exception ex, Func<bool> isRootWindowGone) => ex switch
+    {
+        NoSuchWindowException => ErrorCodes.NoSuchWindow,
+        InvalidSelectorException => ErrorCodes.InvalidSelector,
+        InvalidElementStateException => ErrorCodes.InvalidElementState,
+        KeyNotFoundException => ErrorCodes.ElementNotFound,
+        ArgumentException => ErrorCodes.InvalidArgument,
+        NotSupportedException => ErrorCodes.PatternNotSupported,
+        InvalidOperationException when ex.Message.Contains("Pattern") => ErrorCodes.PatternNotSupported,
+        InvalidOperationException => ErrorCodes.InternalError,
+        COMException { HResult: UiaErrors.ElementNotAvailable } =>
+            isRootWindowGone() ? ErrorCodes.NoSuchWindow : ErrorCodes.ElementNotAvailable,
+        _ => ErrorCodes.InternalError,
+    };
+
+    /// <summary>
+    /// True when the session's root window no longer exists. <see cref="SessionState.GetLiveRoot"/>
+    /// re-resolves the root from its HWND and only falls back to the cached element when that
+    /// lookup fails, so a WPF window that rebuilt its automation peers is not reported as gone.
+    /// </summary>
+    private bool IsRootWindowGone()
+    {
+        try
+        {
+            return _state.GetLiveRoot() is { } root && UiaErrors.IsGone(root);
+        }
+        catch
+        {
+            // Only used to pick an error code for a failure that is already being reported;
+            // never let this probe replace the original error.
+            return false;
         }
     }
 
