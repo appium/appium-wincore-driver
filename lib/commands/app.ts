@@ -549,28 +549,55 @@ export async function minimizeWindow(this: AppiumWincoreDriver): Promise<Rect> {
   return await this.getWindowRect();
 }
 
+/** W3C limits Set Window Rect fields to signed 32-bit integers, i.e. below 2^31. */
+const INT32_LIMIT = 2 ** 31;
+
+/**
+ * Validates one Set Window Rect field the way W3C does: `null` or omitted means "unchanged",
+ * anything else must be a finite number that rounds to an integer from `min` to 2^31 - 1,
+ * otherwise the command fails with "invalid argument" instead of reaching WincoreServer,
+ * which only accepts integers.
+ * @param name - The field name, for the error message.
+ * @param value - The value from the request.
+ * @param min - The smallest allowed value.
+ * @returns The value rounded to an integer, or `null` when it was `null` or omitted.
+ */
+function toRectCoordinate(name: string, value: unknown, min: number): number | null {
+  if (value == null) {
+    return null;
+  }
+  // Check the rounded value, so that e.g. 2^31 - 0.5 can't round up past the limit.
+  const rounded = typeof value === 'number' ? Math.round(value) : Number.NaN;
+  if (!Number.isFinite(rounded) || rounded < min || rounded >= INT32_LIMIT) {
+    throw new errors.InvalidArgumentError(
+      min === 0 ? `${name} must be a non-negative integer.` : `${name} must be an integer.`,
+    );
+  }
+  return rounded;
+}
+
 /**
  * Moves and/or resizes the session's root window, restoring it from a maximized/minimized
  * state first since TransformPattern.Move/Resize require the normal window state.
- * @param x - The new x position, or `null` to leave the position unchanged.
- * @param y - The new y position, or `null` to leave the position unchanged.
- * @param width - The new width (must be non-negative), or `null` to leave the size unchanged.
- * @param height - The new height (must be non-negative), or `null` to leave the size unchanged.
+ * A value that is `null` or omitted from the request (which the protocol layer passes as
+ * `undefined`) leaves that part of the rect unchanged, as in the W3C Set Window Rect command.
+ * @param x - The new x position, or `null`/omitted to leave the position unchanged.
+ * @param y - The new y position, or `null`/omitted to leave the position unchanged.
+ * @param width - The new width (must be non-negative), or `null`/omitted to leave the size unchanged.
+ * @param height - The new height (must be non-negative), or `null`/omitted to leave the size unchanged.
  * @returns The window's rect after the move/resize.
  */
 export async function setWindowRect(
   this: AppiumWincoreDriver,
-  x: number | null,
-  y: number | null,
-  width: number | null,
-  height: number | null,
+  x?: number | null,
+  y?: number | null,
+  width?: number | null,
+  height?: number | null,
 ): Promise<Rect> {
-  if (width !== null && width < 0) {
-    throw new errors.InvalidArgumentError('width must be a non-negative integer.');
-  }
-  if (height !== null && height < 0) {
-    throw new errors.InvalidArgumentError('height must be a non-negative integer.');
-  }
+  x = toRectCoordinate('x', x, -INT32_LIMIT);
+  y = toRectCoordinate('y', y, -INT32_LIMIT);
+  width = toRectCoordinate('width', width, 0);
+  height = toRectCoordinate('height', height, 0);
 
   const elementId = ((await this.sendCommand('saveRootElementToTable', {})) as string)?.trim();
   if (!elementId) {
@@ -580,10 +607,10 @@ export async function setWindowRect(
   // TransformPattern.Move/Resize fail when window is maximized or minimized;
   // restore to normal state first so CanMove/CanResize are true.
   await this.sendCommand('restoreWindow', {elementId});
-  if (x !== null && y !== null) {
+  if (x != null && y != null) {
     await this.sendCommand('moveWindow', {elementId, x, y});
   }
-  if (width !== null && height !== null) {
+  if (width != null && height != null) {
     await this.sendCommand('resizeWindow', {elementId, width, height});
   }
 
