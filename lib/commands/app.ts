@@ -550,6 +550,27 @@ export async function minimizeWindow(this: AppiumWincoreDriver): Promise<Rect> {
 }
 
 /**
+ * Validates one Set Window Rect field the way W3C does: `null` or omitted means "unchanged",
+ * anything else must be a finite number from `min` to 2^31 - 1, otherwise the command fails
+ * with "invalid argument" instead of reaching WincoreServer, which only accepts integers.
+ * @param name - The field name, for the error message.
+ * @param value - The value from the request.
+ * @param min - The smallest allowed value.
+ * @returns The value rounded to an integer, or `null` when it was `null` or omitted.
+ */
+function toRectCoordinate(name: string, value: unknown, min: number): number | null {
+  if (value == null) {
+    return null;
+  }
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > 2 ** 31 - 1) {
+    throw new errors.InvalidArgumentError(
+      min === 0 ? `${name} must be a non-negative integer.` : `${name} must be an integer.`,
+    );
+  }
+  return Math.round(value);
+}
+
+/**
  * Moves and/or resizes the session's root window, restoring it from a maximized/minimized
  * state first since TransformPattern.Move/Resize require the normal window state.
  * A value that is `null` or omitted from the request (which the protocol layer passes as
@@ -567,12 +588,10 @@ export async function setWindowRect(
   width?: number | null,
   height?: number | null,
 ): Promise<Rect> {
-  if (width != null && width < 0) {
-    throw new errors.InvalidArgumentError('width must be a non-negative integer.');
-  }
-  if (height != null && height < 0) {
-    throw new errors.InvalidArgumentError('height must be a non-negative integer.');
-  }
+  x = toRectCoordinate('x', x, -(2 ** 31));
+  y = toRectCoordinate('y', y, -(2 ** 31));
+  width = toRectCoordinate('width', width, 0);
+  height = toRectCoordinate('height', height, 0);
 
   const elementId = ((await this.sendCommand('saveRootElementToTable', {})) as string)?.trim();
   if (!elementId) {

@@ -1,6 +1,7 @@
 /**
  * Unit tests for lib/commands/app.ts: back, forward, getTitle, setWindowRect
  */
+import {errors} from 'appium/driver';
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 
 import {back, forward, title, setWindowRect} from '../../../lib/commands/app';
@@ -206,6 +207,31 @@ describe('setWindowRect', () => {
     const driver = createDriverWithRect();
 
     await expect(setWindowRect.call(driver, 0, 0, 800, -1)).rejects.toThrow('height must be a non-negative integer');
+  });
+
+  it.each([
+    ['a string x', ['a', 10, null, null], 'x must be an integer'],
+    ['a boolean y', [10, true, null, null], 'y must be an integer'],
+    ['a NaN width', [null, null, Number.NaN, 600], 'width must be a non-negative integer'],
+    ['an infinite height', [null, null, 800, Number.POSITIVE_INFINITY], 'height must be a non-negative integer'],
+    ['an x beyond 2^31 - 1', [2 ** 31, 0, null, null], 'x must be an integer'],
+  ])('rejects %s with InvalidArgumentError before touching the window', async (_name, args, message) => {
+    const driver = createDriverWithRect();
+
+    const err = await setWindowRect.call(driver, ...(args as [any, any, any, any])).catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(errors.InvalidArgumentError);
+    expect((err as Error).message).toContain(message);
+    expect(driver.sendCommand).not.toHaveBeenCalled();
+  });
+
+  it('rounds fractional values to the integers WincoreServer expects', async () => {
+    const driver = createDriverWithRect();
+
+    await setWindowRect.call(driver, 10.4, 20.6, 800.5, 600.2);
+
+    expect(driver.sendCommand).toHaveBeenCalledWith('moveWindow', {elementId: ELEMENT_ID, x: 10, y: 21});
+    expect(driver.sendCommand).toHaveBeenCalledWith('resizeWindow', {elementId: ELEMENT_ID, width: 801, height: 600});
   });
 
   it('throws NoSuchWindowError when no active window', async () => {
