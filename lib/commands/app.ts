@@ -579,12 +579,13 @@ function toRectCoordinate(name: string, value: unknown, min: number): number | n
 /**
  * Moves and/or resizes the session's root window, restoring it from a maximized/minimized
  * state first since TransformPattern.Move/Resize require the normal window state.
- * A value that is `null` or omitted from the request (which the protocol layer passes as
- * `undefined`) leaves that part of the rect unchanged, as in the W3C Set Window Rect command.
- * @param x - The new x position, or `null`/omitted to leave the position unchanged.
- * @param y - The new y position, or `null`/omitted to leave the position unchanged.
- * @param width - The new width (must be non-negative), or `null`/omitted to leave the size unchanged.
- * @param height - The new height (must be non-negative), or `null`/omitted to leave the size unchanged.
+ * As in the W3C Set Window Rect command, each value is applied on its own: one that is `null`
+ * or omitted from the request (which the protocol layer passes as `undefined`) leaves that
+ * value unchanged, so e.g. `{x: 0}` moves the window to the left edge and keeps its y.
+ * @param x - The new x position, or `null`/omitted to keep the current x.
+ * @param y - The new y position, or `null`/omitted to keep the current y.
+ * @param width - The new width (must be non-negative), or `null`/omitted to keep the current width.
+ * @param height - The new height (must be non-negative), or `null`/omitted to keep the current height.
  * @returns The window's rect after the move/resize.
  */
 export async function setWindowRect(
@@ -607,11 +608,20 @@ export async function setWindowRect(
   // TransformPattern.Move/Resize fail when window is maximized or minimized;
   // restore to normal state first so CanMove/CanResize are true.
   await this.sendCommand('restoreWindow', {elementId});
-  if (x != null && y != null) {
-    await this.sendCommand('moveWindow', {elementId, x, y});
+
+  // TransformPattern.Move/Resize take both values of a pair, so a value that wasn't given
+  // keeps the window's current one (read after the restore above).
+  const isPartial = (x == null) !== (y == null) || (width == null) !== (height == null);
+  const current = isPartial ? await this.getWindowRect() : undefined;
+  if (x != null || y != null) {
+    await this.sendCommand('moveWindow', {elementId, x: x ?? current!.x, y: y ?? current!.y});
   }
-  if (width != null && height != null) {
-    await this.sendCommand('resizeWindow', {elementId, width, height});
+  if (width != null || height != null) {
+    await this.sendCommand('resizeWindow', {
+      elementId,
+      width: width ?? current!.width,
+      height: height ?? current!.height,
+    });
   }
 
   return await this.getWindowRect();

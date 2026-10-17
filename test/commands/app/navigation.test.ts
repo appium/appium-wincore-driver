@@ -179,6 +179,51 @@ describe('setWindowRect', () => {
     expect(driver.sendCommand).not.toHaveBeenCalledWith('resizeWindow', expect.anything());
   });
 
+  // W3C applies each value on its own, so a value missing from a pair keeps the current one.
+  it('moves only along x when y is omitted, keeping the current y', async () => {
+    const driver = createDriverWithRect({x: 10, y: 20, width: 800, height: 600});
+
+    await setWindowRect.call(driver, 0, undefined, undefined, undefined);
+
+    expect(driver.sendCommand).toHaveBeenCalledWith('moveWindow', {elementId: ELEMENT_ID, x: 0, y: 20});
+    expect(driver.sendCommand).not.toHaveBeenCalledWith('resizeWindow', expect.anything());
+  });
+
+  it('changes only the height when width is omitted, keeping the current width', async () => {
+    const driver = createDriverWithRect({x: 10, y: 20, width: 800, height: 600});
+
+    await setWindowRect.call(driver, undefined, undefined, undefined, 400);
+
+    expect(driver.sendCommand).toHaveBeenCalledWith('resizeWindow', {elementId: ELEMENT_ID, width: 800, height: 400});
+    expect(driver.sendCommand).not.toHaveBeenCalledWith('moveWindow', expect.anything());
+  });
+
+  it('applies x and width while keeping the current y and height', async () => {
+    const driver = createDriverWithRect({x: 10, y: 20, width: 800, height: 600});
+
+    await setWindowRect.call(driver, 50, null, 1024, null);
+
+    expect(driver.sendCommand).toHaveBeenCalledWith('moveWindow', {elementId: ELEMENT_ID, x: 50, y: 20});
+    expect(driver.sendCommand).toHaveBeenCalledWith('resizeWindow', {elementId: ELEMENT_ID, width: 1024, height: 600});
+  });
+
+  it('reads the current rect after restoring the window, not before', async () => {
+    const driver = createDriverWithRect();
+    const calls: string[] = [];
+    driver.sendCommand.mockImplementation(async (command: string) => {
+      calls.push(command);
+      return ELEMENT_ID;
+    });
+    driver.getWindowRect.mockImplementation(async () => {
+      calls.push('getWindowRect');
+      return MOCK_RECT;
+    });
+
+    await setWindowRect.call(driver, 5, undefined, undefined, undefined);
+
+    expect(calls.slice(0, 4)).toEqual(['saveRootElementToTable', 'restoreWindow', 'getWindowRect', 'moveWindow']);
+  });
+
   it('skips move and resize when all arguments are null', async () => {
     const driver = createDriverWithRect();
 
