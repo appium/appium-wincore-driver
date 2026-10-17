@@ -549,10 +549,14 @@ export async function minimizeWindow(this: AppiumWincoreDriver): Promise<Rect> {
   return await this.getWindowRect();
 }
 
+/** W3C limits Set Window Rect fields to signed 32-bit integers, i.e. below 2^31. */
+const INT32_LIMIT = 2 ** 31;
+
 /**
  * Validates one Set Window Rect field the way W3C does: `null` or omitted means "unchanged",
- * anything else must be a finite number from `min` to 2^31 - 1, otherwise the command fails
- * with "invalid argument" instead of reaching WincoreServer, which only accepts integers.
+ * anything else must be a finite number that rounds to an integer from `min` to 2^31 - 1,
+ * otherwise the command fails with "invalid argument" instead of reaching WincoreServer,
+ * which only accepts integers.
  * @param name - The field name, for the error message.
  * @param value - The value from the request.
  * @param min - The smallest allowed value.
@@ -562,12 +566,14 @@ function toRectCoordinate(name: string, value: unknown, min: number): number | n
   if (value == null) {
     return null;
   }
-  if (typeof value !== 'number' || !Number.isFinite(value) || value < min || value > 2 ** 31 - 1) {
+  // Check the rounded value, so that e.g. 2^31 - 0.5 can't round up past the limit.
+  const rounded = typeof value === 'number' ? Math.round(value) : Number.NaN;
+  if (!Number.isFinite(rounded) || rounded < min || rounded >= INT32_LIMIT) {
     throw new errors.InvalidArgumentError(
       min === 0 ? `${name} must be a non-negative integer.` : `${name} must be an integer.`,
     );
   }
-  return Math.round(value);
+  return rounded;
 }
 
 /**
@@ -588,8 +594,8 @@ export async function setWindowRect(
   width?: number | null,
   height?: number | null,
 ): Promise<Rect> {
-  x = toRectCoordinate('x', x, -(2 ** 31));
-  y = toRectCoordinate('y', y, -(2 ** 31));
+  x = toRectCoordinate('x', x, -INT32_LIMIT);
+  y = toRectCoordinate('y', y, -INT32_LIMIT);
   width = toRectCoordinate('width', width, 0);
   height = toRectCoordinate('height', height, 0);
 

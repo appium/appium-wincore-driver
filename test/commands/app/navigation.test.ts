@@ -215,6 +215,8 @@ describe('setWindowRect', () => {
     ['a NaN width', [null, null, Number.NaN, 600], 'width must be a non-negative integer'],
     ['an infinite height', [null, null, 800, Number.POSITIVE_INFINITY], 'height must be a non-negative integer'],
     ['an x beyond 2^31 - 1', [2 ** 31, 0, null, null], 'x must be an integer'],
+    ['an x that rounds up to 2^31', [2 ** 31 - 0.5, 0, null, null], 'x must be an integer'],
+    ['a y below -(2^31)', [0, -(2 ** 31) - 1, null, null], 'y must be an integer'],
   ])('rejects %s with InvalidArgumentError before touching the window', async (_name, args, message) => {
     const driver = createDriverWithRect();
 
