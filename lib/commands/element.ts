@@ -257,7 +257,9 @@ export async function elementDisplayed(this: AppiumWincoreDriver, elementId: str
 // TODO: find better way to handle whether to use select or toggle
 /**
  * Checks whether an element is selected, preferring the UIA SelectionItem pattern and
- * falling back to the Toggle pattern's on/off state.
+ * falling back to the Toggle pattern's on/off state. An element that supports neither
+ * pattern cannot be selected, so it reports `false` (as W3C Is Element Selected does for
+ * anything that is not a checkbox, radio button or option).
  * @param elementId - The id of the element to check.
  * @returns True if the element is selected or toggled on.
  */
@@ -269,8 +271,15 @@ export async function elementSelected(this: AppiumWincoreDriver, elementId: stri
     const result = (await this.sendCommand('isElementSelected', {elementId})) as boolean;
     return result === true || String(result) === 'True';
   } catch {
-    const result = (await this.sendCommand('getToggleState', {elementId})) as string;
-    return result === 'On';
+    try {
+      const result = (await this.sendCommand('getToggleState', {elementId})) as string;
+      return result === 'On';
+    } catch (err: any) {
+      if (!/PatternNotSupported/.test(String(err?.message ?? err))) {
+        throw err;
+      }
+      return false;
+    }
   }
 }
 
