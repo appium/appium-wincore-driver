@@ -1,14 +1,24 @@
 name: E2E Tests
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('E2E Tests (manual, {0})', inputs.sha) || github.event.pull_request.title }}
 
 on:
   pull_request:
     branches:
       - main
       - develop
+  # Fork PRs never run on the self-hosted runner automatically (see the job guard below).
+  # After reviewing a fork PR, a maintainer can run E2E on it from the Actions tab by
+  # passing the exact commit SHA they reviewed, so later pushes to the fork don't run.
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'Full commit SHA to test (e.g. the reviewed head of a fork PR)'
+        required: true
+        type: string
 
 jobs:
   e2e:
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, Windows, X64]
     permissions:
       checks: write
@@ -17,6 +27,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+        with:
+          # Fork PR commits are fetchable from this repo via refs/pull/<n>/head, so a SHA works.
+          ref: ${{ inputs.sha || '' }}
 
       - uses: actions/setup-node@v6
         with:
