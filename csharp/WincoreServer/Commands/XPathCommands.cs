@@ -51,6 +51,11 @@ public static class XPathCommands
             return provider.EvaluateXPath(providerRootId, expression, multiple);
         }
 
+        if (contextElementId == null)
+        {
+            state.ThrowIfRootWindowClosed();
+        }
+
         var root = contextElementId != null
             ? state.GetElement(contextElementId)
             : (state.GetLiveRoot() ?? state.Automation.GetRootElement());

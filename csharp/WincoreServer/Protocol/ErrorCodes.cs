@@ -9,6 +9,7 @@ public static class ErrorCodes
     public const string InvalidCondition = "InvalidCondition";
     public const string InternalError = "InternalError";
     public const string ElementNotAvailable = "ElementNotAvailable";
+    public const string NoSuchWindow = "NoSuchWindow";
     public const string ProcessError = "ProcessError";
     public const string FileSystemError = "FileSystemError";
     public const string InvalidSelector = "InvalidSelector";

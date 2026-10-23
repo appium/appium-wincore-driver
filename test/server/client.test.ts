@@ -28,6 +28,18 @@ describe('WincoreServerClient error mapping', () => {
     expect(err.message).toContain('expand had no effect');
   });
 
+  it('maps NoSuchWindow to NoSuchWindowError', async () => {
+    const err = await respondWith({code: 'NoSuchWindow', message: 'window closed'}).catch((e) => e);
+    expect(err).toBeInstanceOf(errors.NoSuchWindowError);
+    expect(err.message).toContain('window closed');
+  });
+
+  it('maps ElementNotAvailable to StaleElementReferenceError', async () => {
+    const err = await respondWith({code: 'ElementNotAvailable', message: 'element gone'}).catch((e) => e);
+    expect(err).toBeInstanceOf(errors.StaleElementReferenceError);
+    expect(err.message).toContain('element gone');
+  });
+
   it('still maps PatternNotSupported to UnknownError', async () => {
     const err = await respondWith({code: 'PatternNotSupported', message: 'no pattern'}).catch((e) => e);
     expect(err).toBeInstanceOf(errors.UnknownError);
