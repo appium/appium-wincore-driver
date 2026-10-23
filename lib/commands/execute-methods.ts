@@ -259,11 +259,16 @@ export async function emCacheRequest(
 
 /**
  * `executeMethod` wrapper for {@link windowsGetDeviceTime}.
- * @param format - A .NET custom date/time format string; defaults to ISO 8601.
+ * @param format - The date/time format; defaults to ISO 8601.
+ * @param formatSyntax - `dotnet` (default) or `moment`: the notation `format` is written in.
  * @returns The formatted date/time string.
  */
-export async function emGetDeviceTime(this: AppiumWincoreDriver, format?: string): Promise<string> {
-  return await windowsGetDeviceTime.call(this, {format});
+export async function emGetDeviceTime(
+  this: AppiumWincoreDriver,
+  format?: string,
+  formatSyntax?: string,
+): Promise<string> {
+  return await windowsGetDeviceTime.call(this, {format, formatSyntax});
 }
 
 /**

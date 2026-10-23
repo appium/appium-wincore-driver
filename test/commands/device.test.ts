@@ -3,7 +3,7 @@
  */
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 
-import {getDeviceTime} from '../../lib/commands/device';
+import {getDeviceTime, momentToDotNetFormat} from '../../lib/commands/device';
 import {createMockDriver} from '../fixtures/driver';
 
 describe('getDeviceTime', () => {
@@ -38,5 +38,28 @@ describe('getDeviceTime', () => {
     const [, params] = driver.sendCommand.mock.calls[0];
     expect(params.script).toContain('Get-Date');
     expect(params.script).toContain('dd/MM/yyyy');
+  });
+});
+
+describe('momentToDotNetFormat', () => {
+  it('translates the default Appium format and quotes literals', () => {
+    expect(momentToDotNetFormat('YYYY-MM-DDTHH:mm:ssZ')).toBe("yyyy'-'MM'-'dd'T'HH':'mm':'sszzz");
+  });
+
+  it('translates date tokens that differ between moment.js and .NET', () => {
+    expect(momentToDotNetFormat('YYYY/MM/DD')).toBe("yyyy'/'MM'/'dd");
+    expect(momentToDotNetFormat('DD.MM.YY')).toBe("dd'.'MM'.'yy");
+    expect(momentToDotNetFormat('HH:mm:ss.SSS')).toBe("HH':'mm':'ss'.'fff");
+    expect(momentToDotNetFormat('dddd, MMMM D h:mm A')).toBe("dddd', 'MMMM' 'd' 'h':'mm' 'tt");
+  });
+
+  it('prefixes a lone single-letter token with %', () => {
+    expect(momentToDotNetFormat('D')).toBe('%d');
+    expect(momentToDotNetFormat('H')).toBe('%H');
+  });
+
+  it('keeps bracketed text and quotes as literals', () => {
+    expect(momentToDotNetFormat('[Today is] dddd')).toBe("'Today is 'dddd");
+    expect(momentToDotNetFormat("[it's] YYYY")).toBe("'it'\\''s 'yyyy");
   });
 });

@@ -30,6 +30,7 @@ import {
   sendsAsUnicodePacket,
   typeKey,
 } from '../winapi/user32';
+import {momentToDotNetFormat} from './device';
 import {click} from './element';
 import type {UploadOptions} from './screen-recorder';
 import {DEFAULT_EXT, ScreenRecorder, uploadRecordedMedia} from './screen-recorder';
@@ -1397,11 +1398,23 @@ export async function executeClickAndDrag(
 
 /**
  * `windows: getDeviceTime` execute-method handler; delegates to {@link getDeviceTime}.
- * @param args.format - A .NET custom date/time format string; defaults to ISO 8601.
+ * @param args.format - The date/time format; defaults to ISO 8601. Read as a .NET custom
+ * date/time format string (e.g. `yyyy-MM-dd`) unless `formatSyntax` is `moment`.
+ * @param args.formatSyntax - `dotnet` (default) or `moment`. With `moment`, `format` is in
+ * moment.js notation (e.g. `YYYY-MM-DD`), as in the other Appium drivers, and is translated
+ * with {@link momentToDotNetFormat}.
  * @returns The formatted date/time string.
  */
-export async function windowsGetDeviceTime(this: AppiumWincoreDriver, args?: {format?: string}): Promise<string> {
-  return this.getDeviceTime(undefined, args?.format);
+export async function windowsGetDeviceTime(
+  this: AppiumWincoreDriver,
+  args?: {format?: string; formatSyntax?: string},
+): Promise<string> {
+  const formatSyntax = args?.formatSyntax ?? 'dotnet';
+  if (formatSyntax !== 'dotnet' && formatSyntax !== 'moment') {
+    throw new errors.InvalidArgumentError(`'formatSyntax' must be 'dotnet' or 'moment', got '${formatSyntax}'`);
+  }
+  const format = formatSyntax === 'moment' && args?.format ? momentToDotNetFormat(args.format) : args?.format;
+  return this.getDeviceTime(undefined, format);
 }
 
 /**
