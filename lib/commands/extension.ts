@@ -233,12 +233,18 @@ async function expandViaAltDown(this: AppiumWincoreDriver, elementId: string): P
 
 // Reads the live ExpandCollapseState (added alongside this fix — see ElementCommands.cs
 // GetProperty / UIA.ExpandCollapseStatePropertyId). Returns undefined when the state can't
-// be read at all (e.g. tree-provider elements, or a control with no real ExpandCollapsePattern) —
-// callers must treat that as "can't verify" rather than "failed".
+// be read at all (e.g. tree-provider elements returning "" or null, or a control with no real
+// ExpandCollapsePattern) — callers must treat that as "can't verify" rather than "failed".
 async function isExpanded(this: AppiumWincoreDriver, elementId: string): Promise<boolean | undefined> {
   try {
     const state = (await this.sendCommand('getProperty', {elementId, property: 'ExpandCollapseState'})) as string;
-    return state === 'Expanded' || state === 'PartiallyExpanded';
+    if (state === 'Expanded' || state === 'PartiallyExpanded') {
+      return true;
+    }
+    if (state === 'Collapsed') {
+      return false;
+    }
+    return undefined;
   } catch (err) {
     this.log.debug(`[isExpanded] getProperty failed for '${elementId}': ${err instanceof Error ? err.message : err}`);
     return undefined;
@@ -292,6 +298,7 @@ async function shouldSurfaceError(this: AppiumWincoreDriver, elementId: string):
  */
 export async function patternExpand(this: AppiumWincoreDriver, element: Element): Promise<void> {
   const elementId = element[W3C_ELEMENT_KEY];
+  let expandError: unknown;
 
   try {
     await this.sendCommand('expandElement', {elementId});
@@ -310,13 +317,18 @@ export async function patternExpand(this: AppiumWincoreDriver, element: Element)
     if (await shouldSurfaceError.call(this, elementId)) {
       throw err;
     }
+    expandError = err;
     const msg = String(err?.message ?? err);
     this.log.info(`[patternExpand] expandElement failed (${msg}), falling back to ALT+Down.`);
   }
 
-  // Last-resort fallback — ExpandCollapseState isn't trustworthy here (unreadable for
-  // tree-provider elements, unreliable for legacy controls), so just trust the keyboard action.
   await expandViaAltDown.call(this, elementId);
+  if ((await waitForExpanded.call(this, elementId)) === false) {
+    throw (
+      expandError ??
+      new errors.InvalidElementStateError('expand had no effect on this element (state stayed Collapsed).')
+    );
+  }
 }
 
 /**
@@ -328,6 +340,7 @@ export async function patternExpand(this: AppiumWincoreDriver, element: Element)
  */
 export async function patternCollapse(this: AppiumWincoreDriver, element: Element): Promise<void> {
   const elementId = element[W3C_ELEMENT_KEY];
+  let collapseError: unknown;
 
   try {
     await this.sendCommand('collapseElement', {elementId});
@@ -341,6 +354,7 @@ export async function patternCollapse(this: AppiumWincoreDriver, element: Elemen
     if (await shouldSurfaceError.call(this, elementId)) {
       throw err;
     }
+    collapseError = err;
     const msg = String(err?.message ?? err);
     this.log.info(`[patternCollapse] collapseElement failed (${msg}), falling back to ALT+Down.`);
   }
@@ -348,6 +362,12 @@ export async function patternCollapse(this: AppiumWincoreDriver, element: Elemen
   // ALT+Down is just the toggle trigger for the dropdown, not a directional key —
   // same key closes it as opened it, so reuse expandViaAltDown here.
   await expandViaAltDown.call(this, elementId);
+  if ((await waitForCollapsed.call(this, elementId)) === true) {
+    throw (
+      collapseError ??
+      new errors.InvalidElementStateError('collapse had no effect on this element (state stayed Expanded).')
+    );
+  }
 }
 
 /**

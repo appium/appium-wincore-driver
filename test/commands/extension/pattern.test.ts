@@ -150,7 +150,23 @@ describe('pattern commands', () => {
     expect(driver.sendCommand).toHaveBeenCalledWith('getProperty', {elementId: ELEMENT_ID, property: 'ClickablePoint'});
   });
 
-  it('patternExpand resolves without throwing when native and ALT+Down both fail to confirm expansion', async () => {
+  it('patternExpand trusts expandElement when ExpandCollapseState is empty string (unreadable)', async () => {
+    const driver = createMockDriver() as any;
+    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+      if (method === 'expandElement') {
+        return null;
+      }
+      if (method === 'getProperty' && args.property === 'ExpandCollapseState') {
+        return '';
+      }
+      return null;
+    });
+    await patternExpand.call(driver, MOCK_ELEMENT);
+    expect(driver.sendCommand).toHaveBeenCalledWith('expandElement', {elementId: ELEMENT_ID});
+    expect(driver.sendCommand).not.toHaveBeenCalledWith('setFocus', expect.anything());
+  });
+
+  it('patternExpand throws InvalidElementStateError when native and ALT+Down both leave state Collapsed', async () => {
     const driver = createMockDriver() as any;
     driver.sendCommand.mockImplementation(async (method: string, args: any) => {
       if (method === 'getProperty' && args.property === 'ExpandCollapseState') {
@@ -161,7 +177,28 @@ describe('pattern commands', () => {
       }
       return null;
     });
-    await expect(patternExpand.call(driver, MOCK_ELEMENT)).resolves.toBeUndefined();
+    await expect(patternExpand.call(driver, MOCK_ELEMENT)).rejects.toBeInstanceOf(errors.InvalidElementStateError);
+    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+  });
+
+  it('patternExpand rethrows the original error when expandElement throws on a ComboBox and ALT+Down leaves state Collapsed', async () => {
+    const driver = createMockDriver() as any;
+    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+      if (method === 'expandElement') {
+        throw new errors.UnknownError("PatternNotSupported: The 'fake' tree provider does not support Expand.");
+      }
+      if (method === 'getProperty' && args.property === 'ControlType') {
+        return 'ComboBox';
+      }
+      if (method === 'getProperty' && args.property === 'ExpandCollapseState') {
+        return 'Collapsed';
+      }
+      if (method === 'getProperty' && args.property === 'HasKeyboardFocus') {
+        return true;
+      }
+      return null;
+    });
+    await expect(patternExpand.call(driver, MOCK_ELEMENT)).rejects.toThrow(/PatternNotSupported/);
     expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
   });
 
@@ -250,7 +287,7 @@ describe('pattern commands', () => {
     expect(driver.sendCommand).toHaveBeenCalledWith('getProperty', {elementId: ELEMENT_ID, property: 'ClickablePoint'});
   });
 
-  it('patternCollapse resolves without throwing when native and ALT+Down both fail to confirm collapse', async () => {
+  it('patternCollapse throws InvalidElementStateError when native and ALT+Down both leave state Expanded', async () => {
     const driver = createMockDriver() as any;
     driver.sendCommand.mockImplementation(async (method: string, args: any) => {
       if (method === 'getProperty' && args.property === 'ExpandCollapseState') {
@@ -261,7 +298,28 @@ describe('pattern commands', () => {
       }
       return null;
     });
-    await expect(patternCollapse.call(driver, MOCK_ELEMENT)).resolves.toBeUndefined();
+    await expect(patternCollapse.call(driver, MOCK_ELEMENT)).rejects.toBeInstanceOf(errors.InvalidElementStateError);
+    expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
+  });
+
+  it('patternCollapse rethrows the original error when collapseElement throws on a ComboBox and ALT+Down leaves state Expanded', async () => {
+    const driver = createMockDriver() as any;
+    driver.sendCommand.mockImplementation(async (method: string, args: any) => {
+      if (method === 'collapseElement') {
+        throw new errors.UnknownError("PatternNotSupported: The 'fake' tree provider does not support Collapse.");
+      }
+      if (method === 'getProperty' && args.property === 'ControlType') {
+        return 'ComboBox';
+      }
+      if (method === 'getProperty' && args.property === 'ExpandCollapseState') {
+        return 'Expanded';
+      }
+      if (method === 'getProperty' && args.property === 'HasKeyboardFocus') {
+        return true;
+      }
+      return null;
+    });
+    await expect(patternCollapse.call(driver, MOCK_ELEMENT)).rejects.toThrow(/PatternNotSupported/);
     expect(driver.sendCommand).toHaveBeenCalledWith('setFocus', {elementId: ELEMENT_ID});
   });
 
