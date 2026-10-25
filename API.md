@@ -1,4 +1,4 @@
-﻿# API Reference
+# API Reference
 
 Full reference for Appium WinCore Driver. See [README.md](README.md)
 for installation, capabilities, and usage examples.
@@ -6,6 +6,7 @@ for installation, capabilities, and usage examples.
 ## Table of Contents
 
 - [Locator Strategies](#locator-strategies)
+  - [Locator performance](#locator-performance)
   - [Standard accessibility values](#standard-accessibility-values)
   - [Element attributes](#element-attributes-getattribute--getproperty)
 - [Extension Commands](#extension-commands)
@@ -35,7 +36,8 @@ for installation, capabilities, and usage examples.
 | `class name` | `.ClassName` | `ClassName` |
 | `id` | decimal `RuntimeId` string | `RuntimeId` |
 | `name` | element visible label | `Name` |
-| `tag name` | control type name | `LocalizedControlType` |
+| `tag name` | control type name | `ControlType` (PascalCase) or `LocalizedControlType` (lowercase) |
+| `css selector` | compound CSS rule | compiled to `-windows uiautomation` |
 | `xpath` | XPath 1.0 expression | any UIA attribute |
 | `-windows uiautomation` | raw UIA condition | C#/PowerShell condition |
 
@@ -44,6 +46,41 @@ await driver.$('~SubmitButton')                              // accessibility id
 await driver.$('//Button[@Name="OK"]')                       // xpath
 await driver.$('.TextBlock')                                 // class name
 await driver.$('//Button[1]')                                // nth button
+```
+
+### Locator performance
+
+Element lookups take one of two paths in `WincoreServer`:
+
+1. **Native UIA condition search (`FindFirst` / `FindAll` with `TreeScope.Descendants`)** — used by `id`, `accessibility id`, `class name`, `tag name`, `name`, `-windows uiautomation`, and `css selector`. The condition is evaluated inside UIA3's native traversal without building an XML tree or reading unrelated properties. Single-element `findElement` (`FindFirst`) short-circuits on the first match.
+2. **Subtree XML materialization (`UiaXmlModel.Build` + `System.Xml.XPath`)** — used by `xpath`. Every node under the search root is walked (`FindAllBuildCache` with `TreeScope.Children`, reading ~25 UIA properties plus `Value`/`Legacy*` per node) to build an in-memory `XmlDocument` before the XPath expression runs. Even a single-element `findElement` pays the full subtree walk cost (~1.5 ms/node on native WPF providers, or ~4.5–6.0 s on a ~3,000-node window; see [docs/performance.md](docs/performance.md)).
+
+| Strategy | Absolute (`driver.$` / `driver.$$`) | Relative (`element.$` / `element.$$`) | Execution path and notes |
+| --- | --- | --- | --- |
+| `id` (`RuntimeId`) | **A+ (Fastest)** | **A+ (Fastest)** | Native `PropertyCondition(RuntimeId)`. Direct integer-tuple comparison; `FindFirst` stops at the first match. |
+| `accessibility id` (`AutomationId`) | **A+ (Fastest)** | **A+ (Fastest)** | Native `PropertyCondition(AutomationId)`. Stored directly on the provider peer without locale formatting. |
+| `-windows uiautomation` | **A (Fast)** | **A+ (Fastest)** | Native `PropertyCondition` / `AndCondition` / `OrCondition` / `NotCondition`. Narrowing with `ControlType` + `AutomationId`/`Name` lets UIA skip non-matching control types early. |
+| `css selector` | **A (Fast)** | **A+ (Fastest)** | Compiles in Node (`< 1 ms`) to a `-windows uiautomation` condition and runs the same native `FindFirst` / `FindAll` path. |
+| `class name` (`ClassName`) | **A (Fast)** | **A (Fast)** | Native `PropertyCondition(ClassName)`. Fast for `findElement`; `findElements` cost scales with the number of matched elements saved to the element table. |
+| `tag name` (PascalCase, e.g. `Button`) | **A (Fast)** | **A (Fast)** | Native `PropertyCondition(ControlType)` using the integer control-type ID (`UIA_*ControlTypeId`). Locale-independent and faster than string comparisons. |
+| `name` (`Name`) | **B (Good)** | **A (Fast)** | Native `PropertyCondition(Name)`. Avoids XML materialization, but computing accessible `Name` on complex or MSAA-bridged controls is slightly more expensive per visited node than `AutomationId`. |
+| `tag name` (lowercase, e.g. `button`) | **B (Moderate)** | **A (Fast)** | Native `PropertyCondition(LocalizedControlType)`. Compares the OS-localized control type string on each visited node; prefer PascalCase (`Button`) for both speed and locale independence. |
+| `xpath` | **D (Slow)** | **B–C (Moderate to Fast)** | Materializes the entire search-root subtree into an `XmlDocument` before evaluating XPath. Cost is `O(N_subtree)` (~1.5 ms/node on WPF, ~3–5 ms/node on WinForms/MSAA). |
+
+#### Absolute vs. relative lookup
+
+- **Absolute lookup (`driver.findElement` / `driver.findElements`)** resolves the attached top-level window via `IUIAutomation.ElementFromHandle(hwnd)` (or the desktop root in `Root` sessions) and searches the entire window subtree. In `Root` sessions, an un-scoped lookup walks across all open desktop windows.
+- **Relative lookup (`element.findElement` / `element.findElements`)** looks up the parent `IUIAutomationElement` from the session element table in `O(1)` and scopes `TreeScope.Descendants` (or `UiaXmlModel.Build` for XPath) strictly to that element's subtree.
+
+When XPath features (`contains()`, `starts-with()`, positional predicates, upward axes, or `LegacyValue`) are required on a large window, anchor the container with a native condition locator first and run a relative XPath query inside it:
+
+```js
+// Slow (~4.5s on a 3,000-node window): walks the entire window to build the XML model
+const rowSlow = await driver.$('//DataItem[starts-with(@LegacyValue, "db-01;")]');
+
+// Fast (~50-100ms): native AutomationId lookup for the grid, then XPath only over the grid's subtree
+const grid = await driver.$('~ServersGrid');
+const rowFast = await grid.$('.//DataItem[starts-with(@LegacyValue, "db-01;")]');
 ```
 
 ### XPath node tests (tag names)
