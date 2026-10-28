@@ -85,6 +85,63 @@ jobs:
           appium driver install --source=local $PWD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Provide ffmpeg
+        shell: powershell
+        run: |
+          # The driver looks for ffmpeg at <driver root>\ffmpeg\ffmpeg.exe (the checkout, since
+          # it is installed from source) and otherwise downloads ~250 MB on the first
+          # startRecordingScreen call. checkout's clean wipes that folder every run, so the
+          # download used to land inside the recording tests and time them out on a slow
+          # network. Keep a pinned, checksum-verified copy in the runner's tool cache instead
+          # (outside the checkout, so it survives) and drop it in place before the tests.
+          $version = '9.0.2'
+          $sha256 = '759d0a9831c436a0eb331ad36f236c06cb04aaa0005da46571f0e9d3d9206f6b'
+          $cacheDir = Join-Path $env:RUNNER_TOOL_CACHE "ffmpeg\$version"
+          $cachedExe = Join-Path $cacheDir 'ffmpeg.exe'
+
+          if (Test-Path $cachedExe) {
+            Write-Host "Using cached ffmpeg $version"
+          } else {
+            $ProgressPreference = 'SilentlyContinue'  # the progress bar slows Invoke-WebRequest down a lot
+            $work = Join-Path $env:RUNNER_TEMP 'ffmpeg-download'
+            if (Test-Path $work) { Remove-Item -Recurse -Force $work }
+            New-Item -ItemType Directory -Path $work | Out-Null
+            $zip = Join-Path $work 'ffmpeg.zip'
+
+            Invoke-WebRequest -Uri "https://github.com/GyanD/codexffmpeg/releases/download/$version/ffmpeg-$version-full_build.zip" -OutFile $zip -UseBasicParsing
+            $actual = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
+            if ($actual -ne $sha256) {
+              Write-Error "ffmpeg archive checksum mismatch: expected $sha256, got $actual"
+              exit 1
+            }
+
+            tar -xf $zip -C $work
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $extracted = Get-ChildItem -Path $work -Recurse -Filter 'ffmpeg.exe' | Select-Object -First 1
+            if (-not $extracted) {
+              Write-Error "ffmpeg.exe not found in the $version archive"
+              exit 1
+            }
+
+            # Move into the cache only once complete, so a cancelled run never leaves a partial exe behind.
+            New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null
+            Move-Item -Force $extracted.FullName $cachedExe
+            # Best effort: RUNNER_TEMP is emptied after every job anyway.
+            Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
+            Write-Host "Cached ffmpeg $version at $cachedExe"
+          }
+
+          $target = Join-Path $PWD 'ffmpeg'
+          New-Item -ItemType Directory -Force -Path $target | Out-Null
+          Copy-Item -Force $cachedExe (Join-Path $target 'ffmpeg.exe')
+
+          # The recorder captures with gdigrab; fail here rather than in the tests if it is missing.
+          $devices = & (Join-Path $target 'ffmpeg.exe') -hide_banner -devices | Out-String
+          if ($devices -notmatch 'gdigrab') {
+            Write-Error "ffmpeg $version has no gdigrab input device"
+            exit 1
+          }
+
       - name: Install Windows Calculator
         shell: powershell
         run: |
