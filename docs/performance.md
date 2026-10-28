@@ -118,16 +118,3 @@ path for A/B. 198 UIA e2e tests green (Calculator/Notepad page source, XPath, at
 ## Locator performance grading (absolute vs. relative)
 
 See [API.md — Locator performance](../API.md#locator-performance) for full usage examples.
-
-| Strategy | Absolute (`driver.$` / `driver.$$`) | Relative (`element.$` / `element.$$`) | Underlying mechanism |
-| --- | --- | --- | --- |
-| `id` (`RuntimeId`) | **A+ (Fastest)** | **A+ (Fastest)** | Native `FindFirst` / `FindAll` (`TreeScope.Descendants`) with `PropertyCondition(RuntimeId)` |
-| `accessibility id` (`AutomationId`) | **A+ (Fastest)** | **A+ (Fastest)** | Native `FindFirst` / `FindAll` with `PropertyCondition(AutomationId)` |
-| `-windows uiautomation` | **A (Fast)** | **A+ (Fastest)** | Native `FindFirst` / `FindAll` with single or compound `IUIAutomationCondition` |
-| `css selector` | **A (Fast)** | **A+ (Fastest)** | Compiled in Node (`< 1 ms`) to `-windows uiautomation`, then native `FindFirst` / `FindAll` |
-| `class name` (`ClassName`) | **A (Fast)** | **A (Fast)** | Native `FindFirst` / `FindAll` with `PropertyCondition(ClassName)` |
-| `tag name` (PascalCase `ControlType`) | **A (Fast)** | **A (Fast)** | Native `FindFirst` / `FindAll` with integer `ControlTypePropertyId` |
-| `name` (`Name`) | **B (Good)** | **A (Fast)** | Native `FindFirst` / `FindAll` with `PropertyCondition(Name)` |
-| `tag name` (lowercase `LocalizedControlType`) | **B (Moderate)** | **A (Fast)** | Native `FindFirst` / `FindAll` with localized string `LocalizedControlTypePropertyId` |
-| `xpath` | **D (Slow)** (~4.5–6.0s on 3036 nodes) | **B–C (Moderate to Fast)** (~1.5ms × `N_subtree`) | Full subtree walk via `UiaXmlModel.Build` (`uia.xpathModel.node`) before `System.Xml.XPath` evaluation |
-
