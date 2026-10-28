@@ -85,6 +85,42 @@ jobs:
           appium driver install --source=local $PWD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Provide ffmpeg
+        shell: powershell
+        run: |
+          # The driver looks for ffmpeg at <driver root>\ffmpeg\ffmpeg.exe (the checkout, since
+          # it is installed from source) and otherwise downloads ~250 MB on the first
+          # startRecordingScreen call. checkout's clean wipes that folder every run, so the
+          # download used to land inside the recording tests and time them out on a slow
+          # network. ffmpeg is installed once on the runner host instead (like .NET and Chrome);
+          # copy it in place before the tests. To install or bump it, download the GyanD
+          # codexffmpeg <version> full_build.zip, verify its SHA-256 against the release asset
+          # digest, and put bin\ffmpeg.exe at the path below.
+          $version = '9.0.2'
+          $src = "C:\tools\ffmpeg\$version\ffmpeg.exe"
+          if (-not (Test-Path $src)) {
+            Write-Error "ffmpeg $version not found at $src. Install it on this runner, then re-run."
+            exit 1
+          }
+
+          $reported = & $src -hide_banner -version | Select-Object -First 1
+          if ($reported -notmatch "^ffmpeg version $([regex]::Escape($version))-") {
+            Write-Error "$src is not ffmpeg $version (reports '$reported'). Reinstall it on this runner, then re-run."
+            exit 1
+          }
+
+          # The recorder captures with gdigrab; fail here rather than in the tests if it is missing.
+          $devices = & $src -hide_banner -devices | Out-String
+          if ($devices -notmatch 'gdigrab') {
+            Write-Error "ffmpeg $version at $src has no gdigrab input device"
+            exit 1
+          }
+
+          $target = Join-Path $PWD 'ffmpeg'
+          New-Item -ItemType Directory -Force -Path $target | Out-Null
+          Copy-Item -Force $src (Join-Path $target 'ffmpeg.exe')
+          Write-Host "Using $reported"
+
       - name: Install Windows Calculator
         shell: powershell
         run: |
