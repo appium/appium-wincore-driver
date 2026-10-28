@@ -44,6 +44,35 @@ describe('execute (command router)', () => {
     expect(result).toBe('2026-03-03T10:00:00+00:00');
   });
 
+  it('routes windows:getDeviceTime with a moment.js format when formatSyntax is moment', async () => {
+    driver.getDeviceTime = vi.fn().mockResolvedValue('2026-03-03');
+    const result = await extension.execute.call(driver, 'windows: getDeviceTime', [
+      {format: 'YYYY-MM-DD', formatSyntax: 'moment'},
+    ]);
+    expect(driver.getDeviceTime).toHaveBeenCalledWith(undefined, "yyyy'-'MM'-'dd");
+    expect(result).toBe('2026-03-03');
+  });
+
+  it('passes the format through unchanged when formatSyntax is dotnet', async () => {
+    driver.getDeviceTime = vi.fn().mockResolvedValue('2026');
+    await extension.execute.call(driver, 'windows: getDeviceTime', [{format: 'yyyy', formatSyntax: 'dotnet'}]);
+    expect(driver.getDeviceTime).toHaveBeenCalledWith(undefined, 'yyyy');
+  });
+
+  it('keeps the ISO 8601 default when formatSyntax is moment and no format is given', async () => {
+    driver.getDeviceTime = vi.fn().mockResolvedValue('2026-03-03T10:00:00+00:00');
+    await extension.execute.call(driver, 'windows: getDeviceTime', [{formatSyntax: 'moment'}]);
+    expect(driver.getDeviceTime).toHaveBeenCalledWith(undefined, undefined);
+  });
+
+  it('rejects an unknown formatSyntax for windows:getDeviceTime', async () => {
+    driver.getDeviceTime = vi.fn();
+    await expect(
+      extension.execute.call(driver, 'windows: getDeviceTime', [{format: 'yyyy', formatSyntax: 'java'}]),
+    ).rejects.toThrow(/formatSyntax/);
+    expect(driver.getDeviceTime).not.toHaveBeenCalled();
+  });
+
   it('routes windows:deleteFile to deleteFile via sendCommand', async () => {
     await extension.execute.call(driver, 'windows: deleteFile', [{path: 'C:\\temp\\file.txt'}]);
     expect(driver.sendCommand).toHaveBeenCalledWith('deleteFile', {path: 'C:\\temp\\file.txt'});

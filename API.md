@@ -475,7 +475,12 @@ Returns the automation element ID of the current root window. No arguments.
 
 #### windows: getDeviceTime
 
-Returns the Windows system time as a string. No arguments.
+Returns the Windows system time as a string.
+
+| Argument | Type | Description |
+|---|---|---|
+| `format` | string | Optional. The format of the returned string. Defaults to `yyyy-MM-ddTHH:mm:sszzz` (ISO 8601). By default it is a [.NET custom date and time format string](https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings), e.g. `yyyy-MM-dd` (not moment.js `YYYY-MM-DD`). |
+| `formatSyntax` | string | Optional. `dotnet` (default) or `moment`. With `moment`, `format` is in [moment.js notation](https://momentjs.com/docs/#/displaying/format/), as in the other Appium drivers, e.g. `YYYY-MM-DD`. Supported tokens: `YYYY YY MMMM MMM MM M DD D dddd ddd HH H hh h mm m ss s SSS SS S A Z ZZ` (`ZZ` is written with a colon, like `Z`); text in `[brackets]` and other characters are kept as is. |
 
 #### windows: getMonitors
 

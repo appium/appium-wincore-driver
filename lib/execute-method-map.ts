@@ -92,7 +92,7 @@ export const executeMethodMap: ExecuteMethodMap<AppiumWincoreDriver> = {
       ],
     },
   },
-  'windows: getDeviceTime': {command: 'emGetDeviceTime', params: {optional: ['format']}},
+  'windows: getDeviceTime': {command: 'emGetDeviceTime', params: {optional: ['format', 'formatSyntax']}},
   'windows: getWindowElement': {command: 'getWindowElement'},
   'windows: getMonitors': {command: 'windowsGetMonitors'},
   'windows: getDpiScale': {command: 'emGetDpiScale'},
