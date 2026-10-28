@@ -1,3 +1,19 @@
+## [3.3.0](https://github.com/appium/appium-wincore-driver/compare/v3.2.0...v3.3.0) (2026-10-28)
+
+### Features
+
+* add formatSyntax to windows: getDeviceTime for moment.js formats ([#111](https://github.com/appium/appium-wincore-driver/issues/111)) ([76b7d39](https://github.com/appium/appium-wincore-driver/commit/76b7d396fcf2e530ecea7edcb279ba48c873e94e)), closes [#91](https://github.com/appium/appium-wincore-driver/issues/91)
+
+### Bug Fixes
+
+* **app:** handle omitted and invalid setWindowRect fields ([#108](https://github.com/appium/appium-wincore-driver/issues/108)) ([69195eb](https://github.com/appium/appium-wincore-driver/commit/69195ebee85224ada9d987d16e35a84a38e963c5)), closes [#88](https://github.com/appium/appium-wincore-driver/issues/88)
+* **extension:** verify ExpandCollapseState after the ALT+Down fallback ([#115](https://github.com/appium/appium-wincore-driver/issues/115)) ([3eeb698](https://github.com/appium/appium-wincore-driver/commit/3eeb6982ad966b320252a4b3dd2503208788dd30))
+* name the real webviewEnabled capability in context errors ([#112](https://github.com/appium/appium-wincore-driver/issues/112)) ([0e5c6fe](https://github.com/appium/appium-wincore-driver/commit/0e5c6fee334bc53ba6871ae58df58b36fc64cc5f)), closes [#92](https://github.com/appium/appium-wincore-driver/issues/92)
+
+### Code Refactoring
+
+* **app:** move setWindowRect logic into a WincoreServer RPC ([#113](https://github.com/appium/appium-wincore-driver/issues/113)) ([441caad](https://github.com/appium/appium-wincore-driver/commit/441caad165cb8a36cdf724e444ee2f8a62efa4b2)), closes [#110](https://github.com/appium/appium-wincore-driver/issues/110)
+
 ## [3.2.0](https://github.com/appium/appium-wincore-driver/compare/v3.1.2...v3.2.0) (2026-10-14)
 
 ### Features
