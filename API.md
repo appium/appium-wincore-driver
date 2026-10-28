@@ -499,6 +499,41 @@ if (secondary) {
 }
 ```
 
+#### windows: getDpiScale
+
+Returns the primary display's DPI scaling factor as a number, e.g. `1.5`
+for 150% scaling. No arguments.
+
+#### windows: getNativeChildren
+
+Walks the raw MSAA (`IAccessible`) tree of an element, for legacy
+controls that expose no UIA children (custom-drawn Win32 controls,
+ActiveX grids).
+
+| Argument | Type | Required | Description |
+| --- | --- | --- | --- |
+| `elementId` | string | yes | The element whose MSAA children are walked |
+
+Returns `{ supported: true, node }`, where each node has `name`, `role`,
+`value`, `description`, `state`, `defaultAction`, `rect`, `childCount`,
+`truncated` and `children`, or `{ supported: false, reason }` when the
+element has no `IAccessible` implementation. If it is unsupported or the
+root has no children, fall back to image- or coordinate-based
+interaction.
+
+#### windows: getPerfMetrics
+
+Returns the session's performance counters as
+`{ enabled, metrics: { totalCalls, totalMs, byLabel: { <label>: { count, totalMs } } } }`.
+Counters are only collected when the session was created with
+`appium:perfMetrics: true`; otherwise `enabled` is `false` and `metrics`
+is empty. No arguments. See [docs/performance.md](docs/performance.md).
+
+#### windows: resetPerfMetrics
+
+Zeroes the session's performance counters, so the counts that follow
+belong to the next operation alone. No arguments.
+
 ### Clipboard
 
 #### windows: getClipboard
@@ -555,32 +590,50 @@ const video = await driver.executeScript(
 
 ### PowerShell Execution
 
-#### windows: powerShell
+#### powerShell
 
-Executes a PowerShell script and returns stdout.
+Executes a PowerShell script and returns its trimmed stdout. Anything
+written to stderr fails the command with that text.
 
-The driver runs a single persistent PowerShell session per Appium
-session, so variables set in one call are available in subsequent
-calls.
+The script name is `powerShell` (there is no `windows:` prefix). The
+argument is the script as a string, or an object with a `script` (or
+`command`) property.
+
+Each call starts a new `powershell.exe` process, so variables, functions
+and the current location do not carry over from one call to the next.
+Put everything a step needs into one script. The process starts in
+`appium:appWorkingDir` when that capability is set. With
+`appium:isolatedScriptExecution` set to `true`, the process is started
+without loading the user profile.
 
 ```js
-const output = await driver.executeScript('windows: powerShell', [
+const output = await driver.executeScript('powerShell', [
   'Get-Process notepad -ErrorAction SilentlyContinue',
+]);
+
+// Object form
+const year = await driver.executeScript('powerShell', [
+  { script: 'Get-Date -Format yyyy' },
 ]);
 ```
 
 ### Cache Requests
 
-#### windows: pushCacheRequest
+#### windows: cacheRequest
 
-Activates a UIA cache request to expose RawView elements in the element
-tree.
+Activates a UIA cache request, for example to expose RawView elements in
+the element tree. All arguments are optional, but at least one must be
+set.
 
 | Argument | Type | Required | Description |
 | --- | --- | --- | --- |
-| `treeFilter` | string | yes | UIA condition, e.g. `RawView` |
+| `treeFilter` | string | no | UIA condition, e.g. `RawView` |
 | `treeScope` | string | no | `Element`, `Children`, or `Subtree` |
 | `automationElementMode` | string | no | `None` or `Full`. Default: `Full` |
+
+```js
+await driver.executeScript('windows: cacheRequest', [{ treeFilter: 'RawView' }]);
+```
 
 ## W3C Actions
 
