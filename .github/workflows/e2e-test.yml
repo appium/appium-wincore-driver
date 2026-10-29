@@ -1,24 +1,20 @@
 name: E2E Tests
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('E2E Tests (manual, {0})', inputs.sha) || github.event.pull_request.title }}
+run-name: ${{ github.event.pull_request.title }}
 
+# This job runs on a self-hosted runner, so fork PRs must never start it unreviewed.
+# That gate is the repository's "Require approval for all external contributors"
+# setting (Settings > Actions > General), which holds every run from an outside
+# contributor, on every push, until a maintainer approves it. Keep that setting: a
+# job-level `if` cannot replace it, because pull_request runs use the workflow file
+# from the PR itself, which a fork can edit.
 on:
   pull_request:
     branches:
       - main
       - develop
-  # Fork PRs never run on the self-hosted runner automatically (see the job guard below).
-  # After reviewing a fork PR, a maintainer can run E2E on it from the Actions tab by
-  # passing the exact commit SHA they reviewed, so later pushes to the fork don't run.
-  workflow_dispatch:
-    inputs:
-      sha:
-        description: 'Full commit SHA to test (e.g. the reviewed head of a fork PR)'
-        required: true
-        type: string
 
 jobs:
   e2e:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, Windows, X64]
     permissions:
       checks: write
@@ -27,9 +23,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          # Fork PR commits are fetchable from this repo via refs/pull/<n>/head, so a SHA works.
-          ref: ${{ inputs.sha || '' }}
 
       - uses: actions/setup-node@v6
         with:
@@ -234,8 +227,10 @@ jobs:
             test/e2e/extension-screen-recording.e2e.ts `
             test/e2e/standard-accessibility-values.e2e.ts
 
+      # Fork PRs get a read-only GITHUB_TOKEN, so the check run can't be created there;
+      # the results are still in the test step's log.
       - name: Publish E2E test report
-        if: always()
+        if: always() && !github.event.pull_request.head.repo.fork
         uses: dorny/test-reporter@v1
         with:
           name: E2E Test Results
