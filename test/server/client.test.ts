@@ -33,4 +33,13 @@ describe('WincoreServerClient error mapping', () => {
     expect(err).toBeInstanceOf(errors.UnknownError);
     expect(err).not.toBeInstanceOf(errors.InvalidElementStateError);
   });
+
+  it('maps InvalidSelector to InvalidSelectorError', async () => {
+    const err = await respondWith({
+      code: 'InvalidSelector',
+      message: 'Malformed XPath: Expression must evaluate to a node-set.',
+    }).catch((e) => e);
+    expect(err).toBeInstanceOf(errors.InvalidSelectorError);
+    expect(err.message).toContain('Malformed XPath');
+  });
 });

@@ -168,6 +168,9 @@ export class WincoreServerClient {
             case 'InvalidCondition':
               pending.reject(new errors.InvalidArgumentError(errorMessage));
               break;
+            case 'InvalidSelector':
+              pending.reject(new errors.InvalidSelectorError(errorMessage));
+              break;
             case 'PatternNotSupported':
               pending.reject(new errors.UnknownError(errorMessage));
               break;
