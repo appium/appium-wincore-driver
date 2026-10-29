@@ -1,3 +1,9 @@
+## [3.3.1](https://github.com/appium/appium-wincore-driver/compare/v3.3.0...v3.3.1) (2026-10-29)
+
+### Bug Fixes
+
+* **server:** report a closed session window as "no such window" ([#107](https://github.com/appium/appium-wincore-driver/issues/107)) ([b1f9605](https://github.com/appium/appium-wincore-driver/commit/b1f9605e20feace92ebf6b4c7251fd350ab2a43b)), closes [#90](https://github.com/appium/appium-wincore-driver/issues/90)
+
 ## [3.3.0](https://github.com/appium/appium-wincore-driver/compare/v3.2.0...v3.3.0) (2026-10-28)
 
 ### Features
