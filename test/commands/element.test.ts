@@ -198,6 +198,23 @@ describe('elementSelected', () => {
     const result = await elementSelected.call(driver, ELEMENT_ID);
     expect(result).toBe(false);
   });
+
+  it('returns false for an element that supports neither SelectionItem nor Toggle', async () => {
+    const driver = createMockDriver() as any;
+    driver.sendCommand
+      .mockRejectedValueOnce(new Error('PatternNotSupported: Element does not support SelectionItemPattern.'))
+      .mockRejectedValueOnce(new Error('PatternNotSupported: Element does not support TogglePattern.'));
+    const result = await elementSelected.call(driver, ELEMENT_ID);
+    expect(result).toBe(false);
+  });
+
+  it('still surfaces errors other than PatternNotSupported', async () => {
+    const driver = createMockDriver() as any;
+    driver.sendCommand
+      .mockRejectedValueOnce(new Error('ElementNotFound: Element with ID x not found'))
+      .mockRejectedValueOnce(new Error('ElementNotFound: Element with ID x not found'));
+    await expect(elementSelected.call(driver, ELEMENT_ID)).rejects.toThrow('ElementNotFound');
+  });
 });
 
 describe('elementEnabled', () => {
