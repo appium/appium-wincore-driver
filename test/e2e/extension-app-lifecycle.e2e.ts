@@ -10,7 +10,7 @@ import {createCalculatorSession, quitSession, CALCULATOR_APP_ID, closeAllTestApp
 
 describe('App lifecycle commands', () => {
   afterEach(() => {
-    closeAllTestApps;
+    closeAllTestApps();
   });
   describe('windows: launchApp and closeApp cycle', () => {
     it('windows: launchApp launches a new app instance and display shows 0', async () => {
@@ -47,11 +47,9 @@ describe('App lifecycle commands', () => {
       try {
         await driver.executeScript('windows: closeApp', []);
         await driver.executeScript('windows: launchApp', []);
-        // The close/relaunch transition can transiently throw a UIA COM error
-        // (0x80040201, "event was unable to invoke any of the subscribers") if a
-        // findElement call lands mid-transition — a thrown error, not a "not
-        // found" result, so waitForExist alone doesn't cover it (it only retries
-        // the latter). Retry the lookup itself through the transition window.
+        // A freshly launched UWP window can take a moment to populate its UIA tree,
+        // and a lookup during that time may throw rather than return "not found",
+        // which waitForExist alone wouldn't retry.
         await driver.waitUntil(
           async () => {
             try {
