@@ -114,3 +114,7 @@ over a whole subtree) **and incomplete** (cached ~850 of 1744 nodes — offscree
 children not enumerated in a bulk request). The per-level approach matches exactly what
 the live walk and native find see. `UIA_NO_CACHE=1` on the server env forces the live
 path for A/B. 198 UIA e2e tests green (Calculator/Notepad page source, XPath, attributes).
+
+## Locator performance grading (absolute vs. relative)
+
+See [API.md — Locator performance](../API.md#locator-performance) for full usage examples.
