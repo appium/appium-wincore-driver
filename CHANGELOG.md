@@ -1,3 +1,10 @@
+## [3.3.2](https://github.com/appium/appium-wincore-driver/compare/v3.3.1...v3.3.2) (2026-10-29)
+
+### Bug Fixes
+
+* **element:** report unselectable elements as not selected ([#119](https://github.com/appium/appium-wincore-driver/issues/119)) ([0f64408](https://github.com/appium/appium-wincore-driver/commit/0f64408885ac648c0e2a05955cb1b89b4f390c21))
+* **server:** map the InvalidSelector error code to "invalid selector" ([#118](https://github.com/appium/appium-wincore-driver/issues/118)) ([7eb86ae](https://github.com/appium/appium-wincore-driver/commit/7eb86aee79984917edf47ec5fc809dd3fa9f843f))
+
 ## [3.3.1](https://github.com/appium/appium-wincore-driver/compare/v3.3.0...v3.3.1) (2026-10-29)
 
 ### Bug Fixes
