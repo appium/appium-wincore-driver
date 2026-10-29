@@ -52,6 +52,12 @@ const MAX_POLL_ATTEMPTS = 30;
 const SET_WINDOW_MAX_POLL_ATTEMPTS = 2;
 
 /**
+ * How long closeApp waits for the closed window to go away. A window that stays open (say, on an
+ * unsaved-changes prompt) costs this on every closeApp, so it is shorter than a launch phase.
+ */
+const CLOSE_WINDOW_WAIT_MS = 3000;
+
+/**
  * How long to wait for the main window after attaching to a splash screen when
  * `ms:waitForAppLaunch` isn't set. A decorated window always passes the splash
  * probe through its native title bar and system menu, so this only bites undecorated
@@ -295,8 +301,64 @@ export async function closeApp(this: AppiumWincoreDriver): Promise<void> {
   if (!rootId) {
     throw new errors.NoSuchWindowError('No active app window is found for this session.');
   }
+  // Read before closing: the element is gone afterwards.
+  const hwnd = await readNativeWindowHandle(this, rootId);
   await this.sendCommand('closeWindow', {elementId: rootId});
   await this.sendCommand('setRootElementNull', {});
+
+  if (hwnd !== null) {
+    await waitForWindowToClose(this, hwnd);
+  }
+}
+
+/**
+ * Reads an element's native window handle for {@link closeApp}. Failing to get one must not
+ * stop the close itself, so errors and unusable values are logged and yield `null`.
+ * @param driver - The driver to send the command through.
+ * @param elementId - The element to read the handle of.
+ * @returns The handle, or `null` when none is available.
+ */
+async function readNativeWindowHandle(driver: AppiumWincoreDriver, elementId: string): Promise<number | null> {
+  try {
+    const value = await driver.sendCommand('getProperty', {elementId, property: 'NativeWindowHandle'});
+    const hwnd = Number(value);
+    if (Number.isSafeInteger(hwnd) && hwnd > 0) {
+      return hwnd;
+    }
+    driver.log.warn(`Root element has no usable native window handle (${value}). Not waiting for it to close.`);
+  } catch (err) {
+    driver.log.warn(
+      `Could not read the root window handle: ${err instanceof Error ? err.message : err}. ` +
+        'Not waiting for it to close.',
+    );
+  }
+  return null;
+}
+
+/**
+ * Waits until a window closed through `closeWindow` has left the window list.
+ *
+ * WindowPattern.Close only posts the close request, so the window can still be visible when it
+ * returns. A launchApp issued right away would then snapshot it as a pre-existing window and
+ * could re-attach to it as it dies (UWP frames especially), leaving the session rooted on a dead
+ * element. Polls `getAllWindowHandles` rather than `IsWindow` on purpose: that list is what
+ * launchApp looks at, so a window that hides instead of being destroyed is already out of its
+ * way, and needs no wait.
+ * @param driver - The driver, for logging.
+ * @param hwnd - The handle of the window being closed.
+ * @returns Resolves once the window is gone, or after {@link CLOSE_WINDOW_WAIT_MS}.
+ */
+async function waitForWindowToClose(driver: AppiumWincoreDriver, hwnd: number): Promise<void> {
+  const deadline = performance.now() + CLOSE_WINDOW_WAIT_MS;
+  while (getAllWindowHandles().includes(hwnd)) {
+    const remainingMs = deadline - performance.now();
+    if (remainingMs <= 0) {
+      // Likely held by an unsaved-changes prompt; leave that to the caller.
+      driver.log.warn(`Window 0x${hwnd.toString(16).padStart(8, '0')} is still open after closeApp.`);
+      return;
+    }
+    await sleep(Math.min(POLL_INTERVAL_MS, remainingMs));
+  }
 }
 
 /**
