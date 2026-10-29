@@ -54,10 +54,10 @@ public class RootWindowClosedTests
     }
 
     [Fact]
-    public void SaveRootElementToTable_ReturnsNoId_WhenTheWindowWasClosed()
+    public void SaveRootElementToTable_ThrowsNoSuchWindow_WhenTheWindowWasClosed()
     {
         var state = StateRootedAt(DestroyedHandle);
-        Assert.Null(FindCommands.SaveRootElementToTable(state, null));
+        Assert.Throws<NoSuchWindowException>(() => FindCommands.SaveRootElementToTable(state, null));
     }
 
     [Fact]

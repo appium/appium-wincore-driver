@@ -160,11 +160,7 @@ public static class FindCommands
 
     public static object? SaveRootElementToTable(SessionState state, JsonElement? parameters)
     {
-        // No id when the attached window was closed: the driver answers W3C "no such window".
-        if (state.IsRootWindowClosed())
-        {
-            return null;
-        }
+        state.ThrowIfRootWindowClosed();
 
         var root = state.GetLiveRoot() ?? state.Automation.GetRootElement();
         return state.SaveElementAndReturnId(root);
