@@ -295,8 +295,25 @@ export async function closeApp(this: AppiumWincoreDriver): Promise<void> {
   if (!rootId) {
     throw new errors.NoSuchWindowError('No active app window is found for this session.');
   }
+  const hwnd = Number(await this.sendCommand('getProperty', {elementId: rootId, property: 'NativeWindowHandle'}));
   await this.sendCommand('closeWindow', {elementId: rootId});
   await this.sendCommand('setRootElementNull', {});
+
+  // WindowPattern.Close only posts the close request, so the window can still be visible
+  // when this returns. A launchApp issued right away would then snapshot it as a
+  // pre-existing window and could re-attach to it as it dies (UWP frames especially),
+  // leaving the session rooted on a dead element. Wait for it to actually go away.
+  if (!hwnd) {
+    return;
+  }
+  for (let i = 0; i < MAX_POLL_ATTEMPTS; i++) {
+    if (!getAllWindowHandles().includes(hwnd)) {
+      return;
+    }
+    await sleep(POLL_INTERVAL_MS);
+  }
+  // Still open, e.g. held by an unsaved-changes prompt; leave that to the caller.
+  this.log.warn(`Window 0x${hwnd.toString(16).padStart(8, '0')} is still open after closeApp.`);
 }
 
 /**
