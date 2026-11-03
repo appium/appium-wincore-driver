@@ -1,8 +1,8 @@
 name: E2E Tests (GitHub-hosted)
 run-name: ${{ github.event.pull_request.title || 'E2E (hosted) manual run' }}
 
-# Experiment: the same e2e suite as e2e-test.yml, on a GitHub-hosted runner. Runs on
-# the PR with continue-on-error so failures show per-spec results without blocking.
+# Experiment: the same e2e suite as e2e-test.yml (left untouched), on a GitHub-hosted runner.
+# Downloads and build outputs are cached to keep runs short.
 on:
   pull_request:
     branches:
@@ -16,7 +16,6 @@ concurrency:
 jobs:
   e2e:
     runs-on: windows-latest
-    continue-on-error: true
     timeout-minutes: 60
     permissions:
       checks: write
@@ -40,17 +39,52 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # No lockfile in the repo, so cache the npm download cache by manifest instead
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ~\AppData\Local\npm-cache
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~\.nuget\packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('csharp/**/*.csproj', 'appium-wincore-test-apps/**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
       - name: Install dependencies
-        run: npm install --no-package-lock
+        run: npm install --no-package-lock --prefer-offline
+
+      - name: Cache native server build
+        id: native-cache
+        uses: actions/cache@v6
+        with:
+          path: native/win-x64
+          key: native-${{ runner.os }}-${{ hashFiles('csharp/WincoreServer/**', 'csharp/WincoreServerSdk/**') }}
+
+      - name: Build native server
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        run: npm run build:native
 
       - name: Build driver
-        run: npm run build:native && npm run build
+        run: npm run build
+
+      # Own APPIUM_HOME: the default one may already hold a wincore driver
+      - name: Prepare Appium home
+        shell: pwsh
+        run: |
+          $appiumHome = Join-Path $env:RUNNER_TEMP 'appium-home'
+          New-Item -ItemType Directory -Force -Path $appiumHome | Out-Null
+          "APPIUM_HOME=$appiumHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $range = node -p "require('./package.json').peerDependencies.appium"
+          "APPIUM_RANGE=$range" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
       - name: Install Appium
         shell: pwsh
         run: |
-          $range = node -p "require('./package.json').peerDependencies.appium"
-          npm install -g "appium@$range"
+          npm install -g "appium@$env:APPIUM_RANGE" --prefer-offline
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Write-Host "Installed Appium $(appium --version)"
 
@@ -60,16 +94,26 @@ jobs:
           appium driver install --source=local $PWD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Cache ffmpeg
+        id: ffmpeg-cache
+        uses: actions/cache@v6
+        with:
+          path: ffmpeg
+          key: ffmpeg-${{ runner.os }}-v1
+
       - name: Provide ffmpeg
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           choco install ffmpeg --no-progress -y
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $src = (Get-Command ffmpeg.exe).Source
-          $target = Join-Path $PWD 'ffmpeg'
-          New-Item -ItemType Directory -Force -Path $target | Out-Null
-          Copy-Item -Force $src (Join-Path $target 'ffmpeg.exe')
-          & $src -hide_banner -version | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path ffmpeg | Out-Null
+          Copy-Item -Force $src ffmpeg\ffmpeg.exe
+
+      - name: Check ffmpeg
+        shell: pwsh
+        run: .\ffmpeg\ffmpeg.exe -hide_banner -version | Select-Object -First 1
 
       - name: Report preinstalled apps
         shell: pwsh
@@ -79,7 +123,25 @@ jobs:
           Get-Command notepad.exe, chrome.exe -ErrorAction SilentlyContinue | Select-Object Name, Source
           Test-Path "$env:ProgramFiles\Google\Chrome\Application\chrome.exe"
 
+      - name: Resolve fixture apps revision
+        id: apps-rev
+        shell: pwsh
+        run: |
+          $rev = git -C appium-wincore-test-apps rev-parse HEAD
+          "rev=$rev" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Cache fixture app builds
+        id: apps-cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            appium-wincore-test-apps/winform-combo/bin
+            appium-wincore-test-apps/msaa-legacy-controls/bin
+            appium-wincore-test-apps/msaa-legacy-controls/obj
+          key: fixtures-${{ runner.os }}-${{ steps.apps-rev.outputs.rev }}
+
       - name: Set up fixture apps
+        if: steps.apps-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           $testAppsDir = Join-Path $PWD 'appium-wincore-test-apps'
