@@ -136,6 +136,15 @@ jobs:
           (Get-AppxPackage | Select-Object -ExpandProperty Name | Sort-Object) -join ', '
           (Get-CimInstance Win32_OperatingSystem).Caption
 
+      - name: Try installing Windows Calculator
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          winget source list
+          winget install --id 9WZDNCRFHVN5 --source msstore --accept-source-agreements --accept-package-agreements --silent
+          Write-Host "winget exit: $LASTEXITCODE"
+          Get-AppxPackage -Name "Microsoft.WindowsCalculator" | Select-Object Name, Version
+
       - name: Resolve fixture apps revision
         id: apps-rev
         shell: pwsh
