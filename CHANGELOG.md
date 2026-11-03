@@ -1,3 +1,29 @@
+## [4.0.0](https://github.com/appium/appium-wincore-driver/compare/v3.3.2...v4.0.0) (2026-11-03)
+
+### ⚠ BREAKING CHANGES
+
+* the package is now ESM-only.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+* requires Appium 4 and Node.js ^22.22.2 || ^24.15.0 || >=26.0.0.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+### Features
+
+* migrate to ESM ([f3c1de9](https://github.com/appium/appium-wincore-driver/commit/f3c1de96914768df9a5f272e97874ecf364ab782))
+* target Appium 4 beta ([19259a1](https://github.com/appium/appium-wincore-driver/commit/19259a1a0894a3670472b398529cb911ec3e88b5))
+
+### Miscellaneous Chores
+
+* **deps:** bump koffi to ^3.3.3 ([#104](https://github.com/appium/appium-wincore-driver/issues/104)) ([08811c1](https://github.com/appium/appium-wincore-driver/commit/08811c1361e9ac1a56e0324b614782599414887d))
+* fix lint errors and warnings ([9239cab](https://github.com/appium/appium-wincore-driver/commit/9239cab6f9675356515837af0012089e683c35b4))
+* rename scripts to .mjs ([747e783](https://github.com/appium/appium-wincore-driver/commit/747e7836fc3c1299c387681bcda30b04394d9040))
+
+### Code Refactoring
+
+* import support utils via appium/support peer ([#100](https://github.com/appium/appium-wincore-driver/issues/100)) ([87e6455](https://github.com/appium/appium-wincore-driver/commit/87e6455a574455a4d2c70fb5147893dad5e8f15a))
+
 ## [3.3.2](https://github.com/appium/appium-wincore-driver/compare/v3.3.1...v3.3.2) (2026-10-29)
 
 ### Bug Fixes
