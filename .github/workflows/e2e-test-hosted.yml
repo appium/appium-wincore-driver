@@ -1,18 +1,19 @@
 name: E2E Tests (GitHub-hosted)
 run-name: ${{ github.event.pull_request.title || 'E2E (hosted) manual run' }}
 
-# Experiment: the same e2e suite as e2e-test.yml (left untouched), on a GitHub-hosted runner.
-# Runs one suite at a time (default below) to keep runs short; downloads and builds are cached.
+# The e2e suites verified to pass on a GitHub-hosted runner, sharded across parallel jobs
+# (e2e-test.yml, the self-hosted run, is left untouched). Downloads and builds are cached.
+#
+# Not enabled yet (still to be verified on the hosted image): extension-powershell, actions,
+# element-commands, extension-app-lifecycle, device-file-transfer, device-system,
+# extension-cache-request, extension-patterns, extension-filesystem, extension-input,
+# navigation-window, xpath-axes, xpath-boolean-attributes, extension-screen-recording
+# (needs ffmpeg). Add each to a shard once it passes.
 on:
   pull_request:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      specs:
-        description: 'Space-separated e2e spec names (without .e2e.js), e.g. "extension-winform-combo window"'
-        required: false
-        default: 'element-commands'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -20,12 +21,38 @@ concurrency:
 
 jobs:
   e2e:
+    name: e2e (${{ matrix.shard }})
     runs-on: windows-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     permissions:
       checks: write
       pull-requests: write
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Fixture apps only
+          - shard: native
+            calculator: false
+            specs: >-
+              standard-accessibility-values
+              extension-select-from-combobox
+              extension-winform-combo
+              no-runtimeid-element
+          # Chrome + Notepad
+          - shard: webview
+            calculator: false
+            specs: >-
+              extension-webview
+              extension-clipboard
+          # Windows Calculator (installed via winget on this shard only)
+          - shard: calculator
+            calculator: true
+            specs: >-
+              session
+              window
+              find-element
 
     steps:
       - uses: actions/checkout@v7
@@ -104,39 +131,8 @@ jobs:
           appium driver install --source=local $PWD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      - name: Cache ffmpeg
-        id: ffmpeg-cache
-        uses: actions/cache@v6
-        with:
-          path: ffmpeg
-          key: ffmpeg-${{ runner.os }}-v1
-
-      - name: Provide ffmpeg
-        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          choco install ffmpeg --no-progress -y
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          $src = (Get-Command ffmpeg.exe).Source
-          New-Item -ItemType Directory -Force -Path ffmpeg | Out-Null
-          Copy-Item -Force $src ffmpeg\ffmpeg.exe
-
-      - name: Check ffmpeg
-        shell: pwsh
-        run: .\ffmpeg\ffmpeg.exe -hide_banner -version | Select-Object -First 1
-
-      - name: Report preinstalled apps
-        shell: pwsh
-        run: |
-          Get-AppxPackage -Name "Microsoft.WindowsCalculator" | Select-Object Name, Version
-          Get-AppxPackage -Name "Microsoft.WindowsNotepad" | Select-Object Name, Version
-          Get-Command notepad.exe, chrome.exe -ErrorAction SilentlyContinue | Select-Object Name, Source
-          Test-Path "$env:ProgramFiles\Google\Chrome\Application\chrome.exe"
-          Get-Command calc.exe, winget.exe -ErrorAction SilentlyContinue | Select-Object Name, Source
-          (Get-AppxPackage | Select-Object -ExpandProperty Name | Sort-Object) -join ', '
-          (Get-CimInstance Win32_OperatingSystem).Caption
-
       - name: Install Windows Calculator
+        if: matrix.calculator
         shell: pwsh
         run: |
           if (-not (Get-AppxPackage -Name "Microsoft.WindowsCalculator" -ErrorAction SilentlyContinue)) {
@@ -174,7 +170,7 @@ jobs:
         shell: pwsh
         env:
           TEST_APPS_DIR: ${{ github.workspace }}\appium-wincore-test-apps
-          SPECS: ${{ github.event.inputs.specs || 'element-commands' }}
+          SPECS: ${{ matrix.specs }}
         run: |
           $appiumPath = (Get-Command appium.cmd).Source
           $proc = Start-Process -FilePath $appiumPath `
@@ -225,7 +221,7 @@ jobs:
         if: always() && !github.event.pull_request.head.repo.fork
         uses: dorny/test-reporter@v3
         with:
-          name: E2E Test Results (hosted)
+          name: E2E Test Results (hosted, ${{ matrix.shard }})
           path: test-results/e2e-junit*.xml
           reporter: java-junit
           fail-on-error: false
@@ -234,7 +230,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: appium-logs
+          name: appium-logs-${{ matrix.shard }}
           path: |
             appium.log
             appium-err.log
