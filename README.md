@@ -1,7 +1,7 @@
 ﻿# Appium WinCore Driver
 
 Appium WinCore Driver is a Windows UI automation driver for
-[Appium 3](https://appium.io). It automates UWP, WinForms, WPF, Win32,
+[Appium](https://appium.io). It automates UWP, WinForms, WPF, Win32,
 and Internet Explorer applications via real UI Automation.
 
 Key advantages over WinAppDriver:
@@ -24,7 +24,10 @@ Key advantages over WinAppDriver:
 appium driver install --source=npm appium-wincore-driver
 ```
 
-Requires Appium 3 and Windows 10 or later.
+Requires Appium 4 and Windows 10 or later.
+
+> [!NOTE]
+> Since v4, this driver is only compatible with Appium server v4. Use driver v3.x with Appium 3.
 
 ## Related projects
 
