@@ -38,7 +38,7 @@ jobs:
         node-version: lts/*
         check-latest: true
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '10.x'
     - run: npm install --no-package-lock
@@ -84,7 +84,7 @@ jobs:
     steps:
     - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: '10.x'
     # Mirrors semantic-release's "local branch is behind the remote" check: if main
