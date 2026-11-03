@@ -4,11 +4,8 @@ run-name: ${{ github.event.pull_request.title || 'E2E (hosted) manual run' }}
 # The e2e suites verified to pass on a GitHub-hosted runner, sharded across parallel jobs
 # (e2e-test.yml, the self-hosted run, is left untouched). Downloads and builds are cached.
 #
-# Not enabled yet (still to be verified on the hosted image): extension-powershell, actions,
-# element-commands, extension-app-lifecycle, device-file-transfer, device-system,
-# extension-cache-request, extension-patterns, extension-filesystem, extension-input,
-# navigation-window, xpath-axes, xpath-boolean-attributes, extension-screen-recording
-# (needs ffmpeg). Add each to a shard once it passes.
+# Not enabled yet (still to be verified on the hosted image): extension-patterns (Calculator
+# minimize/restore and the To-Do app, which is not installed). Add it to a shard once it passes.
 on:
   pull_request:
     branches:
@@ -53,6 +50,35 @@ jobs:
               session
               window
               find-element
+          # Calculator + Notepad input
+          - shard: input
+            calculator: true
+            specs: >-
+              actions
+              extension-input
+              element-commands
+          # Mostly non-UI commands
+          - shard: system
+            calculator: true
+            specs: >-
+              extension-powershell
+              device-system
+              device-file-transfer
+              extension-filesystem
+              extension-cache-request
+          # App lifecycle, navigation and XPath
+          - shard: apps
+            calculator: true
+            specs: >-
+              extension-app-lifecycle
+              navigation-window
+              xpath-axes
+              xpath-boolean-attributes
+          # Needs ffmpeg (gdigrab)
+          - shard: recording
+            calculator: true
+            ffmpeg: true
+            specs: extension-screen-recording
 
     steps:
       - uses: actions/checkout@v7
@@ -130,6 +156,32 @@ jobs:
         run: |
           appium driver install --source=local $PWD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Cache ffmpeg
+        if: matrix.ffmpeg
+        id: ffmpeg-cache
+        uses: actions/cache@v6
+        with:
+          path: ffmpeg
+          key: ffmpeg-${{ runner.os }}-v2
+
+      # choco puts a shim on PATH; copy the real binary, the shim alone does not run
+      - name: Provide ffmpeg
+        if: matrix.ffmpeg && steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          choco install ffmpeg --no-progress -y
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $src = Get-ChildItem (Join-Path $env:ChocolateyInstall 'lib\ffmpeg') -Recurse -Filter ffmpeg.exe | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path ffmpeg | Out-Null
+          Copy-Item -Force $src.FullName ffmpeg\ffmpeg.exe
+
+      - name: Check ffmpeg
+        if: matrix.ffmpeg
+        shell: pwsh
+        run: |
+          .\ffmpeg\ffmpeg.exe -hide_banner -version | Select-Object -First 1
+          if ((.\ffmpeg\ffmpeg.exe -hide_banner -devices | Out-String) -notmatch 'gdigrab') { Write-Error 'ffmpeg has no gdigrab'; exit 1 }
 
       - name: Install Windows Calculator
         if: matrix.calculator

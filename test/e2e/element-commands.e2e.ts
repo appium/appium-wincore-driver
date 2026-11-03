@@ -6,6 +6,7 @@ import type {Browser, Selector} from 'webdriverio';
 import {
   createCalculatorSession,
   createNotepadSession,
+  getNotepadText,
   getNotepadTextArea,
   quitSession,
   resetCalculator,
@@ -151,7 +152,7 @@ describe('W3C element commands', () => {
     it('sets a value in Notepad text area and getText returns it', async () => {
       const textArea = await getNotepadTextArea(notepad);
       await textArea.setValue('Hello World');
-      const text = await textArea.getText();
+      const text = await getNotepadText(textArea);
       assert.ok(text.includes('Hello World'));
     });
 
@@ -159,7 +160,7 @@ describe('W3C element commands', () => {
       const textArea = await getNotepadTextArea(notepad);
       await textArea.setValue('some text');
       await textArea.clearValue();
-      const text = await textArea.getText();
+      const text = await getNotepadText(textArea);
       assert.equal(text.trim(), '');
     });
   });

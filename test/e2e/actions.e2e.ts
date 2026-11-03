@@ -8,6 +8,7 @@ import {
   createCalculatorSession,
   createNotepadSession,
   createCharmapSession,
+  getNotepadText,
   getNotepadTextArea,
   quitSession,
   resetCalculator,
@@ -43,7 +44,7 @@ describe('W3C Actions API', () => {
       const textArea = await getNotepadTextArea(notepad);
       await textArea.click();
       await notepad.action('key').down(Key.SHIFT).down('b').up('b').up(Key.SHIFT).perform();
-      const text = await textArea.getText();
+      const text = await getNotepadText(textArea);
       assert.ok(text.includes('B'));
       await notepad.keys([Key.BACKSPACE]); // delete 'B' so Notepad closes without a save prompt
       await quitSession(notepad);
@@ -129,7 +130,7 @@ describe('W3C Actions API', () => {
 
       // Shift held during click selects "hello"; typing X replaces it
       await notepad.keys(['X']);
-      assert.equal((await textArea.getText()).trim(), 'X');
+      assert.equal((await getNotepadText(textArea)).trim(), 'X');
     });
 
     it('key + pointer: respect tick order', async () => {
@@ -146,7 +147,7 @@ describe('W3C Actions API', () => {
       ]);
 
       await notepad.keys(['X']);
-      assert.equal((await textArea.getText()).trim(), 'X');
+      assert.equal((await getNotepadText(textArea)).trim(), 'X');
     });
 
     it('wheel scroll moves the viewport: off-screen items become reachable by scrolling', async () => {

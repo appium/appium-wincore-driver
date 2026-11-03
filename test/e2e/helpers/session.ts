@@ -374,7 +374,8 @@ export async function getNotepadTextArea(driver: Browser) {
 }
 
 /** Notepad text: the Win11 Document exposes TextPattern; classic Edit (Windows Server) only has ValuePattern. */
-export async function getNotepadText(textArea: ChainablePromiseElement): Promise<string> {
+export async function getNotepadText(target: WebdriverIO.Element | ChainablePromiseElement): Promise<string> {
+  const textArea = (await target) as WebdriverIO.Element;
   if ((await textArea.getAttribute('IsTextPatternAvailable')) === 'true') {
     return textArea.getText();
   }
