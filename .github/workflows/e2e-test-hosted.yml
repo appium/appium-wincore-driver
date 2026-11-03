@@ -188,7 +188,7 @@ jobs:
             exit 1
           }
 
-          $specs = $env:SPECS -split '\s+' | Where-Object { $_ } | ForEach-Object { "build/test/e2e/$_.e2e.js" }
+          $specs = @($env:SPECS -split '\s+' | Where-Object { $_ } | ForEach-Object { "build/test/e2e/$_.e2e.js" })
 
           New-Item -ItemType Directory -Force -Path test-results | Out-Null
 
