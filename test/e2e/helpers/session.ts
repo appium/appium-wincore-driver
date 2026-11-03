@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 
-import type {Browser} from 'webdriverio';
+import type {Browser, ChainablePromiseElement} from 'webdriverio';
 import {remote} from 'webdriverio';
 
 export const APPIUM_SERVER = {
@@ -371,6 +371,14 @@ export async function getNotepadTextArea(driver: Browser) {
     return el;
   }
   return driver.$('//Edit');
+}
+
+/** Notepad text: the Win11 Document exposes TextPattern; classic Edit (Windows Server) only has ValuePattern. */
+export async function getNotepadText(textArea: ChainablePromiseElement): Promise<string> {
+  if ((await textArea.getAttribute('IsTextPatternAvailable')) === 'true') {
+    return textArea.getText();
+  }
+  return (await textArea.getAttribute('Value.Value')) ?? '';
 }
 
 /** Clear all text in Notepad via Ctrl+A + Delete */

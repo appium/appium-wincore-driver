@@ -188,23 +188,6 @@ jobs:
             exit 1
           }
 
-          # TEMP diagnostics: what does classic Notepad's Edit expose here?
-          @'
-          import {remote} from 'webdriverio';
-          const d = await remote({hostname:'127.0.0.1',port:4723,path:'/',logLevel:'warn',capabilities:{platformName:'Windows','appium:automationName':'Wincore','appium:app':'C:\\Windows\\notepad.exe'}});
-          await d.setTimeout({implicit:1500});
-          const el = await d.$('//Edit');
-          console.log('Edit exists', await el.isExisting());
-          await el.setValue('hello diag');
-          console.log('getText=', JSON.stringify(await el.getText()));
-          for (const a of ['Value.Value','Name','ControlType','LocalizedControlType','ClassName','AutomationId','IsValuePatternAvailable','IsTextPatternAvailable']) {
-            try { console.log(a, '=', JSON.stringify(await el.getAttribute(a))); } catch (e) { console.log(a, 'ERR', e.message); }
-          }
-          console.log((await d.getPageSource()).slice(0, 2500));
-          await d.deleteSession();
-          '@ | Set-Content -Encoding utf8 diag.mjs
-          node diag.mjs
-
           $specs = @($env:SPECS -split '\s+' | Where-Object { $_ } | ForEach-Object { "build/test/e2e/$_.e2e.js" })
 
           New-Item -ItemType Directory -Force -Path test-results | Out-Null

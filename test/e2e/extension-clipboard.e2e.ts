@@ -3,7 +3,13 @@ import {after, before, beforeEach, describe, it} from 'node:test';
 
 import type {Browser} from 'webdriverio';
 
-import {createNotepadSession, getNotepadTextArea, quitSession, clearNotepad} from './helpers/session.js';
+import {
+  createNotepadSession,
+  getNotepadText,
+  getNotepadTextArea,
+  quitSession,
+  clearNotepad,
+} from './helpers/session.js';
 
 // Minimal 1×1 transparent PNG as base64
 const TINY_PNG_BASE64 =
@@ -78,7 +84,7 @@ describe('windows: clipboard extension commands', () => {
       // Ctrl+V to paste
       await notepad.keys(['Control', 'v']);
 
-      const text = await textArea.getText();
+      const text = await getNotepadText(textArea);
       assert.ok(text.includes(pasteText));
     });
   });
