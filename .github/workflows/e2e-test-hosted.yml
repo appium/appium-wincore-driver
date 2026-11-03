@@ -12,7 +12,7 @@ on:
       specs:
         description: 'Space-separated e2e spec names (without .e2e.js), e.g. "extension-winform-combo window"'
         required: false
-        default: 'window'
+        default: 'find-element'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -174,7 +174,7 @@ jobs:
         shell: pwsh
         env:
           TEST_APPS_DIR: ${{ github.workspace }}\appium-wincore-test-apps
-          SPECS: ${{ github.event.inputs.specs || 'window' }}
+          SPECS: ${{ github.event.inputs.specs || 'find-element' }}
         run: |
           $appiumPath = (Get-Command appium.cmd).Source
           $proc = Start-Process -FilePath $appiumPath `
