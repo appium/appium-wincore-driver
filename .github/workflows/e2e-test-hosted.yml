@@ -72,7 +72,7 @@ jobs:
         uses: actions/cache@v6
         with:
           path: native/win-x64
-          key: native-${{ runner.os }}-${{ hashFiles('csharp/WincoreServer/**/*.cs', 'csharp/WincoreServer/**/*.csproj', 'csharp/WincoreServerSdk/**/*.cs', 'csharp/WincoreServerSdk/**/*.csproj') }}
+          key: native-${{ runner.os }}-${{ hashFiles('csharp/WincoreServer/**/*.cs', 'csharp/WincoreServer/**/*.csproj', 'csharp/WincoreServerSdk/**/*.cs', 'csharp/WincoreServerSdk/**/*.csproj', '!**/obj/**', '!**/bin/**') }}
 
       - name: Build native server
         if: steps.native-cache.outputs.cache-hit != 'true'
@@ -192,17 +192,6 @@ jobs:
             Get-Content "appium.log", "appium-err.log" -ErrorAction SilentlyContinue
             exit 1
           }
-
-          # TEMP diagnostics: CDP targets Chrome reports on this runner
-          $ud = Join-Path $env:TEMP 'chrome-diag'
-          $fixture = ([System.Uri](Resolve-Path test/e2e/fixtures/webview.html).Path).AbsoluteUri
-          $chrome = Start-Process "$env:ProgramFiles\Google\Chrome\Application\chrome.exe" -ArgumentList "--remote-debugging-port=9333","--user-data-dir=$ud","--no-first-run","--no-default-browser-check",$fixture -PassThru
-          foreach ($i in 1..4) {
-            Start-Sleep -Seconds 3
-            Write-Host "--- /json/list attempt $i"
-            (Invoke-WebRequest http://localhost:9333/json/list -UseBasicParsing).Content | Write-Host
-          }
-          Stop-Process -Id $chrome.Id -Force -ErrorAction SilentlyContinue
 
           $specs = @($env:SPECS -split '\s+' | Where-Object { $_ } | ForEach-Object { "build/test/e2e/$_.e2e.js" })
 
