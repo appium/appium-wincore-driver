@@ -71,7 +71,7 @@
     "@appium/semantic-release-config": "^2.0.0-beta.1",
     "@appium/tsconfig": "^2.0.0-beta.1",
     "@appium/types": "^2.0.0-beta.2",
-    "@types/node": "^24.8.1",
+    "@types/node": "^26.6.6",
     "webdriverio": "^9.30.1"
   },
   "peerDependencies": {
