@@ -15,6 +15,7 @@ import {
   clearNotepad,
   createTodoTask,
   deleteTasks,
+  IS_CI,
 } from './helpers/session.js';
 
 describe('windows: pattern extension commands', () => {
@@ -112,7 +113,8 @@ describe('windows: pattern extension commands', () => {
       );
     });
 
-    it('minimizes then restores the Calculator window', async () => {
+    // Calculator's UI never comes back after restore on the Windows Server CI image
+    it('minimizes then restores the Calculator window', {skip: IS_CI}, async () => {
       const windowEl = await calc.executeScript('windows: getWindowElement', []);
       await calc.executeScript('windows: minimize', [windowEl]);
       await calc.executeScript('windows: restore', [windowEl]);
@@ -330,7 +332,8 @@ describe('windows: pattern extension commands', () => {
     });
   });
 
-  describe('windows: select / allSelectedItems / isMultiple / toggle', () => {
+  // To-Do needs a signed-in Microsoft account, which CI does not have
+  describe('windows: select / allSelectedItems / isMultiple / toggle', {skip: IS_CI}, () => {
     before(async () => {
       todo = await createTodoSession();
       await createTodoTask(todo, 'First task');

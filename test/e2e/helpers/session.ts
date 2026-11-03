@@ -21,6 +21,9 @@ export const APPIUM_SERVER = {
  */
 export const TEST_APPS_DIR = process.env.TEST_APPS_DIR ?? resolve(process.cwd(), '..', 'appium-wincore-test-apps');
 
+/** True on CI, where tests that are unstable there are skipped. */
+export const IS_CI = process.env.CI === 'true';
+
 export const CALCULATOR_APP_ID = 'Microsoft.WindowsCalculator_8wekyb3d8bbwe!App';
 export const NOTEPAD_APP_PATH = 'C:\\Windows\\notepad.exe';
 export const TODO_APP_ID = 'Microsoft.Todos_8wekyb3d8bbwe!App';

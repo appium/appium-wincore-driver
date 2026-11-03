@@ -4,13 +4,15 @@ run-name: ${{ github.event.pull_request.title || 'E2E (hosted) manual run' }}
 # The e2e suites verified to pass on a GitHub-hosted runner, sharded across parallel jobs
 # (e2e-test.yml, the self-hosted run, is left untouched). Downloads and builds are cached.
 #
-# Not enabled yet (still to be verified on the hosted image): extension-patterns (Calculator
-# minimize/restore and the To-Do app, which is not installed). Add it to a shard once it passes.
 on:
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+# Lets e2e specs skip tests that are unstable on CI (see IS_CI in test/e2e/helpers/session.ts)
+env:
+  CI: 'true'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -74,6 +76,10 @@ jobs:
               navigation-window
               xpath-axes
               xpath-boolean-attributes
+          # To-Do tests skip themselves when To-Do is not signed in
+          - shard: patterns
+            calculator: true
+            specs: extension-patterns
           # Needs ffmpeg (gdigrab)
           - shard: recording
             calculator: true

@@ -7,12 +7,15 @@ run-name: ${{ github.event.pull_request.title }}
 # contributor, on every push, until a maintainer approves it. Keep that setting: a
 # job-level `if` cannot replace it, because pull_request runs use the workflow file
 # from the PR itself, which a fork can edit.
+# Automatic runs are disabled while the e2e suite runs on GitHub-hosted runners
+# (e2e-test-hosted.yml). Re-enable by uncommenting the `pull_request` block.
 on:
-  pull_request:
-    branches:
-      - main
-      - develop
-      - beta
+  workflow_dispatch:
+  # pull_request:
+  #   branches:
+  #     - main
+  #     - develop
+  #     - beta
 
 # A newer commit on the same PR cancels the in-flight run (one shared runner/Appium port)
 concurrency:
