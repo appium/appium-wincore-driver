@@ -4,13 +4,15 @@ run-name: ${{ github.event.pull_request.title || 'E2E (hosted) manual run' }}
 # The e2e suites verified to pass on a GitHub-hosted runner, sharded across parallel jobs
 # (e2e-test.yml, the self-hosted run, is left untouched). Downloads and builds are cached.
 #
-# Not enabled yet (still to be verified on the hosted image): extension-patterns (Calculator
-# minimize/restore and the To-Do app, which is not installed). Add it to a shard once it passes.
 on:
   pull_request:
     branches:
       - main
   workflow_dispatch:
+
+# Lets e2e specs skip tests that are unstable on CI (see IS_CI in test/e2e/helpers/session.ts)
+env:
+  CI: 'true'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -74,6 +76,11 @@ jobs:
               navigation-window
               xpath-axes
               xpath-boolean-attributes
+          # Calculator + To-Do (installed via winget on this shard only)
+          - shard: patterns
+            calculator: true
+            todo: true
+            specs: extension-patterns
           # Needs ffmpeg (gdigrab)
           - shard: recording
             calculator: true
@@ -192,6 +199,16 @@ jobs:
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
           Get-AppxPackage -Name "Microsoft.WindowsCalculator" | Select-Object Name, Version
+
+      - name: Install Microsoft To-Do
+        if: matrix.todo
+        shell: pwsh
+        run: |
+          if (-not (Get-AppxPackage -Name "Microsoft.Todos" -ErrorAction SilentlyContinue)) {
+            winget install --id 9NBLGGH5R558 --source msstore --accept-source-agreements --accept-package-agreements --silent
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Get-AppxPackage -Name "Microsoft.Todos" | Select-Object Name, Version
 
       - name: Resolve fixture apps revision
         id: apps-rev
