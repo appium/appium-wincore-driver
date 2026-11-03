@@ -3,11 +3,7 @@
 ### ⚠ BREAKING CHANGES
 
 * the package is now ESM-only.
-
-Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
 * requires Appium 4 and Node.js ^22.22.2 || ^24.15.0 || >=26.0.0.
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 ### Features
 
