@@ -148,7 +148,8 @@ export async function createChromeWebviewSession(extraCaps?: Record<string, unkn
       'appium:webviewEnabled': true,
       'appium:webviewDevtoolsPort': port,
       'appium:shouldCloseApp': true,
-      'appium:ms:waitForAppLaunch': 3,
+      // Cold Chrome start on a fresh runner can take several seconds to show a window
+      'appium:ms:waitForAppLaunch': 20,
       ...extraCaps,
     } as Caps,
   });

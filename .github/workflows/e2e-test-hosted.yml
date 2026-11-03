@@ -263,17 +263,11 @@ jobs:
 
           New-Item -ItemType Directory -Force -Path test-results | Out-Null
 
-          # Retry failed tests once (UI automation is flaky)
-          $nodeArgs = @(
-            "--enable-source-maps", "--test", "--test-concurrency=1", "--test-timeout=60000",
-            "--test-rerun-failures=test-results/e2e-rerun.json",
-            "--test-reporter=spec", "--test-reporter-destination=stdout"
-          )
-          node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit.xml" @specs
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "Retrying failed tests once"
-            node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit-retry.xml" @specs
-          }
+          # No retries: any failed test must fail the shard
+          node --enable-source-maps --test --test-concurrency=1 --test-timeout=60000 `
+            --test-reporter=spec --test-reporter-destination=stdout `
+            --test-reporter=junit --test-reporter-destination=test-results/e2e-junit.xml @specs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Publish E2E test report
         if: always() && !github.event.pull_request.head.repo.fork

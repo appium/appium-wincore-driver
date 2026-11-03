@@ -238,21 +238,14 @@ jobs:
             "build/test/e2e/standard-accessibility-values.e2e.js"
           )
 
-          # node's JUnit reporter and rerun state don't create missing directories
+          # node's JUnit reporter doesn't create missing directories
           New-Item -ItemType Directory -Force -Path test-results | Out-Null
 
-          # Retry failed tests once (UI automation is flaky); each attempt writes its own JUnit report
-          # so a pass-on-retry stays distinguishable from a clean pass.
-          $nodeArgs = @(
-            "--enable-source-maps", "--test", "--test-concurrency=1", "--test-timeout=60000",
-            "--test-rerun-failures=test-results/e2e-rerun.json",
-            "--test-reporter=spec", "--test-reporter-destination=stdout"
-          )
-          node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit.xml" @specs
-          if ($LASTEXITCODE -ne 0) {
-            Write-Host "Retrying failed tests once"
-            node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit-retry.xml" @specs
-          }
+          # No retries: any failed test must fail the job
+          node --enable-source-maps --test --test-concurrency=1 --test-timeout=60000 `
+            --test-reporter=spec --test-reporter-destination=stdout `
+            --test-reporter=junit --test-reporter-destination=test-results/e2e-junit.xml @specs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       # Fork PRs get a read-only GITHUB_TOKEN, so the check run can't be created there;
       # the results are still in the test step's log.
