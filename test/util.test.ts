@@ -39,6 +39,10 @@ describe('assertSupportedEasingFunction', () => {
 
   it('throws for unsupported easing function names', () => {
     assert.throws(() => assertSupportedEasingFunction('bounce'), /Unsupported or invalid easing function/);
+    assert.throws(
+      () => assertSupportedEasingFunction('bounce'),
+      /\[linear, ease, ease-in, ease-out, ease-in-out, cubic-bezier\(x1,y1,x2,y2\)\]/,
+    );
     assert.throws(() => assertSupportedEasingFunction('spring'), /Unsupported or invalid easing function/);
     assert.throws(() => assertSupportedEasingFunction(''), /Unsupported or invalid easing function/);
   });

@@ -10,7 +10,7 @@ if (process.platform !== 'win32') {
   const lib = {func: () => () => 0};
   mockModule('koffi', {default: {...koffi, load: () => lib}});
 }
-const {isExtendedKeyVk, sendsAsUnicodePacket} = await import('../../lib/winapi/user32.js');
+const {isExtendedKeyVk, resolveEasingFunction, sendsAsUnicodePacket} = await import('../../lib/winapi/user32.js');
 
 describe('isExtendedKeyVk', () => {
   // Regression: SendInput must set KEYEVENTF_EXTENDEDKEY for these VKs, or
@@ -86,5 +86,27 @@ describe('sendsAsUnicodePacket', () => {
   it('is false for WebDriver special keys (virtual keys)', () => {
     assert.equal(sendsAsUnicodePacket(''), false); // Key.BACKSPACE
     assert.equal(sendsAsUnicodePacket('', true), false); // Key.TAB
+  });
+});
+
+describe('resolveEasingFunction', () => {
+  it('returns named easing functions', () => {
+    assert.equal(resolveEasingFunction('linear')(0.3), 0.3);
+    assert.equal(resolveEasingFunction('ease-in-out')(0), 0);
+    assert.equal(resolveEasingFunction('ease-in-out')(1), 1);
+  });
+
+  it('parses cubic-bezier with whitespace and matches the named equivalent', () => {
+    const custom = resolveEasingFunction('cubic-bezier(0.42, 0, 0.58, 1)');
+    const named = resolveEasingFunction('ease-in-out');
+    for (const x of [0, 0.25, 0.5, 0.75, 1]) {
+      assert.ok(Math.abs(custom(x) - named(x)) < 1e-9);
+    }
+  });
+
+  it('honors cubic-bezier control points outside [0, 1] on y', () => {
+    const overshoot = resolveEasingFunction('cubic-bezier(0,-0.5,1,1.5)');
+    assert.ok(overshoot(0.1) < 0);
+    assert.ok(overshoot(0.9) > 1);
   });
 });

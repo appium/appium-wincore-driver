@@ -3,7 +3,6 @@ import {logger} from 'appium/support.js';
 
 const log = logger.getLogger('user32');
 import {errors} from 'appium/driver.js';
-import type {EasingFunction} from 'bezier-easing';
 import bezier from 'bezier-easing';
 import koffi from 'koffi';
 
@@ -167,6 +166,17 @@ const easingFunctions = Object.freeze({
   'ease-out': bezier(0, 0, 0.58, 1),
   'ease-in-out': bezier(0.42, 0, 0.58, 1),
 } as const);
+
+type EasingFunction = (x: number) => number;
+
+/** Resolves a named easing or `cubic-bezier(x1,y1,x2,y2)` string; assumes it was already validated. */
+export function resolveEasingFunction(name: string): EasingFunction {
+  if (name in easingFunctions) {
+    return easingFunctions[name as keyof typeof easingFunctions];
+  }
+  const [x1, y1, x2, y2] = (/\((.*)\)/.exec(name)?.[1] ?? '0,0,1,1').split(',').map((n) => parseFloat(n.trim()));
+  return bezier(x1, y1, x2, y2);
+}
 
 const UINT32_MAX = 0xffffffff;
 
@@ -778,19 +788,8 @@ async function sendMouseMoveInput(args: {
   }
 
   if (easingFunction) {
-    let calculatePoint: EasingFunction;
-
-    // the lines below assume that the validation has been made on createSession
-    if (easingFunction.startsWith('cubic-bezier')) {
-      const bezierArgs = /\((.*?)\)/
-        .exec(easingFunction)
-        ?.groups?.[0].split(',')
-        .map((n) => parseFloat(n.trim())) ?? [0, 0, 1, 1];
-
-      calculatePoint = bezier.apply(bezierArgs);
-    } else {
-      calculatePoint = easingFunctions[easingFunction];
-    }
+    // the line below assumes that the validation has been made on createSession
+    const calculatePoint = resolveEasingFunction(easingFunction);
 
     for (let i = 1; i < iterations; i++) {
       setTimeout(() => {

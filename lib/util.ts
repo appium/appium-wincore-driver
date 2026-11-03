@@ -244,8 +244,8 @@ export function assertSupportedEasingFunction(value: string) {
     /^cubic-bezier\(\s*(0|1|0?\.\d+|\d+(\.\d+)?)\s*,\s*(-?0|-?1|-?0?\.\d+|-?\d+(\.\d+)?)\s*,\s*(0|1|0?\.\d+|\d+(\.\d+)?)\s*,\s*(-?0|-?1|-?0?\.\d+|-?\d+(\.\d+)?)\s*\)$/;
   if (!SupportedEasingFunctions.includes(value) && !cubicBezierRegex.test(value)) {
     throw new errors.InvalidArgumentError(
-      `Unsupported or invalid easing function '${value}' in appium:smoothPointerMove capability.` +
-        `Supported functions are [${SupportedEasingFunctions.join[', ']}, cubic-bezier(x1,y1,x2,y2)].`,
+      `Unsupported or invalid easing function '${value}' in appium:smoothPointerMove capability. ` +
+        `Supported functions are [${SupportedEasingFunctions.join(', ')}, cubic-bezier(x1,y1,x2,y2)].`,
     );
   }
 }
