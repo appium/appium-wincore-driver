@@ -53,6 +53,49 @@ jobs:
               session
               window
               find-element
+          # TEMP discovery: one shard per not-yet-verified suite
+          - shard: extension-powershell
+            calculator: true
+            specs: extension-powershell
+          - shard: actions
+            calculator: true
+            specs: actions
+          - shard: element-commands
+            calculator: true
+            specs: element-commands
+          - shard: extension-app-lifecycle
+            calculator: true
+            specs: extension-app-lifecycle
+          - shard: device-file-transfer
+            calculator: true
+            specs: device-file-transfer
+          - shard: device-system
+            calculator: true
+            specs: device-system
+          - shard: extension-cache-request
+            calculator: true
+            specs: extension-cache-request
+          - shard: extension-patterns
+            calculator: true
+            specs: extension-patterns
+          - shard: extension-filesystem
+            calculator: true
+            specs: extension-filesystem
+          - shard: extension-input
+            calculator: true
+            specs: extension-input
+          - shard: navigation-window
+            calculator: true
+            specs: navigation-window
+          - shard: xpath-axes
+            calculator: true
+            specs: xpath-axes
+          - shard: xpath-boolean-attributes
+            calculator: true
+            specs: xpath-boolean-attributes
+          - shard: extension-screen-recording
+            calculator: true
+            specs: extension-screen-recording
 
     steps:
       - uses: actions/checkout@v7
@@ -130,6 +173,23 @@ jobs:
         run: |
           appium driver install --source=local $PWD
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Cache ffmpeg
+        id: ffmpeg-cache
+        uses: actions/cache@v6
+        with:
+          path: ffmpeg
+          key: ffmpeg-${{ runner.os }}-v1
+
+      - name: Provide ffmpeg
+        if: steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          choco install ffmpeg --no-progress -y
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $src = (Get-Command ffmpeg.exe).Source
+          New-Item -ItemType Directory -Force -Path ffmpeg | Out-Null
+          Copy-Item -Force $src ffmpeg\ffmpeg.exe
 
       - name: Install Windows Calculator
         if: matrix.calculator
