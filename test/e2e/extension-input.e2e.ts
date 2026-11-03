@@ -7,6 +7,7 @@ import {
   createCalculatorSession,
   createNotepadSession,
   createCharmapSession,
+  getNotepadText,
   getNotepadTextArea,
   quitSession,
   resetCalculator,
@@ -27,7 +28,7 @@ async function waitForText(
   try {
     await element.waitUntil(
       async () => {
-        text = await element.getText();
+        text = await getNotepadText(element);
         return text.includes(expected);
       },
       {timeout, interval: 100},
@@ -109,7 +110,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
           ],
         },
       ]);
-      const text = await textArea.getText();
+      const text = await getNotepadText(textArea);
       assert.equal(text.trim(), '');
     });
 
@@ -135,7 +136,7 @@ describe('windows: keys, click, hover, scroll, clickAndDrag extension commands',
           actions: [{virtualKeyCode: VK_SHIFT, down: true}, {text: 'a'}, {virtualKeyCode: VK_SHIFT, down: false}],
         },
       ]);
-      const text = await textArea.getText();
+      const text = await getNotepadText(textArea);
       assert.ok(text.includes('A'));
     });
   });
