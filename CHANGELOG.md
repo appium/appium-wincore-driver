@@ -1,3 +1,9 @@
+## [4.0.2](https://github.com/appium/appium-wincore-driver/compare/v4.0.1...v4.0.2) (2026-11-03)
+
+### Miscellaneous Chores
+
+* **deps:** bump bezier-easing from 2.1.0 to 3.2.0 ([#135](https://github.com/appium/appium-wincore-driver/issues/135)) ([814504b](https://github.com/appium/appium-wincore-driver/commit/814504b266726c72083b6895054b274a7b592d8e))
+
 ## [4.0.1](https://github.com/appium/appium-wincore-driver/compare/v4.0.0...v4.0.1) (2026-11-03)
 
 ### Miscellaneous Chores
