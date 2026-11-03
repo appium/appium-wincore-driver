@@ -347,6 +347,11 @@ describe('windows: pattern extension commands', () => {
 
     before(async () => {
       todo = await createTodoSession();
+      // The UI builds a beat after launch: wait for the sign-in screen or the task input
+      await todo.waitUntil(
+        async () => (await todo.$('~LoginButton').isExisting()) || (await todo.$('//Custom/Group/Edit').isExisting()),
+        {timeout: 20_000, timeoutMsg: 'Microsoft To-Do showed neither the sign-in screen nor the task input'},
+      );
       signedIn = !(await todo.$('~LoginButton').isExisting());
       if (signedIn) {
         await createTodoTask(todo, 'First task');
