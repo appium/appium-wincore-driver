@@ -1,0 +1,236 @@
+name: E2E Tests (GitHub-hosted)
+run-name: ${{ github.event.pull_request.title || 'E2E (hosted) manual run' }}
+
+# The e2e suites verified to pass on a GitHub-hosted runner, sharded across parallel jobs
+# (e2e-test.yml, the self-hosted run, is left untouched). Downloads and builds are cached.
+#
+# Not enabled yet (still to be verified on the hosted image): extension-powershell, actions,
+# element-commands, extension-app-lifecycle, device-file-transfer, device-system,
+# extension-cache-request, extension-patterns, extension-filesystem, extension-input,
+# navigation-window, xpath-axes, xpath-boolean-attributes, extension-screen-recording
+# (needs ffmpeg). Add each to a shard once it passes.
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: e2e (${{ matrix.shard }})
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Fixture apps only
+          - shard: native
+            calculator: false
+            specs: >-
+              standard-accessibility-values
+              extension-select-from-combobox
+              extension-winform-combo
+              no-runtimeid-element
+          # Chrome + Notepad
+          - shard: webview
+            calculator: false
+            specs: >-
+              extension-webview
+              extension-clipboard
+          # Windows Calculator (installed via winget on this shard only)
+          - shard: calculator
+            calculator: true
+            specs: >-
+              session
+              window
+              find-element
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/checkout@v7
+        with:
+          repository: verisoft-ai/appium-wincore-test-apps
+          path: appium-wincore-test-apps
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+          check-latest: true
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      # No lockfile in the repo, so cache the npm download cache by manifest instead
+      - name: Locate npm cache
+        id: npm-cache-dir
+        shell: pwsh
+        run: '"dir=$(npm config get cache)" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append'
+
+      - name: Cache npm downloads
+        uses: actions/cache@v6
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: npm-${{ runner.os }}-${{ hashFiles('package.json') }}
+          restore-keys: npm-${{ runner.os }}-
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v6
+        with:
+          path: ~\.nuget\packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('csharp/**/*.csproj', 'appium-wincore-test-apps/**/*.csproj') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: npm install --no-package-lock --prefer-offline
+
+      - name: Cache native server build
+        id: native-cache
+        uses: actions/cache@v6
+        with:
+          path: native/win-x64
+          key: native-${{ runner.os }}-${{ hashFiles('csharp/WincoreServer/**/*.cs', 'csharp/WincoreServer/**/*.csproj', 'csharp/WincoreServerSdk/**/*.cs', 'csharp/WincoreServerSdk/**/*.csproj', '!**/obj/**', '!**/bin/**') }}
+
+      - name: Build native server
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        run: npm run build:native
+
+      - name: Build driver
+        run: npm run build
+
+      # Own APPIUM_HOME: the default one may already hold a wincore driver
+      - name: Prepare Appium home
+        shell: pwsh
+        run: |
+          $appiumHome = Join-Path $env:RUNNER_TEMP 'appium-home'
+          New-Item -ItemType Directory -Force -Path $appiumHome | Out-Null
+          "APPIUM_HOME=$appiumHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $range = node -p "require('./package.json').peerDependencies.appium"
+          "APPIUM_RANGE=$range" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Install Appium
+        shell: pwsh
+        run: |
+          npm install -g "appium@$env:APPIUM_RANGE" --prefer-offline
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Write-Host "Installed Appium $(appium --version)"
+
+      - name: Install driver into Appium
+        shell: pwsh
+        run: |
+          appium driver install --source=local $PWD
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Install Windows Calculator
+        if: matrix.calculator
+        shell: pwsh
+        run: |
+          if (-not (Get-AppxPackage -Name "Microsoft.WindowsCalculator" -ErrorAction SilentlyContinue)) {
+            winget install --id 9WZDNCRFHVN5 --source msstore --accept-source-agreements --accept-package-agreements --silent
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          Get-AppxPackage -Name "Microsoft.WindowsCalculator" | Select-Object Name, Version
+
+      - name: Resolve fixture apps revision
+        id: apps-rev
+        shell: pwsh
+        run: |
+          $rev = git -C appium-wincore-test-apps rev-parse HEAD
+          "rev=$rev" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+      - name: Cache fixture app builds
+        id: apps-cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            appium-wincore-test-apps/winform-combo/bin
+            appium-wincore-test-apps/msaa-legacy-controls/bin
+            appium-wincore-test-apps/msaa-legacy-controls/obj
+          key: fixtures-${{ runner.os }}-${{ steps.apps-rev.outputs.rev }}
+
+      - name: Set up fixture apps
+        if: steps.apps-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $testAppsDir = Join-Path $PWD 'appium-wincore-test-apps'
+          dotnet publish (Join-Path $testAppsDir 'winform-combo\WinformCombo.csproj') -c Release -o (Join-Path $testAppsDir 'winform-combo\bin')
+          dotnet build (Join-Path $testAppsDir 'msaa-legacy-controls\MsaaLegacyControls.csproj') -c Debug -p:Platform=x64
+
+      - name: Start Appium and run E2E tests
+        shell: pwsh
+        env:
+          TEST_APPS_DIR: ${{ github.workspace }}\appium-wincore-test-apps
+          SPECS: ${{ matrix.specs }}
+        run: |
+          $appiumPath = (Get-Command appium.cmd).Source
+          $proc = Start-Process -FilePath $appiumPath `
+            -ArgumentList "--log-level","info","--allow-insecure","wincore:modify_fs" `
+            -RedirectStandardOutput "appium.log" `
+            -RedirectStandardError "appium-err.log" `
+            -PassThru -WindowStyle Hidden
+
+          $timeout = 60
+          $elapsed = 0
+          do {
+            Start-Sleep -Seconds 2
+            $elapsed += 2
+            if ($proc.HasExited) {
+              Write-Error "Appium exited early (code $($proc.ExitCode))"
+              Get-Content "appium.log", "appium-err.log" -ErrorAction SilentlyContinue
+              exit 1
+            }
+            try {
+              $response = Invoke-WebRequest -Uri "http://127.0.0.1:4723/status" -UseBasicParsing -ErrorAction Stop
+              if ($response.StatusCode -eq 200) { Write-Host "Appium ready after ${elapsed}s"; break }
+            } catch {}
+          } while ($elapsed -lt $timeout)
+
+          if ($elapsed -ge $timeout) {
+            Write-Error "Appium did not start within ${timeout}s"
+            Get-Content "appium.log", "appium-err.log" -ErrorAction SilentlyContinue
+            exit 1
+          }
+
+          $specs = @($env:SPECS -split '\s+' | Where-Object { $_ } | ForEach-Object { "build/test/e2e/$_.e2e.js" })
+
+          New-Item -ItemType Directory -Force -Path test-results | Out-Null
+
+          # Retry failed tests once (UI automation is flaky)
+          $nodeArgs = @(
+            "--enable-source-maps", "--test", "--test-concurrency=1", "--test-timeout=60000",
+            "--test-rerun-failures=test-results/e2e-rerun.json",
+            "--test-reporter=spec", "--test-reporter-destination=stdout"
+          )
+          node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit.xml" @specs
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Retrying failed tests once"
+            node @nodeArgs "--test-reporter=junit" "--test-reporter-destination=test-results/e2e-junit-retry.xml" @specs
+          }
+
+      - name: Publish E2E test report
+        if: always() && !github.event.pull_request.head.repo.fork
+        uses: dorny/test-reporter@v3
+        with:
+          name: E2E Test Results (hosted, ${{ matrix.shard }})
+          path: test-results/e2e-junit*.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      - name: Upload Appium logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: appium-logs-${{ matrix.shard }}
+          path: |
+            appium.log
+            appium-err.log

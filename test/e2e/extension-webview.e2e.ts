@@ -11,7 +11,7 @@ import type {Browser} from 'webdriverio';
 
 import {quitSession, closeAllTestApps, createChromeWebviewSession} from './helpers/session.js';
 
-type WebviewContext = {id: string; title?: string; url?: string};
+type WebviewContext = {id: string; title?: string; url?: string; type?: string};
 
 /** All WEBVIEW_ contexts; Chrome also lists non-page targets such as extension background pages. */
 async function getWebviews(driver: Browser): Promise<WebviewContext[]> {
@@ -181,8 +181,8 @@ describe('Chrome WebView context support', () => {
   });
 
   it('switching between two webview sessions tears down previous Chromedriver', async () => {
-    const contexts = (await driver.execute('mobile: getContexts', [{}])) as unknown as Array<{id: string}>;
-    const webviewIds = contexts.filter((c) => c.id.startsWith('WEBVIEW_')).map((c) => c.id);
+    // Only real pages: Chrome also lists transient extension background pages and browser UI targets
+    const webviewIds = (await getWebviews(driver)).filter((c) => c.type === 'page').map((c) => c.id);
 
     if (webviewIds.length >= 2) {
       await driver.switchContext(webviewIds[0]);
