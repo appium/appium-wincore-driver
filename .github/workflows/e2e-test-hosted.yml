@@ -132,6 +132,9 @@ jobs:
           Get-AppxPackage -Name "Microsoft.WindowsNotepad" | Select-Object Name, Version
           Get-Command notepad.exe, chrome.exe -ErrorAction SilentlyContinue | Select-Object Name, Source
           Test-Path "$env:ProgramFiles\Google\Chrome\Application\chrome.exe"
+          Get-Command calc.exe, winget.exe -ErrorAction SilentlyContinue | Select-Object Name, Source
+          (Get-AppxPackage | Select-Object -ExpandProperty Name | Sort-Object) -join ', '
+          (Get-CimInstance Win32_OperatingSystem).Caption
 
       - name: Resolve fixture apps revision
         id: apps-rev
