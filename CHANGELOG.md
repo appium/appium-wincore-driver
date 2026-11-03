@@ -1,3 +1,12 @@
+## [4.0.1](https://github.com/appium/appium-wincore-driver/compare/v4.0.0...v4.0.1) (2026-11-03)
+
+### Miscellaneous Chores
+
+* **deps:** bump actions/setup-dotnet from 4 to 5 ([#126](https://github.com/appium/appium-wincore-driver/issues/126)) ([13b3266](https://github.com/appium/appium-wincore-driver/commit/13b32660bd32d32e3061b352e47b32ce69297853))
+* **deps:** bump actions/upload-artifact from 4 to 7 ([#128](https://github.com/appium/appium-wincore-driver/issues/128)) ([61db744](https://github.com/appium/appium-wincore-driver/commit/61db744d4eaf26cde3e855b71becf8d3d2781cef))
+* **deps:** bump appium-chromedriver from 8.4.22 to 9.1.13 ([#125](https://github.com/appium/appium-wincore-driver/issues/125)) ([a5fd988](https://github.com/appium/appium-wincore-driver/commit/a5fd988e6c16769ce6d40a1323429560ad0973c7))
+* **deps:** bump dorny/test-reporter from 1 to 3 ([#129](https://github.com/appium/appium-wincore-driver/issues/129)) ([d108799](https://github.com/appium/appium-wincore-driver/commit/d10879961401816a09fc899fd3b84a510c6752e9))
+
 ## [4.0.0](https://github.com/appium/appium-wincore-driver/compare/v3.3.2...v4.0.0) (2026-11-03)
 
 ### ⚠ BREAKING CHANGES
