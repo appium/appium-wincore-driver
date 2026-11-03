@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {existsSync, mkdirSync, writeFileSync, rmdirSync} from 'node:fs';
+import {existsSync, mkdirSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {after, afterEach, before, beforeEach, describe, it} from 'node:test';
@@ -31,7 +31,7 @@ describe('windows: deleteFile and deleteFolder', () => {
       if (existsSync(testFilePath)) {
         // Clean up if test didn't delete it
         try {
-          rmdirSync(testFilePath);
+          rmSync(testFilePath, {force: true});
         } catch {
           // file not a dir
         }
@@ -65,7 +65,7 @@ describe('windows: deleteFile and deleteFolder', () => {
       // Best-effort cleanup in case test failed
       if (existsSync(testDirPath)) {
         try {
-          rmdirSync(testDirPath, {recursive: true});
+          rmSync(testDirPath, {recursive: true, force: true});
         } catch {
           // noop
         }
