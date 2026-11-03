@@ -52,4 +52,34 @@ public class ConditionValueTests
     {
         Assert.Throws<ArgumentException>(() => Convert(UIA.CulturePropertyId, "\"not a culture!\""));
     }
+
+    [Theory]
+    [InlineData("\"None\"", 80050)]
+    [InlineData("\"none\"", 80050)]
+    [InlineData("\"Level2\"", 80052)]
+    [InlineData("\"level9\"", 80059)]
+    [InlineData("0", 80050)]
+    [InlineData("5", 80055)]
+    public void HeadingLevel_BecomesUiaConstant(string json, int expected)
+    {
+        Assert.Equal(expected, Convert(UIA.HeadingLevelPropertyId, json));
+    }
+
+    [Theory]
+    [InlineData("\"Level10\"")]
+    [InlineData("\"Heading\"")]
+    [InlineData("10")]
+    public void HeadingLevel_Unknown_Throws(string json)
+    {
+        Assert.Throws<ArgumentException>(() => Convert(UIA.HeadingLevelPropertyId, json));
+    }
+
+    [Theory]
+    [InlineData("\"Horizontal\"", 1)]
+    [InlineData("\"vertical\"", 2)]
+    [InlineData("1", 1)]
+    public void Orientation_NameOrNumber_BecomesInt(string json, int expected)
+    {
+        Assert.Equal(expected, Convert(UIA.OrientationPropertyId, json));
+    }
 }

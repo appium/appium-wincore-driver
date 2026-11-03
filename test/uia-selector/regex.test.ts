@@ -9,7 +9,10 @@ import {ConstructorRegexMatcher, PropertyRegexMatcher, RegexItem} from '../../li
 describe('namespace validation', () => {
   it('rejects namespaces with characters outside the allowed set', () => {
     assert.throws(() => new PropertyRegexMatcher('System.Windows; rm -rf'), /namespace/);
-    assert.throws(() => new ConstructorRegexMatcher('System.Windows.Point[]', new RegexItem(String.raw`\d+`)), /namespace/);
+    assert.throws(
+      () => new ConstructorRegexMatcher('System.Windows.Point[]', new RegexItem(String.raw`\d+`)),
+      /namespace/,
+    );
     assert.throws(() => new PropertyRegexMatcher(''), /namespace/);
   });
 

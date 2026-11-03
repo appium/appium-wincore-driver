@@ -1000,88 +1000,6 @@
     "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::itemstatusProperty, [Condition]::TrueCondition)'."
   },
   {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, 'text')",
-    "dto": {
-      "type": "property",
-      "property": "javasimpleclass",
-      "value": "text"
-    }
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, 42)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, -7)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, @(1, 2, 3))",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [ControlType]::Button)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [OrientationType]::Horizontal)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [AutomationHeadingLevel]::Level2)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, None)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [Condition]::TrueCondition)",
-    "error": "InvalidSelectorError",
-    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::javasimpleclassProperty, [Condition]::TrueCondition)'."
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, 'text')",
-    "dto": {
-      "type": "property",
-      "property": "javaclass",
-      "value": "text"
-    }
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, 42)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, -7)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, @(1, 2, 3))",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [ControlType]::Button)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [OrientationType]::Horizontal)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [AutomationHeadingLevel]::Level2)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, None)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::javaclassProperty, [Condition]::TrueCondition)",
-    "error": "InvalidSelectorError",
-    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::javaclassProperty, [Condition]::TrueCondition)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::javaclassProperty, [Condition]::TrueCondition)'."
-  },
-  {
     "selector": "[PropertyCondition]::new([AutomationElement]::valueProperty, 'text')",
     "dto": {
       "type": "property",
@@ -3899,30 +3817,6 @@
     }
   },
   {
-    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 3)",
-    "dto": {
-      "type": "property",
-      "property": "Orientation",
-      "value": 3
-    }
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 3)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 9)",
-    "dto": {
-      "type": "property",
-      "property": "Orientation",
-      "value": 9
-    }
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::HeadingLevelProperty, 9)",
-    "error": "InvalidArgumentError"
-  },
-  {
     "selector": "[PropertyCondition]::new([AutomationElement]::OrientationProperty, 10)",
     "error": "InvalidArgumentError"
   },
@@ -4063,14 +3957,6 @@
       "type": "property",
       "property": "ClassName",
       "value": "Button"
-    }
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::JavaClassProperty, 'javax.swing.JButton')",
-    "dto": {
-      "type": "property",
-      "property": "javaclass",
-      "value": "javax.swing.JButton"
     }
   },
   {
@@ -4302,15 +4188,6 @@
   },
   {
     "selector": "[PropertyCondition]::new([AutomationElement]::RuntimeIdProperty, 42)",
-    "error": "InvalidArgumentError"
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, $true)",
-    "error": "InvalidSelectorError",
-    "message": "Could not parse Windows Automation selector expression '[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, $true)'. Some parts of the selector were left unprocessed: '[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, $<processed>)'."
-  },
-  {
-    "selector": "[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, true)",
     "error": "InvalidArgumentError"
   },
   {

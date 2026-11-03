@@ -136,6 +136,7 @@ public static class UIA
     public const int SizeOfSetPropertyId = 30166;
     public const int PositionInSetPropertyId = 30165;
     public const int HeadingLevelPropertyId = 30173;
+    public const int HeadingLevelNone = 80050;
     public const int IsDialogPropertyId = 30174;
     public const int ExpandCollapseStatePropertyId = 30070;
     public const int ValueValuePropertyId = 30045;

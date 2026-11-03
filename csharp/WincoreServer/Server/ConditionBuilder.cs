@@ -244,9 +244,18 @@ public static class ConditionBuilder
 
         if (propertyId == UIA.OrientationPropertyId)
         {
+            if (value.ValueKind == JsonValueKind.Number)
+            {
+                return value.GetInt32();
+            }
             var orientationName = value.GetString() ?? "None";
             // UIA3 OrientationType is an int enum (None=0, Horizontal=1, Vertical=2)
             return (int)Enum.Parse<OrientationType>(orientationName, true);
+        }
+
+        if (propertyId == UIA.HeadingLevelPropertyId)
+        {
+            return ConvertHeadingLevel(value);
         }
 
         // NativeWindowHandle is an HWND. UIA property expects an int (not IntPtr)
@@ -264,6 +273,31 @@ public static class ConditionBuilder
             JsonValueKind.False => false,
             _ => value.GetString() ?? string.Empty
         };
+    }
+
+    // UIA stores HeadingLevel as HeadingLevel_None (80050) .. HeadingLevel9 (80059); the
+    // selector parser sends the name ("None", "Level2") or the level itself (0..9).
+    private static int ConvertHeadingLevel(JsonElement value)
+    {
+        var level = value.ValueKind == JsonValueKind.Number ? value.GetInt32() : ParseHeadingLevelName(value.GetString());
+        if (level is < 0 or > 9)
+        {
+            throw new ArgumentException($"Unknown HeadingLevel: {value.GetRawText()}");
+        }
+        return UIA.HeadingLevelNone + level;
+    }
+
+    private static int ParseHeadingLevelName(string? name)
+    {
+        if ("None".Equals(name, StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+        return name != null
+            && name.StartsWith("Level", StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(name[5..], out var level)
+                ? level
+                : throw new ArgumentException($"Unknown HeadingLevel: '{name}'");
     }
 
     private static double RequireDouble(JsonElement obj, string name) =>

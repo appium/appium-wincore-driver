@@ -1,5 +1,5 @@
 import {errors} from 'appium/driver.js';
-import {logger} from 'appium/support';
+import {logger} from 'appium/support.js';
 
 import {
   andCondition,
@@ -50,6 +50,7 @@ type Rect = Point & {width: number; height: number};
 
 type SelectorValue =
   | {kind: 'string'; value: string}
+  | {kind: 'boolean'; value: boolean}
   | {kind: 'int32'; value: number}
   | {kind: 'int32[]'; value: number[]}
   | {kind: 'point'; value: Point}
@@ -60,7 +61,7 @@ type SelectorValue =
   | {kind: 'culture'; value: string | number}
   | {kind: 'condition'; value: ConditionDto};
 
-type ValueKind = SelectorValue['kind'] | 'boolean' | 'element';
+type ValueKind = SelectorValue['kind'] | 'element';
 
 const BOOLEAN_REGEX = /(?<=[\s,])(?:\$)?(true|false)(?=[\s)])/;
 const INTEGER_REGEX = /((?<![\d.+-])[+-]?\d+(?![\d.]))/;
@@ -96,6 +97,13 @@ const PROPERTY_CONDITION_REGEX = new ConstructorRegexMatcher(
   'System.Windows.Automation.Property(?:Condition)?',
   new PropertyRegexMatcher('System.Windows.Automation.AutomationElement'),
   PROCESSED_ITEM_REGEX_MATCHER,
+).toRegex('gi');
+// PropertyCondition with a boolean value. Only recognised in this position: anywhere else a bare
+// `true`/`false` keeps its meaning of TrueCondition/FalseCondition.
+const BOOLEAN_PROPERTY_CONDITION_REGEX = new ConstructorRegexMatcher(
+  'System.Windows.Automation.Property(?:Condition)?',
+  new PropertyRegexMatcher('System.Windows.Automation.AutomationElement'),
+  BOOLEAN_MATCHER,
 ).toRegex('gi');
 const ANY_LOGIC_CONDITION_REGEX = new ConstructorRegexMatcher(
   'System.Windows.Automation.(?:And|Or|Not)(?:Condition)?',
@@ -224,6 +232,7 @@ const BACKTICK_ESCAPES: Record<string, string> = {
 };
 
 const MAGIC_PLACEHOLDER_UNICODE_BEGIN = 0xee00;
+const MAGIC_PLACEHOLDER_UNICODE_END = 0xefff;
 const PROPERTY_SUFFIX = 'property';
 
 const PROPERTY_VALUE_KINDS: [Record<string, string>, ValueKind][] = [
@@ -259,7 +268,14 @@ class WindowsAutomationSelectorSyntaxError extends errors.InvalidSelectorError {
 export function parseUiaSelector(selector: string): ConditionDto {
   const items: SelectorValue[] = [];
   const push = (item: SelectorValue): string => {
-    const placeholder = String.fromCharCode(MAGIC_PLACEHOLDER_UNICODE_BEGIN + items.length);
+    const code = MAGIC_PLACEHOLDER_UNICODE_BEGIN + items.length;
+    if (code > MAGIC_PLACEHOLDER_UNICODE_END) {
+      throw new WindowsAutomationSelectorSyntaxError(
+        selector,
+        `The selector is too large: at most ${MAGIC_PLACEHOLDER_UNICODE_END - MAGIC_PLACEHOLDER_UNICODE_BEGIN + 1} values and conditions are supported`,
+      );
+    }
+    const placeholder = String.fromCharCode(code);
     items.push(item);
     return placeholder;
   };
@@ -347,6 +363,27 @@ export function parseUiaSelector(selector: string): ConditionDto {
     push({kind: 'int32', value: Number(match)}),
   );
 
+  const propertyConditionItem = (name: string, value: SelectorValue | undefined): string => {
+    let property = name.toLowerCase();
+
+    if (property.endsWith(PROPERTY_SUFFIX)) {
+      property = property.slice(0, property.length - PROPERTY_SUFFIX.length);
+    }
+
+    if (!Object.values(Property).includes(property as Property)) {
+      throw new errors.InvalidArgumentError(`Unknown automation property '${property}'.`);
+    }
+
+    return push({kind: 'condition', value: buildPropertyCondition(property as Property, value)});
+  };
+
+  // has to run before TRUE_CONDITION_REGEX, which would claim a bare `true`
+  processedSelector = processedSelector.replaceAll(
+    BOOLEAN_PROPERTY_CONDITION_REGEX,
+    (_, property: string, value: string) =>
+      propertyConditionItem(property, {kind: 'boolean', value: value.toLowerCase() === 'true'}),
+  );
+
   processedSelector = processedSelector.replaceAll(TRUE_CONDITION_REGEX, () =>
     push({kind: 'condition', value: trueCondition()}),
   );
@@ -377,19 +414,7 @@ export function parseUiaSelector(selector: string): ConditionDto {
 
   processedSelector = processedSelector.replaceAll(
     PROPERTY_CONDITION_REGEX,
-    (_, property: string, processedItem: string) => {
-      property = property.toLowerCase();
-
-      if (property.endsWith(PROPERTY_SUFFIX)) {
-        property = property.slice(0, property.length - PROPERTY_SUFFIX.length);
-      }
-
-      if (!Object.values(Property).includes(property as Property)) {
-        throw new errors.InvalidArgumentError(`Unknown automation property '${property}'.`);
-      }
-
-      return push({kind: 'condition', value: buildPropertyCondition(property as Property, itemAt(processedItem))});
-    },
+    (_, property: string, processedItem: string) => propertyConditionItem(property, itemAt(processedItem)),
   );
 
   const conditionArgs = (content: string): (SelectorValue | undefined)[] => content.split(',').map(itemAt);
@@ -511,12 +536,10 @@ function replaceStringLiterals(selector: string, onString: (value: string) => st
 function buildPropertyCondition(property: Property, value: SelectorValue | undefined): ConditionDto {
   const expected = PROPERTY_VALUE_KINDS.find(([group]) => Object.values(group).includes(property))?.[1];
 
-  // NB: the raw-Int32 bounds are carried over unchanged from the PowerShell-object converter and
-  // look swapped (OrientationType has 3 members, AutomationHeadingLevel 10).
   if (expected === 'orientation' && value?.kind !== 'orientation') {
-    value = coerceEnumValue(property, value, 'orientation', Object.keys(AutomationHeadingLevel).length);
+    value = coerceEnumValue(property, value, 'orientation', Object.keys(OrientationType).length);
   } else if (expected === 'headingLevel' && value?.kind !== 'headingLevel') {
-    value = coerceEnumValue(property, value, 'headingLevel', Object.keys(OrientationType).length);
+    value = coerceEnumValue(property, value, 'headingLevel', Object.keys(AutomationHeadingLevel).length);
   } else if (expected && value?.kind !== expected) {
     throw propertyTypeError(property, expected, value);
   }

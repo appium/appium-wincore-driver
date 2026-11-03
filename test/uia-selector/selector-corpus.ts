@@ -42,7 +42,7 @@ const ENUMS = [
     P('HeadingLevelProperty', `[System.Windows.Automation.AutomationHeadingLevel]::${h}`),
     P('OrientationProperty', `AutomationHeadingLevel.${h}`),
   ]),
-  ...[-1, 0, 1, 2, 3, 9, 10].flatMap((n) => [P('OrientationProperty', `${n}`), P('HeadingLevelProperty', `${n}`)]),
+  ...[-1, 0, 1, 2, 10].flatMap((n) => [P('OrientationProperty', `${n}`), P('HeadingLevelProperty', `${n}`)]),
 ];
 
 const PROPERTY_SPELLINGS = [
@@ -101,8 +101,6 @@ const VALUE_FORMS = [
   P('RuntimeIdProperty', 'int32[] [ 42 , 1 ]'),
   P('RuntimeIdProperty', '{42, 1}'),
   P('RuntimeIdProperty', '42'),
-  P('IsEnabledProperty', '$true'),
-  P('IsEnabledProperty', 'true'),
   P('IsEnabledProperty', `'true'`),
   P('LabeledByProperty', `'x'`),
   P('ClickablePointProperty', '1'),
@@ -302,5 +300,32 @@ export const INTENDED_CHANGES: IntendedChange[] = [
     selector: NAME(`'say "hi"'`),
     before: prop('Name', 'say hi'),
     after: prop('Name', 'say "hi"'),
+  },
+  // the raw-Int32 bounds of Orientation and HeadingLevel were swapped
+  ...[3, 9].flatMap((n) => [
+    {
+      selector: P('OrientationProperty', `${n}`),
+      before: prop('Orientation', n),
+      after: {error: 'InvalidArgumentError'},
+    },
+    {
+      selector: P('HeadingLevelProperty', `${n}`),
+      before: {error: 'InvalidArgumentError'},
+      after: prop('HeadingLevel', n),
+    },
+  ]),
+  // boolean literals had no tokeniser, so $true never parsed and bare true became a TrueCondition
+  {
+    selector: P('IsEnabledProperty', '$true'),
+    before: unprocessed(
+      P('IsEnabledProperty', '$true'),
+      '[PropertyCondition]::new([AutomationElement]::IsEnabledProperty, $<processed>)',
+    ),
+    after: prop('IsEnabled', true),
+  },
+  {
+    selector: P('IsEnabledProperty', 'true'),
+    before: {error: 'InvalidArgumentError'},
+    after: prop('IsEnabled', true),
   },
 ];

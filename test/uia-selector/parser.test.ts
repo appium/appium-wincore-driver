@@ -84,7 +84,8 @@ describe('parseUiaSelector', () => {
       });
       assert.deepEqual(
         parseUiaSelector(P('BoundingRectangleProperty', '[Rect]::new([Point]::new(5, 6), [Point]::new(1, 2))')),
-      , {type: 'property', property: 'BoundingRectangle', value: {x: 1, y: 2, width: 4, height: 4}});
+        {type: 'property', property: 'BoundingRectangle', value: {x: 1, y: 2, width: 4, height: 4}},
+      );
     });
 
     it('sends CultureInfo as its name or LCID', () => {
@@ -159,7 +160,8 @@ describe('parseUiaSelector', () => {
     });
 
     it('throws InvalidSelectorError with more than one argument', () => {
-      assert.throws(() => parseUiaSelector(`[NotCondition]::new(${NAME(`'A'`)}, ${NAME(`'B'`)})`), 
+      assert.throws(
+        () => parseUiaSelector(`[NotCondition]::new(${NAME(`'A'`)}, ${NAME(`'B'`)})`),
         errors.InvalidSelectorError,
       );
     });
@@ -174,13 +176,14 @@ describe('parseUiaSelector', () => {
       parseUiaSelector(
         `[AndCondition]::new([OrCondition]::new(${NAME(`'A'`)}, ${NAME(`'B'`)}), [NotCondition]::new([PropertyCondition]::TrueCondition))`,
       ),
-    , {
-      type: 'and',
-      conditions: [
-        {type: 'or', conditions: [name('A'), name('B')]},
-        {type: 'not', condition: {type: 'true'}},
-      ],
-    });
+      {
+        type: 'and',
+        conditions: [
+          {type: 'or', conditions: [name('A'), name('B')]},
+          {type: 'not', condition: {type: 'true'}},
+        ],
+      },
+    );
   });
 
   describe('ControlView / ContentView conditions', () => {
@@ -252,7 +255,8 @@ describe('parseUiaSelector', () => {
     });
 
     it('does not tokenise string contents', () => {
-      assert.deepEqual(parseUiaSelector(NAME(`'[ControlType]::Button, 42 TrueCondition)'`)), 
+      assert.deepEqual(
+        parseUiaSelector(NAME(`'[ControlType]::Button, 42 TrueCondition)'`)),
         name('[ControlType]::Button, 42 TrueCondition)'),
       );
     });
@@ -275,6 +279,60 @@ describe('parseUiaSelector', () => {
 
     it('keeps single quotes and $ verbatim (no variable expansion)', () => {
       assert.deepEqual(parseUiaSelector(NAME(`"it's $name"`)), name("it's $name"));
+    });
+  });
+
+  describe('boolean values', () => {
+    it('accepts $true / $false / bare true / false for boolean properties', () => {
+      const isEnabled = (value: boolean) => ({type: 'property', property: 'IsEnabled', value});
+      assert.deepEqual(parseUiaSelector(P('IsEnabledProperty', '$true')), isEnabled(true));
+      assert.deepEqual(parseUiaSelector(P('IsEnabledProperty', '$false')), isEnabled(false));
+      assert.deepEqual(parseUiaSelector(P('IsEnabledProperty', 'true')), isEnabled(true));
+      assert.deepEqual(parseUiaSelector(P('IsEnabledProperty', 'FALSE')), isEnabled(false));
+    });
+
+    it('rejects a boolean for a non-boolean property', () => {
+      assert.throws(() => parseUiaSelector(NAME('$true')), errors.InvalidArgumentError);
+    });
+
+    it('keeps bare true as TrueCondition outside a property condition', () => {
+      assert.deepEqual(parseUiaSelector('[NotCondition]::new(true)'), {type: 'not', condition: {type: 'true'}});
+    });
+  });
+
+  describe('raw Int32 enum values', () => {
+    it('bounds Orientation to 0..2', () => {
+      assert.deepEqual(parseUiaSelector(P('OrientationProperty', '2')), {
+        type: 'property',
+        property: 'Orientation',
+        value: 2,
+      });
+      assert.throws(() => parseUiaSelector(P('OrientationProperty', '3')), errors.InvalidArgumentError);
+    });
+
+    it('bounds HeadingLevel to 0..9', () => {
+      assert.deepEqual(parseUiaSelector(P('HeadingLevelProperty', '9')), {
+        type: 'property',
+        property: 'HeadingLevel',
+        value: 9,
+      });
+      assert.throws(() => parseUiaSelector(P('HeadingLevelProperty', '10')), errors.InvalidArgumentError);
+    });
+  });
+
+  describe('selector size limit', () => {
+    const orOf = (count: number) =>
+      `[OrCondition]::new(${Array.from({length: count}, (_, i) => NAME(`'n${i}'`)).join(', ')})`;
+
+    it('parses a selector that fits the placeholder range', () => {
+      assert.equal((parseUiaSelector(orOf(255)) as {conditions: unknown[]}).conditions.length, 255);
+    });
+
+    it('reports a selector that does not fit as too large', () => {
+      assert.throws(
+        () => parseUiaSelector(orOf(256)),
+        (e: Error) => e instanceof errors.InvalidSelectorError && e.message.includes('at most 512 values'),
+      );
     });
   });
 
