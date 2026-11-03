@@ -255,7 +255,7 @@ jobs:
       # the results are still in the test step's log.
       - name: Publish E2E test report
         if: always() && !github.event.pull_request.head.repo.fork
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3
         with:
           name: E2E Test Results
           path: test-results/e2e-junit*.xml
