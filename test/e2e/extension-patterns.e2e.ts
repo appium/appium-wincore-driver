@@ -333,34 +333,51 @@ describe('windows: pattern extension commands', () => {
   });
 
   describe('windows: select / allSelectedItems / isMultiple / toggle', () => {
+    // To-Do needs a signed-in Microsoft account, which a fresh CI image does not have
+    let signedIn = false;
+
+    const itSignedIn = (name: string, fn: () => Promise<void>) =>
+      it(name, async (t) => {
+        if (!signedIn) {
+          t.skip('Microsoft To-Do is not signed in');
+          return;
+        }
+        await fn();
+      });
+
     before(async () => {
       todo = await createTodoSession();
-      await createTodoTask(todo, 'First task');
-      await createTodoTask(todo, 'Second task');
+      signedIn = !(await todo.$('~LoginButton').isExisting());
+      if (signedIn) {
+        await createTodoTask(todo, 'First task');
+        await createTodoTask(todo, 'Second task');
+      }
     });
 
     after(async () => {
-      await deleteTasks(todo);
+      if (signedIn) {
+        await deleteTasks(todo);
+      }
       await quitSession(todo);
     });
 
-    it('toggles a task checkbox in To-Do', async () => {
+    itSignedIn('toggles a task checkbox in To-Do', async () => {
       const checkbox = await todo.$('~CompleteTodoCheckBox');
       await assert.doesNotReject(todo.executeScript('windows: toggle', [checkbox]));
     });
 
-    it('select selects a task item in the To-Do list', async () => {
+    itSignedIn('select selects a task item in the To-Do list', async () => {
       const item = await todo.$('//Custom/Group/List/ListItem[1]');
       await assert.doesNotReject(todo.executeScript('windows: select', [item]));
     });
 
-    it('isMultiple returns a boolean for the To-Do task list container', async () => {
+    itSignedIn('isMultiple returns a boolean for the To-Do task list container', async () => {
       const list = await todo.$('~TodosListView');
       const result = await todo.executeScript('windows: isMultiple', [list]);
       assert.equal(typeof result, 'boolean');
     });
 
-    it('allSelectedItems returns an array for the To-Do task list container', async () => {
+    itSignedIn('allSelectedItems returns an array for the To-Do task list container', async () => {
       const list = await todo.$('~TodosListView');
       const result = await todo.executeScript('windows: allSelectedItems', [list]);
       assert.equal(Array.isArray(result), true);

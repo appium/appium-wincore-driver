@@ -76,10 +76,9 @@ jobs:
               navigation-window
               xpath-axes
               xpath-boolean-attributes
-          # Calculator + To-Do (installed via winget on this shard only)
+          # To-Do tests skip themselves when To-Do is not signed in
           - shard: patterns
             calculator: true
-            todo: true
             specs: extension-patterns
           # Needs ffmpeg (gdigrab)
           - shard: recording
@@ -200,16 +199,6 @@ jobs:
           }
           Get-AppxPackage -Name "Microsoft.WindowsCalculator" | Select-Object Name, Version
 
-      - name: Install Microsoft To-Do
-        if: matrix.todo
-        shell: pwsh
-        run: |
-          if (-not (Get-AppxPackage -Name "Microsoft.Todos" -ErrorAction SilentlyContinue)) {
-            winget install --id 9NBLGGH5R558 --source msstore --accept-source-agreements --accept-package-agreements --silent
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-          Get-AppxPackage -Name "Microsoft.Todos" | Select-Object Name, Version
-
       - name: Resolve fixture apps revision
         id: apps-rev
         shell: pwsh
@@ -240,7 +229,6 @@ jobs:
         env:
           TEST_APPS_DIR: ${{ github.workspace }}\appium-wincore-test-apps
           SPECS: ${{ matrix.specs }}
-          TODO_DIAG: ${{ matrix.todo }}
         run: |
           $appiumPath = (Get-Command appium.cmd).Source
           $proc = Start-Process -FilePath $appiumPath `
@@ -269,21 +257,6 @@ jobs:
             Write-Error "Appium did not start within ${timeout}s"
             Get-Content "appium.log", "appium-err.log" -ErrorAction SilentlyContinue
             exit 1
-          }
-
-          # TEMP diagnostics: what does To-Do show on this runner?
-          if ($env:TODO_DIAG) {
-            @'
-          import {remote} from 'webdriverio';
-          const d = await remote({hostname:'127.0.0.1',port:4723,path:'/',logLevel:'warn',capabilities:{platformName:'Windows','appium:automationName':'Wincore','appium:app':'Microsoft.Todos_8wekyb3d8bbwe!App'}});
-          await new Promise(r => setTimeout(r, 8000));
-          const src = await d.getPageSource();
-          console.log('PAGE_SOURCE_START');
-          console.log(src.replace(/ (AcceleratorKey|AccessKey|HelpText|ItemStatus|ItemType|LiveSetting|FrameworkId|IsContentelement|IsControlelement|IsDataValidforform|IsPassword|IsRequiredforform|Orientation|ProviderDescription|Culture|IsPeripheral|IsDialog|HasKeyboardfocus|IsKeyboardfocusable|IsEnabled|IsOffscreen|LegacyValue|Value)="[^"]*"/g, '').slice(0, 9000));
-          console.log('PAGE_SOURCE_END');
-          await d.deleteSession();
-          '@ | Set-Content -Encoding utf8 diag.mjs
-            node diag.mjs
           }
 
           $specs = @($env:SPECS -split '\s+' | Where-Object { $_ } | ForEach-Object { "build/test/e2e/$_.e2e.js" })
