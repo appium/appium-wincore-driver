@@ -1,3 +1,9 @@
+## [4.0.3](https://github.com/appium/appium-wincore-driver/compare/v4.0.2...v4.0.3) (2026-11-03)
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump @types/node from 24.19.2 to 26.6.6 ([#136](https://github.com/appium/appium-wincore-driver/issues/136)) ([6f68120](https://github.com/appium/appium-wincore-driver/commit/6f68120134ce5af1e6b161fe1255105fa07dc6ec))
+
 ## [4.0.2](https://github.com/appium/appium-wincore-driver/compare/v4.0.1...v4.0.2) (2026-11-03)
 
 ### Miscellaneous Chores
