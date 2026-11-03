@@ -2,12 +2,17 @@ name: E2E Tests (GitHub-hosted)
 run-name: ${{ github.event.pull_request.title || 'E2E (hosted) manual run' }}
 
 # Experiment: the same e2e suite as e2e-test.yml (left untouched), on a GitHub-hosted runner.
-# Downloads and build outputs are cached to keep runs short.
+# Runs one suite at a time (default below) to keep runs short; downloads and builds are cached.
 on:
   pull_request:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      specs:
+        description: 'Space-separated e2e spec names (without .e2e.js), e.g. "extension-winform-combo window"'
+        required: false
+        default: 'extension-winform-combo'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -152,6 +157,7 @@ jobs:
         shell: pwsh
         env:
           TEST_APPS_DIR: ${{ github.workspace }}\appium-wincore-test-apps
+          SPECS: ${{ github.event.inputs.specs || 'extension-winform-combo' }}
         run: |
           $appiumPath = (Get-Command appium.cmd).Source
           $proc = Start-Process -FilePath $appiumPath `
@@ -182,31 +188,7 @@ jobs:
             exit 1
           }
 
-          $specs = @(
-            "build/test/e2e/extension-powershell.e2e.js"
-            "build/test/e2e/extension-webview.e2e.js"
-            "build/test/e2e/actions.e2e.js"
-            "build/test/e2e/element-commands.e2e.js"
-            "build/test/e2e/extension-app-lifecycle.e2e.js"
-            "build/test/e2e/device-file-transfer.e2e.js"
-            "build/test/e2e/device-system.e2e.js"
-            "build/test/e2e/extension-cache-request.e2e.js"
-            "build/test/e2e/extension-clipboard.e2e.js"
-            "build/test/e2e/find-element.e2e.js"
-            "build/test/e2e/extension-winform-combo.e2e.js"
-            "build/test/e2e/extension-patterns.e2e.js"
-            "build/test/e2e/extension-select-from-combobox.e2e.js"
-            "build/test/e2e/extension-filesystem.e2e.js"
-            "build/test/e2e/extension-input.e2e.js"
-            "build/test/e2e/navigation-window.e2e.js"
-            "build/test/e2e/session.e2e.js"
-            "build/test/e2e/window.e2e.js"
-            "build/test/e2e/xpath-axes.e2e.js"
-            "build/test/e2e/xpath-boolean-attributes.e2e.js"
-            "build/test/e2e/no-runtimeid-element.e2e.js"
-            "build/test/e2e/extension-screen-recording.e2e.js"
-            "build/test/e2e/standard-accessibility-values.e2e.js"
-          )
+          $specs = $env:SPECS -split '\s+' | Where-Object { $_ } | ForEach-Object { "build/test/e2e/$_.e2e.js" }
 
           New-Item -ItemType Directory -Force -Path test-results | Out-Null
 
