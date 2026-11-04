@@ -1,3 +1,9 @@
+## [4.0.4](https://github.com/appium/appium-wincore-driver/compare/v4.0.3...v4.0.4) (2026-11-04)
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump webdriverio from 9.33.1 to 10.1.0 ([#138](https://github.com/appium/appium-wincore-driver/issues/138)) ([6b2568d](https://github.com/appium/appium-wincore-driver/commit/6b2568d6cbcd781a9601c2beaf4251bbf6e2114f))
+
 ## [4.0.3](https://github.com/appium/appium-wincore-driver/compare/v4.0.2...v4.0.3) (2026-11-03)
 
 ### Miscellaneous Chores
