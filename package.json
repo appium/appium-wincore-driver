@@ -72,7 +72,7 @@
     "@appium/tsconfig": "^2.0.0-beta.1",
     "@appium/types": "^2.0.0-beta.2",
     "@types/node": "^26.6.6",
-    "webdriverio": "^9.30.1"
+    "webdriverio": "^10.1.0"
   },
   "peerDependencies": {
     "appium": "^4.0.0-beta.0"
