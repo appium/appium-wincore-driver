@@ -13,6 +13,8 @@ export const APPIUM_SERVER = {
   port: Number(process.env.APPIUM_PORT ?? 4723),
   path: '/',
   logLevel: 'warn' as const,
+  // wdio 10 throws on `$()` matching several elements; the tests rely on first-match
+  strictSelectors: false,
 };
 
 /**

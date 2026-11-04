@@ -17,11 +17,11 @@ describe('back and forward', () => {
   });
 
   it('back() completes without error on an active window', async () => {
-    assert.equal(await notepad.back(), null);
+    await assert.doesNotReject(notepad.back());
   });
 
   it('forward() completes without error on an active window', async () => {
-    assert.equal(await notepad.forward(), null);
+    await assert.doesNotReject(notepad.forward());
   });
 
   it('back() followed by forward() does not throw', async () => {
