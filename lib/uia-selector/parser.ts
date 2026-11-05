@@ -26,7 +26,6 @@ import {
   OrientationTypeProperty,
   PointProperty,
   Property,
-  RectProperty,
   StringProperty,
 } from './types.js';
 
@@ -46,7 +45,6 @@ import {
  */
 
 type Point = {x: number; y: number};
-type Rect = Point & {width: number; height: number};
 
 type SelectorValue =
   | {kind: 'string'; value: string}
@@ -54,7 +52,6 @@ type SelectorValue =
   | {kind: 'int32'; value: number}
   | {kind: 'int32[]'; value: number[]}
   | {kind: 'point'; value: Point}
-  | {kind: 'rect'; value: Rect}
   | {kind: 'controlType'; value: string}
   | {kind: 'orientation'; value: string}
   | {kind: 'headingLevel'; value: string}
@@ -67,7 +64,6 @@ const BOOLEAN_REGEX = /(?<=[\s,])(?:\$)?(true|false)(?=[\s)])/;
 const INTEGER_REGEX = /((?<![\d.+-])[+-]?\d+(?![\d.]))/;
 const POSITIVE_INTEGER_REGEX = /((?<![\d.+-])[+]?\d+(?![\d.]))/;
 const FLOATING_POINT_NUMBER_REGEX = /((?<![\d.+-])[+-]?(?:\d*[.])?\d+(?![\d.]))/;
-const POSITIVE_FLOATING_POINT_NUMBER_REGEX = /((?<![\d.+-])[+]?(?:\d*[.])?\d+(?![\d.]))/;
 const PROCESSED_STRING_RESULT_MATCH_REGEX = /^[-]{1}$/;
 const PROCESSED_ITEMS_REGEX = /[-]/g;
 
@@ -75,20 +71,9 @@ const BOOLEAN_MATCHER = new RegexItem(BOOLEAN_REGEX.source);
 const INTEGER_MATCHER = new RegexItem(INTEGER_REGEX.source);
 const POSITIVE_INTEGER_MATCHER = new RegexItem(POSITIVE_INTEGER_REGEX.source);
 const FLOATING_POINT_NUMBER_MATCHER = new RegexItem(FLOATING_POINT_NUMBER_REGEX.source);
-const POSITIVE_FLOATING_POINT_NUMBER_MATCHER = new RegexItem(POSITIVE_FLOATING_POINT_NUMBER_REGEX.source);
 const PROCESSED_ITEM_REGEX_MATCHER = new RegexItem(`(${PROCESSED_ITEMS_REGEX.source}{1})`);
 const POINT_REGEX_MATCHER = new ConstructorRegexMatcher(
   'System.Windows.Point',
-  FLOATING_POINT_NUMBER_MATCHER,
-  FLOATING_POINT_NUMBER_MATCHER,
-);
-const SIZE_REGEX_MATCHER = new ConstructorRegexMatcher(
-  'System.Windows.Size',
-  POSITIVE_FLOATING_POINT_NUMBER_MATCHER,
-  POSITIVE_FLOATING_POINT_NUMBER_MATCHER,
-);
-const VECTOR_REGEX_MATCHER = new ConstructorRegexMatcher(
-  'System.Windows.Vector',
   FLOATING_POINT_NUMBER_MATCHER,
   FLOATING_POINT_NUMBER_MATCHER,
 );
@@ -147,35 +132,6 @@ const CONTENT_VIEW_CONDITION_REGEX = new PropertyRegexMatcher(
 
 const POINT_PARAMETER_REGEX = POINT_REGEX_MATCHER.toRegex('gi');
 
-// Rect(Point, Size)
-const RECT_PARAMETER_REGEX_C1 = new ConstructorRegexMatcher(
-  'System.Windows.Rect',
-  POINT_REGEX_MATCHER,
-  SIZE_REGEX_MATCHER,
-).toRegex('gi');
-// Rect(x, y, width, height)
-const RECT_PARAMETER_REGEX_C2 = new ConstructorRegexMatcher(
-  'System.Windows.Rect',
-  FLOATING_POINT_NUMBER_MATCHER,
-  FLOATING_POINT_NUMBER_MATCHER,
-  FLOATING_POINT_NUMBER_MATCHER,
-  FLOATING_POINT_NUMBER_MATCHER,
-).toRegex('gi');
-// Rect(Point, Point)
-const RECT_PARAMETER_REGEX_C3 = new ConstructorRegexMatcher(
-  'System.Windows.Rect',
-  POINT_REGEX_MATCHER,
-  POINT_REGEX_MATCHER,
-).toRegex('gi');
-// Rect(Point, Vector)
-const RECT_PARAMETER_REGEX_C4 = new ConstructorRegexMatcher(
-  'System.Windows.Rect',
-  POINT_REGEX_MATCHER,
-  VECTOR_REGEX_MATCHER,
-).toRegex('gi');
-// Rect(Size)
-const RECT_PARAMETER_REGEX_C5 = new ConstructorRegexMatcher('System.Windows.Rect', SIZE_REGEX_MATCHER).toRegex('gi');
-
 const AUTOMATION_HEADING_LEVEL_PARAMETER_REGEX = new PropertyRegexMatcher(
   'System.Windows.Automation.AutomationHeadingLevel',
   ...Object.values(AutomationHeadingLevel),
@@ -231,6 +187,9 @@ const BACKTICK_ESCAPES: Record<string, string> = {
   v: '\v',
 };
 
+// Checked once string literals are gone, so a value that merely contains the word still parses.
+const BOUNDING_RECTANGLE_PROPERTY_REGEX = /\bBoundingRectangle(?:Property)?\b/i;
+
 const MAGIC_PLACEHOLDER_UNICODE_BEGIN = 0xee00;
 const MAGIC_PLACEHOLDER_UNICODE_END = 0xefff;
 const PROPERTY_SUFFIX = 'property';
@@ -241,7 +200,6 @@ const PROPERTY_VALUE_KINDS: [Record<string, string>, ValueKind][] = [
   [StringProperty, 'string'],
   [Int32ArrayProperty, 'int32[]'],
   [PointProperty, 'point'],
-  [RectProperty, 'rect'],
   [ControlTypeProperty, 'controlType'],
   [AutomationElementProperty, 'element'],
   [OrientationTypeProperty, 'orientation'],
@@ -285,37 +243,15 @@ export function parseUiaSelector(selector: string): ConditionDto {
   // it's important to process the strings first as they can contain other tokens that may be matched later
   let processedSelector = replaceStringLiterals(selector, (value) => push({kind: 'string', value}));
 
+  if (BOUNDING_RECTANGLE_PROPERTY_REGEX.test(processedSelector)) {
+    throw new errors.InvalidSelectorError(
+      'Finding elements by BoundingRectangle is not supported: UIA can fail to match it on scaled displays. ' +
+        'Find the element by another property and read its BoundingRectangle attribute instead.',
+    );
+  }
+
   processedSelector = processedSelector.replaceAll(INTEGER_ARRAY_PARAMETER_REGEX, (_, value: string) =>
     push({kind: 'int32[]', value: value.split(',').map(Number)}),
-  );
-
-  // it's important to process Rect before Point as some of Rect's constructors contain Point or Points
-  processedSelector = processedSelector.replaceAll(RECT_PARAMETER_REGEX_C1, (_, x, y, width, height) =>
-    push({kind: 'rect', value: {x: Number(x), y: Number(y), width: Number(width), height: Number(height)}}),
-  );
-
-  processedSelector = processedSelector.replaceAll(RECT_PARAMETER_REGEX_C2, (_, x, y, width, height) =>
-    push({kind: 'rect', value: {x: Number(x), y: Number(y), width: Number(width), height: Number(height)}}),
-  );
-
-  processedSelector = processedSelector.replaceAll(RECT_PARAMETER_REGEX_C3, (_, x1, y1, x2, y2) => {
-    const [p1x, p1y, p2x, p2y] = [x1, y1, x2, y2].map(Number);
-    return push({
-      kind: 'rect',
-      value: {x: Math.min(p1x, p2x), y: Math.min(p1y, p2y), width: Math.abs(p2x - p1x), height: Math.abs(p2y - p1y)},
-    });
-  });
-
-  processedSelector = processedSelector.replaceAll(RECT_PARAMETER_REGEX_C4, (_, px, py, vx, vy) => {
-    const [x, y, dx, dy] = [px, py, vx, vy].map(Number);
-    return push({
-      kind: 'rect',
-      value: {x: dx < 0 ? x + dx : x, y: dy < 0 ? y + dy : y, width: Math.abs(dx), height: Math.abs(dy)},
-    });
-  });
-
-  processedSelector = processedSelector.replaceAll(RECT_PARAMETER_REGEX_C5, (_, width, height) =>
-    push({kind: 'rect', value: {x: 0, y: 0, width: Number(width), height: Number(height)}}),
   );
 
   processedSelector = processedSelector.replaceAll(POINT_PARAMETER_REGEX, (_, x: string, y: string) =>

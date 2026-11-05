@@ -191,20 +191,17 @@ public static class ConditionBuilder
 
     internal static object ConvertValue(int propertyId, JsonElement value)
     {
-        // Point / Rect arrive as {x, y} / {x, y, width, height}; UIA stores them as
-        // double arrays (ClickablePoint = [x, y], BoundingRectangle = [left, top, width, height]).
+        // UIA can fail to match BoundingRectangle on a scaled display, even with the value the
+        // element itself reports. An error beats a search that silently finds nothing.
+        if (propertyId == UIA.BoundingRectanglePropertyId)
+        {
+            throw new ArgumentException("BoundingRectangle cannot be used in a condition.");
+        }
+
+        // A Point arrives as {x, y}; UIA stores ClickablePoint as a double array [x, y].
         if (propertyId == UIA.ClickablePointPropertyId && value.ValueKind == JsonValueKind.Object)
         {
             return new[] { RequireDouble(value, "x"), RequireDouble(value, "y") };
-        }
-
-        if (propertyId == UIA.BoundingRectanglePropertyId && value.ValueKind == JsonValueKind.Object)
-        {
-            return new[]
-            {
-                RequireDouble(value, "x"), RequireDouble(value, "y"),
-                RequireDouble(value, "width"), RequireDouble(value, "height"),
-            };
         }
 
         // UIA reports Culture as an LCID; accept a culture name ("en-US") too.

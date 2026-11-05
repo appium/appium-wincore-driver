@@ -22,17 +22,16 @@ public class ConditionValueTests
     }
 
     [Fact]
-    public void BoundingRectangle_Object_BecomesLeftTopWidthHeight()
+    public void BoundingRectangle_IsRejected()
     {
-        Assert.Equal(
-            new[] { 1.0, 2.0, 3.0, 4.0 },
-            Convert(UIA.BoundingRectanglePropertyId, """{"x":1,"y":2,"width":3,"height":4}"""));
+        Assert.Throws<ArgumentException>(
+            () => Convert(UIA.BoundingRectanglePropertyId, """{"x":1,"y":2,"width":3,"height":4}"""));
     }
 
     [Fact]
-    public void BoundingRectangle_MissingField_Throws()
+    public void ClickablePoint_MissingField_Throws()
     {
-        Assert.Throws<ArgumentException>(() => Convert(UIA.BoundingRectanglePropertyId, """{"x":1,"y":2}"""));
+        Assert.Throws<ArgumentException>(() => Convert(UIA.ClickablePointPropertyId, """{"x":1}"""));
     }
 
     [Fact]

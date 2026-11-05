@@ -82,31 +82,17 @@ describe('-windows uiautomation selectors', () => {
   });
 
   describe('BoundingRectangle', () => {
-    // driver.getElementRect() is relative to the session window; the UIA property is in screen coordinates
-    const boundingRectangle = async (): Promise<RectResult> =>
-      (await driver.getElementAttribute(await buttonElementId(), 'BoundingRectangle')) as unknown as RectResult;
-
-    it('finds the element from its BoundingRectangle attribute', async () => {
-      const {x, y, width, height} = await boundingRectangle();
-
-      assert.deepEqual(await findIds(P('BoundingRectangleProperty', `[Rect]::new(${x}, ${y}, ${width}, ${height})`)), [
-        BUTTON_ID,
-      ]);
-      assert.deepEqual(
-        await findIds(
-          P('BoundingRectangleProperty', `[Rect]::new([Point]::new(${x}, ${y}), [Size]::new(${width}, ${height}))`),
-        ),
-        [BUTTON_ID],
-      );
+    it('is rejected with a clear error', async () => {
+      await assert.rejects(findIds(P('BoundingRectangleProperty', '[Rect]::new(1, 2, 3, 4)')), /not supported/);
     });
 
-    it('finds nothing for a rect that is off by one', async () => {
-      const {x, y, width, height} = await boundingRectangle();
+    it('stays readable as an attribute', async () => {
+      const rect = (await driver.getElementAttribute(
+        await buttonElementId(),
+        'BoundingRectangle',
+      )) as unknown as RectResult;
 
-      assert.deepEqual(
-        await findIds(P('BoundingRectangleProperty', `[Rect]::new(${x + 1}, ${y}, ${width}, ${height})`)),
-        [],
-      );
+      assert.ok(rect.width > 0 && rect.height > 0);
     });
   });
 

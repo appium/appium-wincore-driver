@@ -81,32 +81,31 @@ describe('parseUiaSelector', () => {
       });
     });
 
-    it('sends Point and Rect values as structured JSON', () => {
+    it('sends Point values as structured JSON', () => {
       assert.deepEqual(parseUiaSelector(P('ClickablePointProperty', '[System.Windows.Point]::new(1, -2.5)')), {
         type: 'property',
         property: 'ClickablePoint',
         value: {x: 1, y: -2.5},
       });
-      assert.deepEqual(
-        parseUiaSelector(P('BoundingRectangleProperty', '[Rect]::new([Point]::new(5, 6), [Point]::new(1, 2))')),
-        {type: 'property', property: 'BoundingRectangle', value: {x: 1, y: 2, width: 4, height: 4}},
-      );
     });
 
-    for (const [overload, rect, value] of [
-      ['(x, y, width, height)', '[System.Windows.Rect]::new(1, 2, 3, 4)', {x: 1, y: 2, width: 3, height: 4}],
-      ['(Point, Size)', '[Rect]::new([Point]::new(1, 2), [Size]::new(3, 4))', {x: 1, y: 2, width: 3, height: 4}],
-      ['(Point, Vector)', '[Rect]::new([Point]::new(5, 6), [Vector]::new(-2, 3))', {x: 3, y: 6, width: 2, height: 3}],
-      ['(Size)', '[Rect]::new([Size]::new(3, 4))', {x: 0, y: 0, width: 3, height: 4}],
-    ] as const) {
-      it(`parses the Rect${overload} overload`, () => {
-        assert.deepEqual(parseUiaSelector(P('BoundingRectangleProperty', rect)), {
-          type: 'property',
-          property: 'BoundingRectangle',
-          value,
-        });
-      });
-    }
+    it('rejects BoundingRectangle with a clear error', () => {
+      for (const selector of [
+        P('BoundingRectangleProperty', '[Rect]::new(1, 2, 3, 4)'),
+        P('BoundingRectangleProperty', '[Rect]::new([Point]::new(1, 2), [Size]::new(3, 4))'),
+        P('boundingrectangle', `'x'`),
+      ]) {
+        assert.throws(
+          () => parseUiaSelector(selector),
+          (e: Error) =>
+            e instanceof errors.InvalidSelectorError && e.message.includes('BoundingRectangle is not supported'),
+        );
+      }
+    });
+
+    it('does not mistake a string value for the BoundingRectangle property', () => {
+      assert.deepEqual(parseUiaSelector(NAME(`'BoundingRectangleProperty'`)), name('BoundingRectangleProperty'));
+    });
 
     it('sends CultureInfo as its name or LCID', () => {
       for (const culture of [`[CultureInfo]::new('en-US')`, `[CultureInfo]::new('en-US', $true)`]) {
