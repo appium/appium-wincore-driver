@@ -57,7 +57,9 @@
     "test:e2e": "npm run build && node --enable-source-maps --test --test-concurrency=1 --test-timeout=60000 \"build/test/e2e/**/*.e2e.js\"",
     "test:perf": "npm run build && node --enable-source-maps --test --test-concurrency=1 --test-timeout=900000 \"build/test/perf/**/*.perf.js\"",
     "postinstall": "node scripts/postinstall.mjs",
-    "pack:dist": "node scripts/pack-dist.mjs"
+    "pack:dist": "node scripts/pack-dist.mjs",
+    "docs:serve": "python -m mkdocs serve",
+    "docs:build": "python -m mkdocs build --strict"
   },
   "dependencies": {
     "@appium/css-locator-to-native": "^1.0.6",

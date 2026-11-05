@@ -117,4 +117,4 @@ path for A/B. 198 UIA e2e tests green (Calculator/Notepad page source, XPath, at
 
 ## Locator performance grading (absolute vs. relative)
 
-See [API.md — Locator performance](../API.md#locator-performance) for full usage examples.
+See [Locator performance](../reference/locators.md#locator-performance) for full usage examples.
