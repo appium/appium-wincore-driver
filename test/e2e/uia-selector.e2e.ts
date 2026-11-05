@@ -61,7 +61,7 @@ describe('-windows uiautomation selectors', () => {
   describe('logical conditions', () => {
     it('combines with OrCondition', async () => {
       const ids = await findIds(`[OrCondition]::new(${AUTOMATION_ID('num1Button')}, ${AUTOMATION_ID('num2Button')})`);
-      assert.deepEqual(ids.toSorted(), ['num1Button', 'num2Button']);
+      assert.deepEqual(new Set(ids), new Set(['num1Button', 'num2Button']));
     });
 
     it('excludes with NotCondition', async () => {
