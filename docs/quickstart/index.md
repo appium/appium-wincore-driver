@@ -8,7 +8,7 @@ application.
 ## Requirements
 
 - Windows 10 or later
-- [Node.js](https://nodejs.org) LTS
+- [Node.js](https://nodejs.org) `^22.22.2`, `^24.15.0` or `>=26.0.0`
 - [Appium 4](https://appium.io/docs/en/latest/quickstart/install/)
 
 !!! note
@@ -18,8 +18,12 @@ application.
 
 ## Install Appium
 
+Appium 4 is published on the npm `beta` tag, so name it explicitly. A plain
+`npm install -g appium` installs Appium 3, which this driver version does
+not support.
+
 ```bash
-npm install -g appium
+npm install -g appium@beta
 ```
 
 ## Install the driver

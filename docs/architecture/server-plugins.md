@@ -15,8 +15,8 @@ Each plugin directory contains:
 - `plugin.json` — the manifest
 - an assembly implementing `IServerPlugin`
 
-The contract is published as the `WincoreServerSdk` project
-(`csharp/WincoreServerSdk/`). The loader and registry live in
+The contract is published as the `WincoreServerSdk` NuGet package (source:
+`csharp/WincoreServerSdk/`). The loader and registry live in
 `csharp/WincoreServer/Plugins/`.
 
 ## Tree providers
@@ -35,6 +35,12 @@ is UIA-only — window operations and the session root, for example.
 
 Find, XPath and page source are routed per window
 (`TryResolveWindow(hwnd)`) and stay bespoke in their handlers.
+
+`FindItemInContainer` is optional. It backs
+[`windows: selectFromCombobox`](../reference/commands.md#windows-selectfromcombobox),
+and can return entries a container has not created yet. When a provider
+does not implement it, or returns null, the driver searches the container's
+current descendants instead.
 
 ## Compatibility
 

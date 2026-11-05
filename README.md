@@ -29,6 +29,7 @@ Requires Appium 4 and Windows 10 or later.
 
 > [!NOTE]
 > Since v4, this driver is only compatible with Appium server v4. Use driver v3.x with Appium 3.
+> Appium 4 is published on the npm `beta` tag: `npm install -g appium@beta`.
 
 ## Related projects
 

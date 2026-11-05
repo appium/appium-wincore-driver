@@ -152,7 +152,9 @@ How the check works:
   without verification. One with no state and no default action reports
   "not supported", so the client's ALT+Down fallback runs.
 - ComboBoxes keep the ALT+Down fallback, also after `invalid element
-  state`.
+  state`. The state is checked again afterwards: if ALT+Down changed
+  nothing, the command fails with the original error, or with
+  `invalid element state` when the pattern call had reported success.
 
 Behaviour changes from earlier versions:
 
@@ -263,7 +265,7 @@ Each entry in the returned array contains:
 ```js
 const windows = await driver.executeScript('windows: getWindows', []);
 // [
-//   { handle: '0x000a1234', title: 'My App', className: 'MyAppWindow' },
+//   { handle: '0x000a1234', title: 'My App', className: 'Notepad' },
 //   { handle: '0x000b5678', title: '',        className: '#32770' },
 // ]
 

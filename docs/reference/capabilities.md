@@ -16,7 +16,7 @@ All capabilities use the `appium:` prefix in W3C format
 | `appium:shouldCloseApp` | boolean | Close the window at session end. Default: `true` |
 | `appium:prerun` | object | `{ script }` or `{ command }` — PowerShell before start |
 | `appium:postrun` | object | `{ script }` or `{ command }` — PowerShell after end |
-| `appium:isolatedScriptExecution` | boolean | Isolated PS for pre/postrun. Default: `false` |
+| `appium:isolatedScriptExecution` | boolean | Run PowerShell scripts (`powerShell`, pre/postrun) without loading the user profile. Default: `false` |
 | `appium:smoothPointerMove` | string | CSS easing for mouse (e.g. `ease-in`) |
 | `appium:delayBeforeClick` | number | Milliseconds before each click |
 | `appium:delayAfterClick` | number | Milliseconds after each click |
