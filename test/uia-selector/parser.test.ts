@@ -54,6 +54,11 @@ describe('parseUiaSelector', () => {
         property: 'ControlType',
         value: 'SemanticZoom',
       });
+      assert.deepEqual(parseUiaSelector(P('ControlTypeProperty', '[ControlType]::AppBar')), {
+        type: 'property',
+        property: 'ControlType',
+        value: 'AppBar',
+      });
     });
 
     it('parses automation id property condition', () => {
@@ -88,12 +93,29 @@ describe('parseUiaSelector', () => {
       );
     });
 
-    it('sends CultureInfo as its name or LCID', () => {
-      assert.deepEqual(parseUiaSelector(P('CultureProperty', `[CultureInfo]::new('en-US', $true)`)), {
-        type: 'property',
-        property: 'Culture',
-        value: 'en-US',
+    for (const [overload, rect, value] of [
+      ['(x, y, width, height)', '[System.Windows.Rect]::new(1, 2, 3, 4)', {x: 1, y: 2, width: 3, height: 4}],
+      ['(Point, Size)', '[Rect]::new([Point]::new(1, 2), [Size]::new(3, 4))', {x: 1, y: 2, width: 3, height: 4}],
+      ['(Point, Vector)', '[Rect]::new([Point]::new(5, 6), [Vector]::new(-2, 3))', {x: 3, y: 6, width: 2, height: 3}],
+      ['(Size)', '[Rect]::new([Size]::new(3, 4))', {x: 0, y: 0, width: 3, height: 4}],
+    ] as const) {
+      it(`parses the Rect${overload} overload`, () => {
+        assert.deepEqual(parseUiaSelector(P('BoundingRectangleProperty', rect)), {
+          type: 'property',
+          property: 'BoundingRectangle',
+          value,
+        });
       });
+    }
+
+    it('sends CultureInfo as its name or LCID', () => {
+      for (const culture of [`[CultureInfo]::new('en-US')`, `[CultureInfo]::new('en-US', $true)`]) {
+        assert.deepEqual(parseUiaSelector(P('CultureProperty', culture)), {
+          type: 'property',
+          property: 'Culture',
+          value: 'en-US',
+        });
+      }
       assert.deepEqual(parseUiaSelector(P('CultureProperty', '[CultureInfo]::new(1033)')), {
         type: 'property',
         property: 'Culture',
@@ -112,6 +134,72 @@ describe('parseUiaSelector', () => {
       assert.throws(() => parseUiaSelector(P('ControlTypeProperty', `'Button'`)), errors.InvalidArgumentError);
       assert.throws(() => parseUiaSelector(P('LabeledByProperty', `'x'`)), errors.InvalidArgumentError);
     });
+  });
+
+  describe('accepted spellings', () => {
+    for (const selector of [
+      `[PropertyCondition]::new(NameProperty, 'a')`,
+      `[PropertyCondition]::new(AutomationElement.NameProperty, 'a')`,
+      `[PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty, 'a')`,
+      `[PropertyCondition]::new([automationelement]::nameproperty, 'a')`,
+      `[PROPERTYCONDITION]::NEW([AUTOMATIONELEMENT]::NAMEPROPERTY, 'a')`,
+      `[System.Windows.Automation.PropertyCondition]::new([AutomationElement]::NameProperty, 'a')`,
+      `[Automation.PropertyCondition]::new([AutomationElement]::NameProperty, 'a')`,
+      `[Property]::new([AutomationElement]::NameProperty, 'a')`,
+      `new PropertyCondition(AutomationElement.NameProperty, 'a')`,
+      `PropertyCondition(NameProperty, 'a')`,
+      `[PropertyCondition]::new([AutomationElement]::NameProperty,'a')`,
+    ]) {
+      it(`parses ${selector}`, () => {
+        assert.deepEqual(parseUiaSelector(selector), name('a'));
+      });
+    }
+
+    for (const controlType of [
+      'Button',
+      'BUTTON',
+      '[ControlType]::BUTTON',
+      '[System.Windows.Automation.ControlType]::button',
+    ]) {
+      it(`parses control type ${controlType}`, () => {
+        const {value} = parseUiaSelector(P('ControlTypeProperty', controlType)) as {value: string};
+        assert.equal(value.toLowerCase(), 'button');
+      });
+    }
+
+    for (const runtimeId of [
+      '@(42, 1)',
+      '[int[]] @(42, 1)',
+      '[int32[]]@(42,1)',
+      'new int[] {42, 1}',
+      'int32[] [ 42 , 1 ]',
+      '{42, 1}',
+    ]) {
+      it(`parses integer array ${runtimeId}`, () => {
+        assert.deepEqual(parseUiaSelector(P('RuntimeIdProperty', runtimeId)), {
+          type: 'property',
+          property: 'RuntimeId',
+          value: [42, 1],
+        });
+      });
+    }
+
+    for (const selector of ['TrueCondition']) {
+      it(`parses ${selector}`, () => {
+        assert.deepEqual(parseUiaSelector(selector), {type: 'true'});
+      });
+    }
+
+    for (const selector of [
+      `new AndCondition(${NAME(`'A'`)}, ${NAME(`'B'`)})`,
+      `[And]::new(${NAME(`'A'`)}, ${NAME(`'B'`)})`,
+      `[System.Windows.Automation.AndCondition]::new(${NAME(`'A'`)}, ${NAME(`'B'`)})`,
+      `[AndCondition]::new(\n  ${NAME(`'A'`)},\n  ${NAME(`'B'`)}\n)`,
+    ]) {
+      it(`parses ${selector}`, () => {
+        assert.deepEqual(parseUiaSelector(selector), {type: 'and', conditions: [name('A'), name('B')]});
+      });
+    }
   });
 
   describe('AndCondition', () => {
@@ -233,6 +321,24 @@ describe('parseUiaSelector', () => {
       });
     });
 
+    for (const selector of [
+      '   ',
+      `'just a string'`,
+      '[ControlType]::Button',
+      '@(1, 2)',
+      '[PropertyCondition]::new([AutomationElement]::NameProperty)',
+      `[PropertyCondition]::new([AutomationElement]::NameProperty, 'a', 'b')`,
+      `${NAME(`'a'`)} ${NAME(`'b'`)}`,
+      `[AndCondition]::new()`,
+      `[FooCondition]::new(${NAME(`'a'`)})`,
+      NAME(`'unterminated`),
+      NAME(`"unterminated`),
+    ]) {
+      it(`throws InvalidSelectorError for ${selector.trim() || 'blank input'}`, () => {
+        assert.throws(() => parseUiaSelector(selector), errors.InvalidSelectorError);
+      });
+    }
+
     it('reports the unprocessed remainder', () => {
       assert.throws(() => parseUiaSelector(`${NAME(`'a'`)} trailing`), {
         message: /Some parts of the selector were left unprocessed: '<processed> trailing'/,
@@ -241,6 +347,12 @@ describe('parseUiaSelector', () => {
   });
 
   describe('single-quoted strings', () => {
+    it('keeps non-ASCII text and separators inside a string', () => {
+      for (const value of ['שורות', '日本語 🎉', 'a,b', 'a)b', '@(1, 2)', '42', 'TrueCondition']) {
+        assert.deepEqual(parseUiaSelector(NAME(`'${value}'`)), name(value));
+      }
+    });
+
     it('handles escaped single quotes', () => {
       assert.deepEqual(parseUiaSelector(NAME(`'it''s'`)), name("it's"));
     });
