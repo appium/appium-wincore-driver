@@ -1,3 +1,13 @@
+## [4.0.6](https://github.com/appium/appium-wincore-driver/compare/v4.0.5...v4.0.6) (2026-11-06)
+
+### Bug Fixes
+
+* **app:** wait for the window to close in closeApp ([#121](https://github.com/appium/appium-wincore-driver/issues/121)) ([ee31176](https://github.com/appium/appium-wincore-driver/commit/ee31176ce456b0620abf8c245f5b81708b27be31))
+
+### Code Refactoring
+
+* **selector:** remove the PowerShell layer from -windows uiautomation parsing ([#98](https://github.com/appium/appium-wincore-driver/issues/98)) ([aaed46a](https://github.com/appium/appium-wincore-driver/commit/aaed46afa7e6ea2f5a48a2cb3bbac64bcebbc001)), closes [#12](https://github.com/appium/appium-wincore-driver/issues/12)
+
 ## [4.0.5](https://github.com/appium/appium-wincore-driver/compare/v4.0.4...v4.0.5) (2026-11-05)
 
 ### Miscellaneous Chores
