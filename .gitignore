@@ -168,3 +168,6 @@ ffmpeg/
 
 .claude/
 .vscode/
+
+# MkDocs build output (npm run docs:build)
+site/

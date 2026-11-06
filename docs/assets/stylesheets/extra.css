@@ -1,0 +1,18 @@
+.md-source__fact--version {
+  display: none;
+}
+.md-source__fact:nth-child(1n + 2):before {
+  margin-left: 0 !important;
+}
+
+.verisoft-thanks {
+  width: 100%;
+  margin: 0.5rem 0.6rem auto 0.6rem;
+  display: flex;
+  align-items: center;
+}
+
+.verisoft-thanks img {
+  margin: auto 6px;
+  height: 32px;
+}
