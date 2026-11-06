@@ -62,6 +62,9 @@ public static class ConditionBuilder
         ["IsValuePatternAvailable"] = UIA.IsValuePatternAvailablePropertyId,
         ["IsWindowPatternAvailable"] = UIA.IsWindowPatternAvailablePropertyId,
         ["IsLegacyIAccessiblePatternAvailable"] = UIA.IsLegacyIAccessiblePatternAvailablePropertyId,
+        ["IsItemContainerPatternAvailable"] = UIA.IsItemContainerPatternAvailablePropertyId,
+        ["IsVirtualizedItemPatternAvailable"] = UIA.IsVirtualizedItemPatternAvailablePropertyId,
+        ["IsSynchronizedInputPatternAvailable"] = UIA.IsSynchronizedInputPatternAvailablePropertyId,
         // Standard accessibility values. Same spelling as the page source / XPath
         // attributes (StandardValues.Attributes).
         ["Value"] = UIA.ValueValuePropertyId,

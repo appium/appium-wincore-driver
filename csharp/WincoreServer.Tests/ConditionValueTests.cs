@@ -74,6 +74,15 @@ public class ConditionValueTests
     }
 
     [Theory]
+    [InlineData("IsItemContainerPatternAvailable", UIA.IsItemContainerPatternAvailablePropertyId)]
+    [InlineData("IsVirtualizedItemPatternAvailable", UIA.IsVirtualizedItemPatternAvailablePropertyId)]
+    [InlineData("IsSynchronizedInputPatternAvailable", UIA.IsSynchronizedInputPatternAvailablePropertyId)]
+    public void PatternAvailability_NameResolvesToPropertyId(string name, int expected)
+    {
+        Assert.Equal(expected, ConditionBuilder.GetPropertyId(name));
+    }
+
+    [Theory]
     [InlineData("\"Horizontal\"", 1)]
     [InlineData("\"vertical\"", 2)]
     [InlineData("1", 1)]

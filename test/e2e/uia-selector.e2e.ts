@@ -79,6 +79,17 @@ describe('-windows uiautomation selectors', () => {
     it('does not match $false', async () => {
       assert.deepEqual(await findIds(ON_BUTTON(P('IsEnabledProperty', '$false'))), []);
     });
+
+    it('accepts every pattern availability property the parser does', async () => {
+      for (const property of [
+        'IsItemContainerPatternAvailableProperty',
+        'IsVirtualizedItemPatternAvailableProperty',
+        'IsSynchronizedInputPatternAvailableProperty',
+      ]) {
+        const eitherValue = `[OrCondition]::new(${P(property, '$true')}, ${P(property, '$false')})`;
+        assert.deepEqual(await findIds(ON_BUTTON(eitherValue)), [BUTTON_ID]);
+      }
+    });
   });
 
   describe('BoundingRectangle', () => {

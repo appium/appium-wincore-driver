@@ -150,6 +150,9 @@ public static class UIA
     public const int LegacyIAccessibleStatePropertyId = 30096;
     public const int LegacyIAccessibleDefaultActionPropertyId = 30100;
     public const int ProviderDescriptionPropertyId = 30107;
+    public const int IsItemContainerPatternAvailablePropertyId = 30108;
+    public const int IsVirtualizedItemPatternAvailablePropertyId = 30109;
+    public const int IsSynchronizedInputPatternAvailablePropertyId = 30110;
 
     // MSAA state / selection flags (oleacc.h), read through LegacyIAccessible.State.
     public const int StateSystemSelected = 0x2;
