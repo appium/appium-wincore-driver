@@ -3,7 +3,8 @@
  */
 import assert from 'node:assert/strict';
 import {performance} from 'node:perf_hooks';
-import {beforeEach, describe, it, mock} from 'node:test';
+import {beforeEach, describe, it} from 'node:test';
+import type {TestContext} from 'node:test';
 
 import {createMockDriver} from '../../fixtures/driver.js';
 import {mockCommonModules} from '../../helpers/common.js';
@@ -34,7 +35,7 @@ function listWindows(...snapshots: number[][]) {
 }
 
 /** Makes `performance.now()` advance only through the (otherwise no-op) `sleep`. */
-function useFakeClock(t: {mock: typeof mock}) {
+function useFakeClock(t: TestContext) {
   let now = 0;
   t.mock.method(performance, 'now', () => now);
   sleep.mock.mockImplementation(async (ms: number) => {

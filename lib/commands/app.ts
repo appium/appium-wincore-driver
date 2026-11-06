@@ -325,7 +325,7 @@ async function readNativeWindowHandle(driver: AppiumWincoreDriver, elementId: st
     if (Number.isSafeInteger(hwnd) && hwnd > 0) {
       return hwnd;
     }
-    driver.log.warn(`Root element has no usable native window handle (${value}). Not waiting for it to close.`);
+    driver.log.warn(`Root element has no usable native window handle (${String(value)}). Not waiting for it to close.`);
   } catch (err) {
     driver.log.warn(
       `Could not read the root window handle: ${err instanceof Error ? err.message : err}. ` +
