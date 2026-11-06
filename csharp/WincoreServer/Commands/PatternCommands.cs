@@ -335,16 +335,37 @@ public static class PatternCommands
 
     public static object? MinimizeWindow(SessionState state, IUIAutomationElement element, JsonElement parameters)
     {
-        Require<IUIAutomationWindowPattern>(element, UIA.WindowPatternId, "WindowPattern")
-            .SetWindowVisualState(WindowVisualState.Minimized);
+        SetVisualState(
+            Require<IUIAutomationWindowPattern>(element, UIA.WindowPatternId, "WindowPattern"),
+            WindowVisualState.Minimized);
         return null;
     }
 
     public static object? RestoreWindow(SessionState state, IUIAutomationElement element, JsonElement parameters)
     {
-        Require<IUIAutomationWindowPattern>(element, UIA.WindowPatternId, "WindowPattern")
-            .SetWindowVisualState(WindowVisualState.Normal);
+        SetVisualState(
+            Require<IUIAutomationWindowPattern>(element, UIA.WindowPatternId, "WindowPattern"),
+            WindowVisualState.Normal);
         return null;
+    }
+
+    /// <summary>
+    /// Sets the window state and waits for it to apply. A request issued while a previous
+    /// transition is still running (restore right after minimize) is silently dropped, so
+    /// re-issue it until the state matches. Best effort: gives up after the attempts.
+    /// </summary>
+    internal static void SetVisualState(IUIAutomationWindowPattern window, WindowVisualState target,
+        int attempts = 6, int pollMs = 25, int pollsPerAttempt = 20)
+    {
+        for (var attempt = 0; attempt < attempts; attempt++)
+        {
+            window.SetWindowVisualState(target);
+            for (var poll = 0; poll < pollsPerAttempt; poll++)
+            {
+                if (window.CurrentWindowVisualState == target) return;
+                Thread.Sleep(pollMs);
+            }
+        }
     }
 
     public static object? CloseWindow(SessionState state, IUIAutomationElement element, JsonElement parameters)

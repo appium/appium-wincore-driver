@@ -113,19 +113,19 @@ describe('windows: pattern extension commands', () => {
       );
     });
 
-    // Calculator's UI never comes back after restore on the Windows Server CI image
-    it('minimizes then restores the Calculator window', {skip: IS_CI}, async () => {
+    it('minimizes then restores the Calculator window', async () => {
       const windowEl = await calc.executeScript('windows: getWindowElement', []);
-      await calc.executeScript('windows: minimize', [windowEl]);
-      await calc.executeScript('windows: restore', [windowEl]);
-      // Window should be accessible again. Restore returns as soon as the visual
-      // state is set, but a minimized UWP app is suspended and rebuilds its UIA
-      // content tree a beat later — wait for it rather than checking once.
-      const display = await calc.$('~CalculatorResults');
-      await display.waitForExist({
-        timeout: 10_000,
-        timeoutMsg: 'Calculator UI did not come back after restore',
-      });
+      // Back-to-back cycles catch a restore that is dropped mid-minimize
+      for (let i = 0; i < 3; i++) {
+        await calc.executeScript('windows: minimize', [windowEl]);
+        await calc.executeScript('windows: restore', [windowEl]);
+        // A minimized UWP app is suspended and rebuilds its UIA tree a beat after restore
+        const display = await calc.$('~CalculatorResults');
+        await display.waitForExist({
+          timeout: 10_000,
+          timeoutMsg: `Calculator UI did not come back after restore (cycle ${i + 1})`,
+        });
+      }
     });
 
     it('restore on an already-normal window is a no-op: rect is unchanged', async () => {
