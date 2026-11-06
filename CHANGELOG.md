@@ -1,3 +1,9 @@
+## [4.0.5](https://github.com/appium/appium-wincore-driver/compare/v4.0.4...v4.0.5) (2026-11-05)
+
+### Miscellaneous Chores
+
+* **deps:** bump actions/setup-dotnet from 5 to 6 ([#139](https://github.com/appium/appium-wincore-driver/issues/139)) ([a319806](https://github.com/appium/appium-wincore-driver/commit/a319806006b74a4e159d3c10a954475ebb5c50a4))
+
 ## [4.0.4](https://github.com/appium/appium-wincore-driver/compare/v4.0.3...v4.0.4) (2026-11-04)
 
 ### Miscellaneous Chores
