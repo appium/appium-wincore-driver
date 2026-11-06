@@ -81,16 +81,10 @@ export class PropertyRegexMatcher extends RegexItem {
   }
 }
 
-export class StringRegexMatcher extends RegexItem {
-  constructor() {
-    super(`('(?:[^']*(?:''[^']*)?)*')`);
-  }
-}
-
 function assertCorrectNamespace(namespace: string): void {
-  if (!/[a-z.()?:]*/i.test(namespace)) {
+  if (!/^[a-z.()?:|]+$/i.test(namespace)) {
     throw new errors.InvalidArgumentError(
-      'namespace parameter should consist of only alphabetical latin letters and dots.',
+      'namespace parameter should consist of only latin letters, dots and the regex characters ()?:|.',
     );
   }
 }

@@ -24,10 +24,6 @@ export const OrientationTypeProperty = Object.freeze({
   ORIENTATION: 'orientation',
 } as const);
 
-export const RectProperty = Object.freeze({
-  BOUNDING_RECTANGLE: 'boundingrectangle',
-});
-
 export const Int32ArrayProperty = Object.freeze({
   RUNTIME_ID: 'runtimeid',
 });
@@ -102,7 +98,6 @@ export const Property = Object.freeze(
     ControlTypeProperty,
     AutomationElementProperty,
     OrientationTypeProperty,
-    RectProperty,
     Int32Property,
     Int32ArrayProperty,
     StringProperty,
@@ -114,7 +109,6 @@ export const Property = Object.freeze(
   typeof ControlTypeProperty &
   typeof AutomationElementProperty &
   typeof OrientationTypeProperty &
-  typeof RectProperty &
   typeof Int32Property &
   typeof Int32ArrayProperty &
   typeof StringProperty &
@@ -126,7 +120,6 @@ export type PointProperty = Enum<typeof PointProperty>;
 export type ControlTypeProperty = Enum<typeof ControlTypeProperty>;
 export type AutomationElementProperty = Enum<typeof AutomationElementProperty>;
 export type OrientationTypeProperty = Enum<typeof OrientationTypeProperty>;
-export type RectProperty = Enum<typeof RectProperty>;
 export type Int32ArrayProperty = Enum<typeof Int32ArrayProperty>;
 export type Int32Property = Enum<typeof Int32Property>;
 export type StringProperty = Enum<typeof StringProperty>;
@@ -139,7 +132,6 @@ export type Property =
   | ControlTypeProperty
   | AutomationElementProperty
   | OrientationTypeProperty
-  | RectProperty
   | Int32Property
   | Int32ArrayProperty
   | StringProperty

@@ -17,8 +17,7 @@ export const ATTRIBUTE_SCHEMA: AttributeSchema = {
     'framework-id': {type: 'string'},
     'item-status': {type: 'string'},
     'item-type': {type: 'string'},
-    // Boolean attributes (enabled, offscreen, ...) are intentionally unsupported: the
-    // `-windows uiautomation` DSL has no working literal for standalone $true/$false values
-    // (see lib/powershell/converter.ts — BOOLEAN_MATCHER is defined but never wired up).
+    // Boolean attributes (enabled, offscreen, ...) are not mapped yet: UiaConditionEmitter only
+    // emits string values, although the `-windows uiautomation` DSL accepts $true/$false.
   },
 };
