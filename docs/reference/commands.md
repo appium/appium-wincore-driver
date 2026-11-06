@@ -411,24 +411,86 @@ Returns base64-encoded clipboard content.
 
 ## Screen Recording
 
-Screen recording uses the bundled ffmpeg binary. It is not available
-if the driver was installed without its npm dependencies.
+Records the whole desktop with ffmpeg (`gdigrab` input, H.264 in an mp4
+file). The driver looks for ffmpeg in `appium:ffmpegExecutablePath` first,
+then at `ffmpegfmpeg.exe` in the driver's folder. If neither exists, it
+downloads the latest build from GitHub into that folder on first use, which
+needs network access. Any build you supply must include `gdigrab`.
 
 ### windows: startRecordingScreen
 
-Begins recording the screen.
+Begins recording the screen. All arguments are optional.
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `outputPath` | string | temp file | Where to write the video, on the machine running Appium. Must end in `.mp4` |
+| `timeLimit` | number | `600` | Maximum duration in seconds. ffmpeg stops by itself at this limit |
+| `videoFps` | number | `15` | Frames per second |
+| `preset` | string | `veryfast` | libx264 encoder preset, e.g. `ultrafast` |
+| `videoFilter` | string | none | ffmpeg video filter, passed to `-filter:v` |
+| `audioInput` | string | none | DirectShow audio device name to record from |
+| `forceRestart` | boolean | `true` | When a recording is running: `true` discards it and starts a new one, `false` keeps it and does nothing |
+| `captureCursor` | boolean | `false` | See the warning below |
+| `captureClicks` | boolean | `false` | See the warning below |
+
+Starting a recording deletes the file of the previous one, even if it was
+already stopped. Copy the file first if you set `outputPath` and want to
+keep it.
+
+!!! warning
+
+    Do not set `captureCursor` or `captureClicks` to `true`. ffmpeg rejects
+    the flags they add for `gdigrab` input, so the command fails with
+    "The expected screen record file does not exist". The mouse pointer is
+    always recorded, whatever `captureCursor` says, and clicks cannot be
+    highlighted.
+
+!!! warning
+
+    `videoFilter` replaces the driver's built-in filter, which pads the
+    video to even dimensions. On a desktop with an odd width or height,
+    include your own padding or scaling, or the recording fails.
 
 ### windows: stopRecordingScreen
 
-Stops recording and returns a base64-encoded video string.
+Stops recording. Without `remotePath`, it returns the video as a
+base64-encoded string. With `remotePath`, it uploads the video and returns
+an empty string. It also returns an empty string when no recording was
+started.
+
+All arguments are optional.
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `remotePath` | string | none | HTTP(S) URL to upload the video to |
+| `user` | string | none | Basic auth user name. Needs `pass` too |
+| `pass` | string | none | Basic auth password. Needs `user` too |
+| `method` | string | `PUT` | HTTP method of the upload |
+| `headers` | object | none | Extra HTTP headers |
+| `fileFieldName` | string | `file` | Multipart form field holding the video. An empty string sends the video as the raw request body |
+| `formFields` | object or array | none | Extra multipart form fields, as an object or an array of `[name, value]` pairs |
+
+The video file stays on disk after stopping. Stop any running recording
+before ending the session, because the driver does not stop it for you; it
+runs until `timeLimit`.
 
 ```js
-await driver.executeScript('windows: startRecordingScreen', [{}]);
+await driver.executeScript('windows: startRecordingScreen', [{
+  videoFps: 30,
+  timeLimit: 120,
+}]);
 // ... run your test ...
 const video = await driver.executeScript(
   'windows: stopRecordingScreen', [{}]
 );
 // video is a base64-encoded mp4
+
+// Or upload it instead
+await driver.executeScript('windows: stopRecordingScreen', [{
+  remotePath: 'https://example.com/recordings/run-42.mp4',
+  user: 'ci',
+  pass: 'secret',
+}]);
 ```
 
 ## PowerShell Execution
