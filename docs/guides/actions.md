@@ -1,4 +1,6 @@
-# W3C Actions
+---
+title: W3C Actions
+---
 
 The driver implements the W3C WebDriver Actions API. Supported input
 source types: `pointer` (mouse only; touch/pen not supported), `key`,

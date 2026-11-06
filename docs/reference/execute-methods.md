@@ -1,6 +1,8 @@
-# Extension Commands
+---
+title: Execute Methods
+---
 
-Invoke all extension commands via `executeScript`:
+Invoke all execute methods via `executeScript`:
 
 ```js
 await driver.executeScript('windows: <command>', [args]);
@@ -199,7 +201,7 @@ Steps:
    `ItemContainerPattern`. This reaches entries a virtualized list (WPF)
    has not created yet; the entry is realized (`VirtualizedItemPattern`)
    so it can be selected. A container from a
-   [server plugin](../architecture/server-plugins.md) is asked through its tree provider's
+   [server plugin](../guides/server-plugins.md) is asked through its tree provider's
    `FindItemInContainer` instead, when the plugin implements it.
 1. Otherwise looks for a descendant whose `Name` equals `value`. List,
    data, tree and menu items win over other elements with the same text,
@@ -370,7 +372,7 @@ Returns the session's performance counters as
 `{ enabled, metrics: { totalCalls, totalMs, byLabel: { <label>: { count, totalMs } } } }`.
 Counters are only collected when the session was created with
 `appium:perfMetrics: true`; otherwise `enabled` is `false` and `metrics`
-is empty. No arguments. See [Performance](../contributing/performance.md).
+is empty. No arguments. See [Performance](../guides/performance.md).
 
 ### windows: resetPerfMetrics
 
@@ -398,11 +400,15 @@ Returns base64-encoded clipboard content.
 
 ### windows: deleteFile
 
+Requires the [`modify_fs`](./insecure-features.md#modify_fs) insecure feature.
+
 | Argument | Type | Required | Description |
 | --- | --- | --- | --- |
 | `path` | string | yes | Absolute path to the file |
 
 ### windows: deleteFolder
+
+Requires the [`modify_fs`](./insecure-features.md#modify_fs) insecure feature.
 
 | Argument | Type | Required | Description |
 | --- | --- | --- | --- |

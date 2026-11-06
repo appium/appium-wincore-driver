@@ -1,4 +1,6 @@
-# Performance benchmarks
+---
+title: Performance benchmarks
+---
 
 Tracks the cost of the driver's expensive tree-walk paths so regressions are visible
 and improvements are documented with numbers.
@@ -117,4 +119,4 @@ path for A/B. 198 UIA e2e tests green (Calculator/Notepad page source, XPath, at
 
 ## Locator performance grading (absolute vs. relative)
 
-See [Locator performance](../reference/locators.md#locator-performance) for full usage examples.
+See [Locator performance](../reference/locator-strategies.md#locator-performance) for full usage examples.

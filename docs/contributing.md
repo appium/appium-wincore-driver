@@ -1,4 +1,9 @@
-# Contributing
+---
+hide:
+  - navigation
+
+title: Contributing
+---
 
 ## Development setup
 
@@ -30,19 +35,18 @@ for PowerShell/C syntax highlighting in VS Code.
 
 ## Documentation
 
-This site is built with
-[MkDocs Material](https://squidfunk.github.io/mkdocs-material/) from the
-`docs/` folder. Preview it locally:
+This site is built with [`@appium/docutils`](https://www.npmjs.com/package/@appium/docutils),
+like the other Appium driver sites. Install its Python dependencies, then preview the site
+locally:
 
 ```bash
-pip install -r docs/requirements.txt
-npm run docs:serve
+npm run install-docs-deps
+npm run dev:docs
 ```
 
-Then open <http://127.0.0.1:8000>. Pages are published to GitHub Pages
-automatically when `docs/` changes on `main`.
+Pages are published to GitHub Pages automatically after each release run on `main`.
 
 ## Performance
 
 Benchmarks and the `perfMetrics` capability are described in
-[Performance](performance.md).
+[Performance](guides/performance.md).

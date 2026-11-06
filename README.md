@@ -13,7 +13,7 @@ Key advantages over WinAppDriver:
   VB6, Delphi) hide behind placeholder names is locatable without a
   plugin. `windows: select` / `expand` / `collapse` check they took
   effect. See
-  [Locator strategies](https://appium.github.io/appium-wincore-driver/reference/locators/#standard-accessibility-values)
+  [Locator strategies](https://appium.github.io/appium-wincore-driver/latest/reference/locator-strategies/#standard-accessibility-values)
 - Reliable text input independent of the active keyboard layout
 - WebView2, Chrome, and Edge embedded content via CDP
 - Internet Explorer 11 automation via built-in IE DOM Bridge
@@ -39,15 +39,15 @@ Requires Appium 4 and Windows 10 or later.
 
 Full documentation lives at **<https://appium.github.io/appium-wincore-driver/>**:
 
-- [Quickstart](https://appium.github.io/appium-wincore-driver/quickstart/) — install and run a first test
-- [Capabilities](https://appium.github.io/appium-wincore-driver/reference/capabilities/)
-- [Locator strategies](https://appium.github.io/appium-wincore-driver/reference/locators/)
-- [`windows:` extension commands](https://appium.github.io/appium-wincore-driver/reference/commands/)
-- [Guides](https://appium.github.io/appium-wincore-driver/guides/) — W3C Actions, WebView/CDP, Internet Explorer, examples
-- [Architecture](https://appium.github.io/appium-wincore-driver/architecture/)
+- [Getting Started](https://appium.github.io/appium-wincore-driver/latest/getting-started/) — install and run a first test
+- [Capabilities](https://appium.github.io/appium-wincore-driver/latest/reference/capabilities/)
+- [Locator strategies](https://appium.github.io/appium-wincore-driver/latest/reference/locator-strategies/)
+- [`windows:` execute methods](https://appium.github.io/appium-wincore-driver/latest/reference/execute-methods/)
+- [Guides](https://appium.github.io/appium-wincore-driver/latest/guides/webview/) — W3C Actions, WebView/CDP, Internet Explorer, examples
+- [Overview](https://appium.github.io/appium-wincore-driver/latest/overview/)
 
 The site source is in [`docs/`](docs/); see
-[Contributing](https://appium.github.io/appium-wincore-driver/contributing/) to preview it locally.
+[Contributing](https://appium.github.io/appium-wincore-driver/latest/contributing/) to preview it locally.
 
 ## Development
 

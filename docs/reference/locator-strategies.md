@@ -1,4 +1,6 @@
-# Locator Strategies
+---
+title: Locator Strategies
+---
 
 | Strategy | WebdriverIO selector | Maps to UIA property |
 | --- | --- | --- |
@@ -23,7 +25,7 @@ await driver.$('//Button[1]')                                // nth button
 Element lookups take one of two paths in `WincoreServer`:
 
 1. **Native UIA condition search (`FindFirst` / `FindAll` with `TreeScope.Descendants`)** — used by `id`, `accessibility id`, `class name`, `tag name`, `name`, `-windows uiautomation`, and `css selector`. The condition is evaluated inside UIA3's native traversal without building an XML tree or reading unrelated properties. Single-element `findElement` (`FindFirst`) short-circuits on the first match.
-2. **Subtree XML materialization (`UiaXmlModel.Build` + `System.Xml.XPath`)** — used by `xpath`. Every node under the search root is walked (`FindAllBuildCache` with `TreeScope.Children`, reading ~25 UIA properties plus `Value`/`Legacy*` per node) to build an in-memory `XmlDocument` before the XPath expression runs. Even a single-element `findElement` pays the full subtree walk cost (~1.5 ms/node on native WPF providers, or ~4.5–6.0 s on a ~3,000-node window; see [Performance](../contributing/performance.md)).
+2. **Subtree XML materialization (`UiaXmlModel.Build` + `System.Xml.XPath`)** — used by `xpath`. Every node under the search root is walked (`FindAllBuildCache` with `TreeScope.Children`, reading ~25 UIA properties plus `Value`/`Legacy*` per node) to build an in-memory `XmlDocument` before the XPath expression runs. Even a single-element `findElement` pays the full subtree walk cost (~1.5 ms/node on native WPF providers, or ~4.5–6.0 s on a ~3,000-node window; see [Performance](../guides/performance.md)).
 
 | Strategy | Absolute (`driver.$` / `driver.$$`) | Relative (`element.$` / `element.$$`) | Execution path and notes |
 | --- | --- | --- | --- |
@@ -126,34 +128,6 @@ value, and **on a password element that can be the secret itself** (as
 Page source text keeps every character XML allows, including emoji.
 Only characters XML 1.0 cannot carry (control characters, unpaired
 surrogates) are removed.
-
-## Element attributes (getAttribute / getProperty)
-
-`getAttribute` accepts every UIA property name above (`Name`,
-`AutomationId`, `IsEnabled`, …), the standard accessibility names, and
-these pattern-qualified aliases:
-
-| Name | Same as |
-| --- | --- |
-| `Value.Value` | `Value` |
-| `Value.IsReadOnly` | `ValuePattern.IsReadOnly` |
-| `SelectionItem.IsSelected` | `SelectionItemPattern.IsSelected` |
-| `LegacyIAccessible.Value` | `LegacyValue` |
-| `LegacyIAccessible.Name` | `LegacyName` |
-| `LegacyIAccessible.Description` | `LegacyDescription` |
-| `LegacyIAccessible.Role` | `LegacyRole` |
-| `LegacyIAccessible.State` | `LegacyState` |
-| `LegacyIAccessible.DefaultAction` | `LegacyDefaultAction` |
-
-Names are case-insensitive. Two more are `getAttribute`-only:
-
-- `ExpandCollapseState`: `Expanded`, `Collapsed`, `PartiallyExpanded`
-  or `LeafNode`. On MSAA elements without `ExpandCollapsePattern` it is
-  read from the MSAA state bits; it errors when the element reports no
-  state.
-- `ProviderDescription`: which UIA provider serves the element (for
-  example `MSAA Proxy`). Useful to tell why an element behaves the way
-  it does.
 
 ## -windows uiautomation
 

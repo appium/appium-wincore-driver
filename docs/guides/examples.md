@@ -1,4 +1,6 @@
-# Examples
+---
+title: Examples
+---
 
 ## Desktop root: click an icon and switch windows
 

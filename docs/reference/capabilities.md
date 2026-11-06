@@ -1,4 +1,6 @@
-# Capabilities
+---
+title: Capabilities
+---
 
 All capabilities use the `appium:` prefix in W3C format
 (except `platformName`).
@@ -30,4 +32,4 @@ All capabilities use the `appium:` prefix in W3C format
 | `appium:ms:forcequit` | boolean | Force-kill process on session close |
 | `appium:ms:experimental-webdriver` | boolean | Experimental WebDriver features |
 | `appium:logFile` | string | Path to write session logs |
-| `appium:perfMetrics` | boolean | Enable per-session performance counters, read via `windows: getPerfMetrics` / reset via `windows: resetPerfMetrics`. Default: `false`. See [Performance](../contributing/performance.md). |
+| `appium:perfMetrics` | boolean | Enable per-session performance counters, read via `windows: getPerfMetrics` / reset via `windows: resetPerfMetrics`. Default: `false`. See [Performance](../guides/performance.md). |

@@ -1,4 +1,6 @@
-# Server plugins
+---
+title: Server plugins
+---
 
 `WincoreServer.exe` loads external .NET plugins at startup. A plugin adds
 JSON-RPC command handlers and one tree provider: a source of elements that
@@ -37,7 +39,7 @@ Find, XPath and page source are routed per window
 (`TryResolveWindow(hwnd)`) and stay bespoke in their handlers.
 
 `FindItemInContainer` is optional. It backs
-[`windows: selectFromCombobox`](../reference/commands.md#windows-selectfromcombobox),
+[`windows: selectFromCombobox`](../reference/execute-methods.md#windows-selectfromcombobox),
 and can return entries a container has not created yet. When a provider
 does not implement it, or returns null, the driver searches the container's
 current descendants instead.

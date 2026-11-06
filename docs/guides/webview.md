@@ -1,4 +1,6 @@
-# WebView and CDP
+---
+title: WebView and CDP
+---
 
 The driver proxies commands through Chromedriver or EdgeDriver to
 automate WebView2 controls, Electron apps, or standalone browsers.
@@ -35,7 +37,7 @@ const title = await driver.getTitle();
 await driver.switchContext('NATIVE_APP');
 ```
 
-`windows:` extension commands always target the native UIA layer
+`windows:` execute methods always target the native UIA layer
 regardless of the active context.
 
 ## Launching Chrome or Edge for testing

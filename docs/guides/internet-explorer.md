@@ -1,4 +1,6 @@
-# Internet Explorer
+---
+title: Internet Explorer
+---
 
 `iexplore.exe` exposes content via MSAA/COM, not UIA. The driver
 includes a built-in IE DOM Bridge — a 32-bit C# process
@@ -90,7 +92,7 @@ returns to the top-level document rather than popping a frame stack.
 | `switchToParentFrame()` | ✅ | returns to default content (single-level only) |
 | `getElementRect(el)` | ❌ | not implemented |
 | `getElementScreenshot(el)` | ❌ | not implemented |
-| `windows:` extension commands | ❌ | target the UIA tree, not the HTML DOM |
+| `windows:` execute methods | ❌ | target the UIA tree, not the HTML DOM |
 
 ## Locator strategies in IE windows
 
@@ -109,7 +111,7 @@ WebView2/CDP, screen recording, clipboard API,
 `appium:prerun`/`appium:postrun`, and UIA locator strategies
 (`accessibility id`, `-windows uiautomation`, `class name`).
 
-`windows:` extension commands target the UIA tree and are not
+`windows:` execute methods target the UIA tree and are not
 available while an IE window is active; use standard WebDriver
 equivalents (`element.click()`, `driver.url()`, `executeScript`) instead.
 
@@ -165,7 +167,7 @@ Supported XPath patterns: `//tag`, `//tag[@attr="val"]`,
 | `switchToParentFrame()` | ✅ | returns to default content (single-level only) |
 | `getElementRect(el)` | ❌ | not implemented |
 | `getElementScreenshot(el)` | ❌ | not implemented |
-| `windows:` extension commands | ❌ | target the UIA tree, not the HTML DOM |
+| `windows:` execute methods | ❌ | target the UIA tree, not the HTML DOM |
 
 ### Launch IE and automate it
 
