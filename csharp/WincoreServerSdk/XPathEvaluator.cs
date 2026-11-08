@@ -12,7 +12,7 @@ namespace Wincore.ServerSdk;
 /// the result nodes back to element-table ids.
 ///
 /// Keeping this in one place means the result-set rules — document order, dedupe,
-/// single-vs-multiple, "a non-node-set result is not a locator", malformed-XPath
+/// single-vs-multiple, "a non-node-set result is an invalid selector", malformed-XPath
 /// handling — are defined once and unit-tested once. Lives in the SDK so an
 /// out-of-repo tree provider can reuse the exact same semantics.
 /// </summary>
@@ -44,8 +44,10 @@ public static class XPathEvaluator
             // Lazy sequence: runtime type errors surface while iterating, so keep it inside the try.
             foreach (var item in nav.XPath2Select(expression))
             {
-                // string(...), count(...) etc. yield atomic items — not an element locator.
-                if (!item.IsNode || item is not XPathNavigator cur || cur.NodeType != XPathNodeType.Element) continue;
+                // W3C: a non-node result (string(...), count(...), …) is an invalid selector.
+                if (!item.IsNode)
+                    throw new InvalidSelectorException("Invalid XPath expression: the result is not a node set.");
+                if (item is not XPathNavigator cur || cur.NodeType != XPathNodeType.Element) continue;
                 var xmlEl = ((cur as IHasXmlNode)?.GetNode() ?? cur.UnderlyingObject) as XmlElement;
                 var nodeId = xmlEl?.GetAttribute(idAttr);
                 if (string.IsNullOrEmpty(nodeId) || !seen.Add(nodeId!)) continue;
@@ -54,6 +56,10 @@ public static class XPathEvaluator
         }
         // W3C: any error compiling or evaluating the expression is "invalid selector". XPath2.Net
         // wraps syntax errors in XPath2Exception but lets runtime errors (casts, div by zero) escape raw.
+        catch (InvalidSelectorException)
+        {
+            throw;
+        }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             var code = (ex as XPath2Exception)?.ErrorCode;

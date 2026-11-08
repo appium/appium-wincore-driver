@@ -110,11 +110,20 @@ public class XPathEvaluatorTests
         Assert.Equal(new[] { "n7" }, Eval(doc, "//Edit", ctx: numberPad));
     }
 
-    [Fact]
-    public void A_non_node_set_result_is_not_a_locator()
+    [Theory]
+    [InlineData("count(//Button)")]
+    [InlineData("string(//Button/@Name)")]
+    [InlineData("true()")]
+    [InlineData("//Button/@Name/string(.)")]
+    public void A_non_node_result_throws_InvalidSelectorException(string expr)
     {
-        Assert.Empty(Eval("count(//Button)"));
-        Assert.Empty(Eval("string(//Button/@Name)"));
+        Assert.Throws<InvalidSelectorException>(() => Eval(expr));
+    }
+
+    [Fact]
+    public void An_empty_node_set_is_not_an_error()
+    {
+        Assert.Empty(Eval("//NoSuchTag"));
     }
 
     [Theory]
