@@ -9,14 +9,13 @@ using WincoreServer.Uia3;
 namespace WincoreServer.Commands;
 
 /// <summary>
-/// "evaluateXPath" — evaluates a whole XPath 1.0 expression in the process that
-/// owns the tree, using the platform's mature engine instead of the hand-written
+/// "evaluateXPath" — evaluates a whole XPath 2.0 expression in the process that
+/// owns the tree, using XPath2.Net instead of the hand-written
 /// remote-tree evaluator that used to live in lib/xpath/.
 ///
 /// For real UIA the tree is materialised once into an <see cref="XmlDocument"/>
-/// and handed to <c>System.Xml.XPath</c> (a complete, Microsoft-maintained XPath
-/// 1.0 implementation — axes, positional predicates, count(), string functions,
-/// unions, all correct). Result nodes carry the element-table id of the element
+/// and handed to XPath2.Net (XPath 2.0 over the standard <c>XPathNavigator</c>).
+/// Result nodes carry the element-table id of the element
 /// they were built from, so the WebDriver layer gets back the same id strings the
 /// old engine produced.
 ///

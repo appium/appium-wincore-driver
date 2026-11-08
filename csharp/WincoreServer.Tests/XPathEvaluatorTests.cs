@@ -77,6 +77,23 @@ public class XPathEvaluatorTests
         Assert.Equal(expected, Eval(expr));
     }
 
+    [Theory]
+    [InlineData("//Button[matches(@Name, '^T')]", "n4,n5")]
+    [InlineData("//Button[ends-with(@AutomationId, 'Button') and lower-case(@Name) = 'one']", "n3")]
+    [InlineData("//Button[@Name = ('One', 'Three')]", "n3,n5")]
+    [InlineData("//Button[some $b in . satisfies $b/@IsEnabled = 'false']", "n5")]
+    [InlineData("//Button[if (@IsEnabled = 'true') then true() else false()]", "n3,n4")]
+    [InlineData("//Group[@AutomationId = 'NumberPad']/Button except //Button[@Name = 'Two']", "n3,n5")]
+    [InlineData("//Button intersect //*[@IsEnabled = 'true']", "n3,n4")]
+    [InlineData("for $b in //Button[@Name = 'Two'] return $b", "n4")]
+    [InlineData("//Button[string-length(@Name) = 3]", "n3,n4")]
+    // sequence constructed out of document order is returned in document order
+    [InlineData("(//Edit, //Button[@Name = 'One'])", "n3,n7")]
+    public void Supports_xpath_2_0_features(string expr, string expectedCsv)
+    {
+        Assert.Equal(expectedCsv.Split(','), Eval(expr));
+    }
+
     [Fact]
     public void Single_find_returns_only_the_first_match()
     {
@@ -100,11 +117,16 @@ public class XPathEvaluatorTests
         Assert.Empty(Eval("string(//Button/@Name)"));
     }
 
-    [Fact]
-    public void Malformed_xpath_throws_InvalidSelectorException()
+    [Theory]
+    [InlineData("")]                                        // empty
+    [InlineData("//Button[")]                               // syntax
+    [InlineData("//Button[bogus-fn()]")]                    // unknown function
+    [InlineData("//foo:Button")]                            // unbound prefix
+    [InlineData("//Button[xs:integer(@Name) = 1]")]         // runtime cast error
+    [InlineData("//Button[1 idiv 0]")]                      // runtime arithmetic error
+    public void Invalid_xpath_throws_InvalidSelectorException(string expr)
     {
-        Assert.Throws<InvalidSelectorException>(() => Eval("//Button["));
-        Assert.Throws<InvalidSelectorException>(() => Eval("//Button[bogus-fn()]"));
+        Assert.Throws<InvalidSelectorException>(() => Eval(expr));
     }
 
     [Fact]

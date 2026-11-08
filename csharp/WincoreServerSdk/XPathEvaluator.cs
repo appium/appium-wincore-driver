@@ -1,5 +1,6 @@
 using System.Xml;
 using System.Xml.XPath;
+using Wmhelp.XPath2;
 
 namespace Wincore.ServerSdk;
 
@@ -7,7 +8,7 @@ namespace Wincore.ServerSdk;
 /// Shared back half of every <c>evaluateXPath</c> path (real UIA and any tree
 /// provider). Each caller materialises its runtime's subtree into an
 /// <see cref="XmlDocument"/> whose elements carry a node-id attribute, then hands
-/// the document here to run the expression through <c>System.Xml.XPath</c> and map
+/// the document here to run the expression through XPath2.Net (XPath 2.0) and map
 /// the result nodes back to element-table ids.
 ///
 /// Keeping this in one place means the result-set rules — document order, dedupe,
@@ -35,35 +36,46 @@ public static class XPathEvaluator
     {
         XPathNavigator nav = (contextNode ?? doc).CreateNavigator()!;
 
-        object evaluated;
+        // (nodeId, navigator) of each matched element; deduped by nodeId.
+        var matches = new List<(string NodeId, XPathNavigator Nav)>();
+        var seen = new HashSet<string>();
         try
         {
-            evaluated = nav.Evaluate(expression);
+            // Lazy sequence: runtime type errors surface while iterating, so keep it inside the try.
+            foreach (var item in nav.XPath2Select(expression))
+            {
+                // string(...), count(...) etc. yield atomic items — not an element locator.
+                if (!item.IsNode || item is not XPathNavigator cur || cur.NodeType != XPathNodeType.Element) continue;
+                var xmlEl = ((cur as IHasXmlNode)?.GetNode() ?? cur.UnderlyingObject) as XmlElement;
+                var nodeId = xmlEl?.GetAttribute(idAttr);
+                if (string.IsNullOrEmpty(nodeId) || !seen.Add(nodeId!)) continue;
+                matches.Add((nodeId!, cur.Clone()));
+            }
         }
-        catch (XPathException ex)
+        // W3C: any error compiling or evaluating the expression is "invalid selector". XPath2.Net
+        // wraps syntax errors in XPath2Exception but lets runtime errors (casts, div by zero) escape raw.
+        catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            throw new InvalidSelectorException($"Malformed XPath: {ex.Message}");
+            var code = (ex as XPath2Exception)?.ErrorCode;
+            throw new InvalidSelectorException(
+                $"Invalid XPath expression{(string.IsNullOrEmpty(code) ? "" : $" [{code}]")}: {ex.Message}");
         }
-        catch (ArgumentException ex)
+
+        // XPath 2.0 sequences keep construction order, e.g. `(//b, //a)`; locators expect document order.
+        if (matches.Count > 1)
         {
-            throw new InvalidSelectorException($"Malformed XPath: {ex.Message}");
+            matches.Sort((a, b) => a.Nav.ComparePosition(b.Nav) switch
+            {
+                XmlNodeOrder.Before => -1,
+                XmlNodeOrder.After => 1,
+                _ => 0,
+            });
         }
 
         var ids = new List<string>();
-        if (evaluated is not XPathNodeIterator it)
+        foreach (var (nodeId, _) in matches)
         {
-            // string(...), count(...), boolean(...) — not an element locator.
-            return ids;
-        }
-
-        while (it.MoveNext())
-        {
-            var cur = it.Current;
-            if (cur == null || cur.NodeType != XPathNodeType.Element) continue;
-            var xmlEl = (cur as IHasXmlNode)?.GetNode() as XmlElement;
-            var nodeId = xmlEl?.GetAttribute(idAttr);
-            if (string.IsNullOrEmpty(nodeId)) continue;
-            var elId = resolve(nodeId!);
+            var elId = resolve(nodeId);
             if (elId == null || ids.Contains(elId)) continue;
             ids.Add(elId);
             if (!multiple) break;

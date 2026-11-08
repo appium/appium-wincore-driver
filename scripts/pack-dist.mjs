@@ -9,6 +9,6 @@ const pkg = JSON.parse(readFileSync(path.join(rootDir, 'package.json'), 'utf8'))
 const outFile = path.resolve(rootDir, `${pkg.name}-${pkg.version}.zip`);
 
 execSync(
-  `powershell -Command "Compress-Archive -Path 'build','node_modules','LICENSE','README.md','package.json' -DestinationPath '${outFile}' -Force"`,
+  `powershell -Command "Compress-Archive -Path 'build','node_modules','LICENSE','THIRD_PARTY_NOTICES.md','README.md','package.json' -DestinationPath '${outFile}' -Force"`,
   {stdio: 'inherit', cwd: rootDir},
 );

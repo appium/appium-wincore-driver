@@ -38,7 +38,7 @@ for installation, capabilities, and usage examples.
 | `name` | element visible label | `Name` |
 | `tag name` | control type name | `ControlType` (PascalCase) or `LocalizedControlType` (lowercase) |
 | `css selector` | compound CSS rule | compiled to `-windows uiautomation` |
-| `xpath` | XPath 1.0 expression | any UIA attribute |
+| `xpath` | XPath 2.0 expression (via XPath2.Net) | any UIA attribute |
 | `-windows uiautomation` | raw UIA condition | C#/PowerShell condition |
 
 ```js
@@ -53,7 +53,7 @@ await driver.$('//Button[1]')                                // nth button
 Element lookups take one of two paths in `WincoreServer`:
 
 1. **Native UIA condition search (`FindFirst` / `FindAll` with `TreeScope.Descendants`)** — used by `id`, `accessibility id`, `class name`, `tag name`, `name`, `-windows uiautomation`, and `css selector`. The condition is evaluated inside UIA3's native traversal without building an XML tree or reading unrelated properties. Single-element `findElement` (`FindFirst`) short-circuits on the first match.
-2. **Subtree XML materialization (`UiaXmlModel.Build` + `System.Xml.XPath`)** — used by `xpath`. Every node under the search root is walked (`FindAllBuildCache` with `TreeScope.Children`, reading ~25 UIA properties plus `Value`/`Legacy*` per node) to build an in-memory `XmlDocument` before the XPath expression runs. Even a single-element `findElement` pays the full subtree walk cost (~1.5 ms/node on native WPF providers, or ~4.5–6.0 s on a ~3,000-node window; see [docs/performance.md](docs/performance.md)).
+2. **Subtree XML materialization (`UiaXmlModel.Build` + XPath2.Net)** — used by `xpath`. Every node under the search root is walked (`FindAllBuildCache` with `TreeScope.Children`, reading ~25 UIA properties plus `Value`/`Legacy*` per node) to build an in-memory `XmlDocument` before the XPath expression runs. Even a single-element `findElement` pays the full subtree walk cost (~1.5 ms/node on native WPF providers, or ~4.5–6.0 s on a ~3,000-node window; see [docs/performance.md](docs/performance.md)).
 
 | Strategy | Absolute (`driver.$` / `driver.$$`) | Relative (`element.$` / `element.$$`) | Execution path and notes |
 | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ control-type name — `Button`, `Edit`, `CheckBox`, `DataGrid`, … — not the
 localized name the `tag name` strategy uses. These names are:
 
 - **PascalCase and case-sensitive.** `//Button` matches; `//button` and
-  `//BUTTON` match nothing. XPath 1.0 has no case-insensitive node test.
+  `//BUTTON` match nothing. Node tests are always case-sensitive; compare attribute values case-insensitively with `lower-case(@Name)`.
 - **Language-neutral.** `//Button` matches identically on an English,
   Hebrew, or any other localized Windows.
 
