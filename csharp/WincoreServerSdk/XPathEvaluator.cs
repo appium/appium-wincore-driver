@@ -42,8 +42,10 @@ public static class XPathEvaluator
         try
         {
             // Lazy sequence: runtime type errors surface while iterating, so keep it inside the try.
-            foreach (var item in nav.XPath2Select(expression))
+            var seq = nav.XPath2Select(expression);
+            while (seq.MoveNext())
             {
+                var item = seq.Current;
                 // W3C: a non-node result (string(...), count(...), …) is an invalid selector.
                 if (!item.IsNode)
                     throw new InvalidSelectorException("Invalid XPath expression: the result is not a node set.");
