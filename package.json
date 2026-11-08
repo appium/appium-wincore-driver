@@ -77,6 +77,10 @@
   "peerDependencies": {
     "appium": "^4.0.0-beta.0"
   },
+  "overrides": {
+    "glob": "14.0.4",
+    "minimatch": "11.0.5"
+  },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0",
     "npm": ">=10"
