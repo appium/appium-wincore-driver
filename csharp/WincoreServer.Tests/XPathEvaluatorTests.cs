@@ -101,6 +101,12 @@ public class XPathEvaluatorTests
     }
 
     [Fact]
+    public void Single_find_returns_the_document_order_first_match_of_an_out_of_order_sequence()
+    {
+        Assert.Equal(new[] { "n3" }, Eval("(//Edit, //Button)", multiple: false));
+    }
+
+    [Fact]
     public void Relative_expression_evaluates_against_the_context_node()
     {
         var doc = Doc();

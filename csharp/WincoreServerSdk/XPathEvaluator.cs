@@ -36,7 +36,7 @@ public static class XPathEvaluator
     {
         XPathNavigator nav = (contextNode ?? doc).CreateNavigator()!;
 
-        // (nodeId, navigator) of each matched element; deduped by nodeId.
+        // Matched elements; deduped by nodeId. A single find keeps only the document-order-first one.
         var matches = new List<(string NodeId, XPathNavigator Nav)>();
         var seen = new HashSet<string>();
         try
@@ -53,7 +53,15 @@ public static class XPathEvaluator
                 var xmlEl = ((cur as IHasXmlNode)?.GetNode() ?? cur.UnderlyingObject) as XmlElement;
                 var nodeId = xmlEl?.GetAttribute(idAttr);
                 if (string.IsNullOrEmpty(nodeId) || !seen.Add(nodeId!)) continue;
-                matches.Add((nodeId!, cur.Clone()));
+
+                if (multiple || matches.Count == 0)
+                {
+                    matches.Add((nodeId!, cur.Clone()));
+                }
+                else if (cur.ComparePosition(matches[0].Nav) == XmlNodeOrder.Before)
+                {
+                    matches[0] = (nodeId!, cur.Clone());
+                }
             }
         }
         // W3C: any error compiling or evaluating the expression is "invalid selector". XPath2.Net
@@ -69,8 +77,9 @@ public static class XPathEvaluator
                 $"Invalid XPath expression{(string.IsNullOrEmpty(code) ? "" : $" [{code}]")}: {ex.Message}");
         }
 
-        // XPath 2.0 sequences keep construction order, e.g. `(//b, //a)`; locators expect document order.
-        if (matches.Count > 1)
+        // XPath 2.0 sequences keep construction order, e.g. `(//b, //a)`; locators expect document
+        // order. Path results already are, so only sort when an adjacent pair is out of order.
+        if (matches.Count > 1 && !InDocumentOrder(matches))
         {
             matches.Sort((a, b) => a.Nav.ComparePosition(b.Nav) switch
             {
@@ -81,14 +90,24 @@ public static class XPathEvaluator
         }
 
         var ids = new List<string>();
+        var seenIds = new HashSet<string>();
         foreach (var (nodeId, _) in matches)
         {
             var elId = resolve(nodeId);
-            if (elId == null || ids.Contains(elId)) continue;
+            if (elId == null || !seenIds.Add(elId)) continue;
             ids.Add(elId);
             if (!multiple) break;
         }
 
         return ids;
+    }
+
+    private static bool InDocumentOrder(List<(string NodeId, XPathNavigator Nav)> matches)
+    {
+        for (var i = 1; i < matches.Count; i++)
+        {
+            if (matches[i - 1].Nav.ComparePosition(matches[i].Nav) != XmlNodeOrder.Before) return false;
+        }
+        return true;
     }
 }
