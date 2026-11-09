@@ -99,50 +99,42 @@ See the [README](../README.md#capabilities) for the full list.
 
 ## Locators
 
-The supported strategies are a superset of the old driver's. Existing
-locators keep working; there are two differences worth checking.
+`accessibility id`, `name`, `class name`, `id` (decimal `RuntimeId`) and
+`xpath` (XPath 1.0) work as before. What differs:
 
-| Strategy | .NET | Notes |
+| Strategy | .NET | Change |
 | --- | --- | --- |
-| `accessibility id` | `MobileBy.AccessibilityId("num1Button")` | `AutomationId` |
-| `name` | `MobileBy.Name("One")` | `Name` |
-| `class name` | `MobileBy.ClassName("TextBlock")` | `ClassName` |
-| `id` | `MobileBy.Id("42.1234.5")` | Decimal `RuntimeId` |
-| `tag name` | `MobileBy.TagName("Button")` | See below |
-| `xpath` | `By.XPath("//Button[@Name='OK']")` | XPath 1.0, as before |
-| `-windows uiautomation` | `MobileBy.WindowsAutomation("new PropertyCondition(AutomationElement.NameProperty, 'OK')")` | Parsed natively, not executed |
+| `tag name` | `MobileBy.TagName("Button")` | PascalCase now matches `ControlType`; see below |
+| `-windows uiautomation` | `MobileBy.WindowsAutomation("new PropertyCondition(AutomationElement.NameProperty, 'OK')")` | New. Parsed natively, not executed |
 | `css selector` | `By.CssSelector("Button[name='OK']")` | New. Compiled to a native condition |
 
-Prefer the `MobileBy.*` factories over `By.Id` / `By.Name` / `By.ClassName`.
-The .NET client sends the Selenium ones as CSS selectors (`#x`, `*[name ="x"]`,
-`.x`), which WinCore compiles to `AutomationId`, `Name` and `ClassName`
-conditions. Note that `By.Id` therefore matches the **AutomationId**, while
-`MobileBy.Id` matches the **RuntimeId**.
-
-**`tag name`.** `Button` (PascalCase) now matches the language-neutral
+**`tag name`.** `Button` (PascalCase) matches the language-neutral
 `ControlType`; lowercase `button` matches the OS-localized control type, as
 the old driver's tag name did. Switch to PascalCase to make a suite
 independent of the Windows display language.
 
-**XPath speed.** The old driver relied on WinAppDriver's own tree walk;
-WinCore evaluates XPath against an XML snapshot of the whole search-root
-subtree, so an absolute `//...` query on a very large window can be slow,
-while `id`, `accessibility id`, `name`, `class name` and `-windows uiautomation`
-are native UIA searches. Anchor with a native locator and run XPath relative
-to it:
+**`By.Id` / `By.Name` / `By.ClassName`.** The .NET client sends these as CSS
+selectors (`#x`, `*[name ="x"]`, `.x`), which WinCore compiles to
+`AutomationId`, `Name` and `ClassName` conditions. `By.Id` therefore matches
+the **AutomationId**, while `MobileBy.Id` matches the **RuntimeId**. Prefer
+the `MobileBy.*` factories to be explicit.
+
+**XPath speed.** WinCore evaluates XPath against an XML snapshot of the whole
+search-root subtree, so an absolute `//...` query on a very large window can
+be slow, while the other strategies are native UIA searches. Anchor with a
+native locator and run XPath relative to it:
 
 ```csharp
 var grid = driver.FindElement(MobileBy.AccessibilityId("ServersGrid"));
 var row = grid.FindElement(By.XPath(".//DataItem[starts-with(@LegacyValue, 'db-01;')]"));
 ```
 
-XPath node tests are case-sensitive PascalCase control types (`//Button`;
-`//button` matches nothing). Details and timings: [API.md](../API.md#locator-performance).
+Details and timings: [API.md](../API.md#locator-performance).
 
-New attributes on every element: `Value`, `LegacyValue`, `LegacyName`,
-`LegacyDescription`, `LegacyRole`, `LegacyState`. They make content of MSAA
-grids (DevExpress, DataGridView, VB6, Delphi) locatable without extra setup.
-See [API.md](../API.md#standard-accessibility-values).
+**New element attributes.** Every element exposes `Value`, `LegacyValue`,
+`LegacyName`, `LegacyDescription`, `LegacyRole` and `LegacyState`, which make
+content of MSAA grids (DevExpress, DataGridView, VB6, Delphi) locatable
+without extra setup. See [API.md](../API.md#standard-accessibility-values).
 
 ## Extension commands
 
@@ -304,5 +296,4 @@ finally
 | `'path' must be provided.` | `deleteFile` / `deleteFolder` still pass `remotePath` |
 | `windows: deleteFile` rejected as insecure | Start Appium with `--allow-insecure=modify_fs` |
 | XPath lookups much slower than before | Anchor with a native locator, then query relative to it |
-| `//button` finds nothing | Node tests are case-sensitive: `//Button` |
 | `invalid element state` from `windows: select` / `expand` / `collapse` | The MSAA control did not change state; the old driver reported success regardless |
