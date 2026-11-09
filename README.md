@@ -49,6 +49,11 @@ Full documentation lives at **<https://appium.github.io/appium-wincore-driver/>*
 The site source is in [`docs/`](docs/); see
 [Contributing](https://appium.github.io/appium-wincore-driver/latest/contributing/) to preview it locally.
 
+## Migrating from appium-windows-driver
+
+Coming from the deprecated WinAppDriver-based driver? See the
+[client migration guide](docs/migration-from-appium-windows-driver.md).
+
 ## Development
 
 ```bash
