@@ -35,6 +35,7 @@ import type {UploadOptions} from './screen-recorder.js';
 import {DEFAULT_EXT, ScreenRecorder, uploadRecordedMedia} from './screen-recorder.js';
 
 const PLATFORM_COMMAND_PREFIX = 'windows:';
+const PLATFORM_COMMAND_PREFIX_RE = /^\s*windows:\s*/;
 
 const ContentType = Object.freeze({
   PLAINTEXT: 'plaintext',
@@ -99,11 +100,13 @@ function coerceExecuteMethodArgs(script: string, args: any[]): any[] | null {
  * @returns The result of the dispatched command.
  */
 export async function execute(this: AppiumWincoreDriver, script: string, args: any[]) {
-  if (script.startsWith(PLATFORM_COMMAND_PREFIX)) {
-    const executeMethodArgs = coerceExecuteMethodArgs(script, args);
+  // Clients differ on spacing (the .NET client sends `windows:closeApp`); the method map keys use `windows: `.
+  const normalizedScript = script.replace(PLATFORM_COMMAND_PREFIX_RE, `${PLATFORM_COMMAND_PREFIX} `);
+  if (normalizedScript.startsWith(PLATFORM_COMMAND_PREFIX)) {
+    const executeMethodArgs = coerceExecuteMethodArgs(normalizedScript, args);
     if (executeMethodArgs === null) {
       throw new errors.InvalidArgumentError(
-        `Did not get correct format of arguments for '${script}'. Expected zero or one arguments object.`,
+        `Did not get correct format of arguments for '${normalizedScript}'. Expected zero or one arguments object.`,
       );
     }
 
@@ -113,7 +116,7 @@ export async function execute(this: AppiumWincoreDriver, script: string, args: a
     // static property is this driver's own map only and has no visibility into commands a
     // plugin contributes, which made every plugin-provided
     // `windows: *` command unreachable via the classic execute/executeScript endpoint.
-    return await this.executeMethod(script, executeMethodArgs);
+    return await this.executeMethod(normalizedScript, executeMethodArgs);
   }
 
   if (script.replace(/\s/g, '') === 'mobile:getContexts') {
