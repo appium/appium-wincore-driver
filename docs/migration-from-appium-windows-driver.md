@@ -78,19 +78,14 @@ var driver = new WindowsDriver(new Uri("http://127.0.0.1:4723/"), options);
 
 ### Capabilities
 
+Capabilities not listed here (`platformName`, `app`, `appTopLevelWindow`,
+`appArguments`, `appWorkingDir`, `ms:forcequit`, `ms:experimental-webdriver`,
+`prerun`, `postrun`, `newCommandTimeout`) work as before.
+
 | Capability | Status | Notes |
 | --- | --- | --- |
-| `platformName` | Same | `Windows` |
 | `appium:automationName` | **Changed** | `Wincore` |
-| `appium:app` | Same | AUMID, path, or `Root` |
-| `appium:appTopLevelWindow` | Same | Hex/decimal window handle. Do not combine with `app` |
-| `appium:appArguments` | Same | |
-| `appium:appWorkingDir` | Same | Also the working directory of `powerShell` scripts |
-| `appium:ms:waitForAppLaunch` | Same, wider range | Seconds (<=120) or milliseconds (>120). The old limit was 50 s |
-| `appium:ms:forcequit` | Same | Force-kill the app at session end |
-| `appium:ms:experimental-webdriver` | Same | |
-| `appium:prerun` / `appium:postrun` | Same | `{ script }` or `{ command }` PowerShell. Run before the session starts / after it ends |
-| `appium:newCommandTimeout` | Same | Handled by Appium core |
+| `appium:ms:waitForAppLaunch` | **Changed** | Seconds (<=120) or milliseconds (>120). The old limit was 50 s |
 | `appium:systemPort` | **Ignored** | There is no HTTP listener; the driver talks to its server over stdin/stdout. A log line notes the capability is ignored |
 | `appium:createSessionTimeout` | **Removed** | A WinAppDriver start-up workaround |
 | `appium:wadUrl` | **Removed** | There is no WinAppDriver to point at |
