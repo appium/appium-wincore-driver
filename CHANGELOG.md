@@ -1,3 +1,9 @@
+## [4.0.7](https://github.com/appium/appium-wincore-driver/compare/v4.0.6...v4.0.7) (2026-11-10)
+
+### Bug Fixes
+
+* **execute:** accept any spacing after the `windows:` prefix ([#145](https://github.com/appium/appium-wincore-driver/issues/145)) ([ff9976b](https://github.com/appium/appium-wincore-driver/commit/ff9976b9ff4bbd68ec75ad660ceb2ca6ecfda3ff))
+
 ## [4.0.6](https://github.com/appium/appium-wincore-driver/compare/v4.0.5...v4.0.6) (2026-11-06)
 
 ### Bug Fixes
