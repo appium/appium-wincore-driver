@@ -6,6 +6,8 @@
 import assert from 'node:assert/strict';
 import {beforeEach, describe, it, mock} from 'node:test';
 
+import {W3C_ELEMENT_KEY} from 'appium/driver.js';
+
 import {createMockDriver, withExecuteMethodDispatch, MOCK_ELEMENT} from '../../fixtures/driver.js';
 import {mockCommonModules} from '../../helpers/common.js';
 import {assertCalledTimes, assertCalledWith, assertNotCalled, calls, queueResolved} from '../../helpers/mock.js';
@@ -40,6 +42,22 @@ describe('execute (command router)', () => {
     driver.closeApp = mock.fn(async () => undefined);
     await extension.execute.call(driver, 'windows: closeApp', []);
     assertCalledTimes(driver.closeApp, 1);
+  });
+
+  for (const script of ['windows:closeApp', 'windows:   closeApp', '  windows: closeApp']) {
+    it(`normalizes spacing in the script name: ${JSON.stringify(script)}`, async () => {
+      driver.closeApp = mock.fn(async () => undefined);
+      await extension.execute.call(driver, script, []);
+      assertCalledTimes(driver.closeApp, 1);
+    });
+  }
+
+  it('normalizes spacing for commands with positional args (windows:setValue)', async () => {
+    await extension.execute.call(driver, 'windows:setValue', [MOCK_ELEMENT, 'abc']);
+    assertCalledWith(driver.sendCommand, 'setElementValue', {
+      elementId: MOCK_ELEMENT[W3C_ELEMENT_KEY],
+      value: 'abc',
+    });
   });
 
   it('routes windows:getDeviceTime with format arg', async () => {
