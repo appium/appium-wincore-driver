@@ -61,7 +61,7 @@
   },
   "dependencies": {
     "@appium/css-locator-to-native": "^1.0.6",
-    "appium-chromedriver": "^9.1.13",
+    "appium-chromedriver": "^10.0.1",
     "asyncbox": "^6.3.5",
     "bezier-easing": "^3.2.0",
     "koffi": "^3.3.3"

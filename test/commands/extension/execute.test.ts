@@ -172,7 +172,6 @@ describe('execute (command router)', () => {
     const mockCommand = mock.fn(async () => 'proxy-result');
     driver.chromedriver = {
       jwproxy: {
-        downstreamProtocol: 'W3C',
         command: mockCommand,
       },
     };
@@ -184,27 +183,9 @@ describe('execute (command router)', () => {
     assert.equal(result, 'proxy-result');
   });
 
-  it('proxy uses /execute endpoint for MJSONWP protocol', async () => {
-    const mockCommand = mock.fn(async () => undefined);
-    driver.chromedriver = {
-      jwproxy: {
-        downstreamProtocol: 'MJSONWP',
-        command: mockCommand,
-      },
-    };
-    driver.jwpProxyActive = true;
-    driver.proxyActive = mock.fn(() => true);
-
-    await extension.execute.call(driver, 'return 1', []);
-    const [call] = calls(mockCommand);
-    assertCalledTimes(mockCommand, 1);
-    assert.deepEqual(call.slice(0, 2), ['/execute', 'POST']);
-    assert.ok(call.length === 3 && call[2] != null);
-  });
-
   it('powerShell runs before proxy passthrough even when jwpProxyActive', async () => {
     const mockCommand = mock.fn();
-    driver.chromedriver = {jwproxy: {downstreamProtocol: 'W3C', command: mockCommand}};
+    driver.chromedriver = {jwproxy: {command: mockCommand}};
     driver.jwpProxyActive = true;
     driver.proxyActive = mock.fn(() => true);
     driver.assertFeatureEnabled = mock.fn();
