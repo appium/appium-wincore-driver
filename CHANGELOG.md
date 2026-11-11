@@ -1,3 +1,9 @@
+## [4.0.9](https://github.com/appium/appium-wincore-driver/compare/v4.0.8...v4.0.9) (2026-11-11)
+
+### Miscellaneous Chores
+
+* **deps:** bump appium-chromedriver to 10.0.1 ([#147](https://github.com/appium/appium-wincore-driver/issues/147)) ([f8ba814](https://github.com/appium/appium-wincore-driver/commit/f8ba81443bc79360d160ad540386231bdc6d310a))
+
 ## [4.0.8](https://github.com/appium/appium-wincore-driver/compare/v4.0.7...v4.0.8) (2026-11-11)
 
 ### Bug Fixes
