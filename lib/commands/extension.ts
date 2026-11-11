@@ -4,7 +4,7 @@ import {dirname, extname, join} from 'node:path';
 
 import type {Element} from '@appium/types';
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {PROTOCOLS, W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 
 import {MODIFY_FS_FEATURE} from '../constants.js';
 import type {AppiumWincoreDriver} from '../driver.js';
@@ -144,8 +144,7 @@ export async function execute(this: AppiumWincoreDriver, script: string, args: a
   }
 
   if (this.chromedriver && this.proxyActive()) {
-    const endpoint = this.chromedriver.jwproxy.downstreamProtocol === PROTOCOLS.MJSONWP ? '/execute' : '/execute/sync';
-    return await this.chromedriver.jwproxy.command(endpoint, 'POST', {script, args});
+    return await this.chromedriver.jwproxy.command('/execute/sync', 'POST', {script, args});
   }
 
   if (script === 'return window.name') {
