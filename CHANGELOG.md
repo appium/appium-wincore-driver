@@ -1,3 +1,9 @@
+## [4.0.8](https://github.com/appium/appium-wincore-driver/compare/v4.0.7...v4.0.8) (2026-11-11)
+
+### Bug Fixes
+
+* **window:** re-issue minimize/restore until the window state applies ([#141](https://github.com/appium/appium-wincore-driver/issues/141)) ([a8b2b9f](https://github.com/appium/appium-wincore-driver/commit/a8b2b9f5622f2950203c83be8c9dbb9d69237c96))
+
 ## [4.0.7](https://github.com/appium/appium-wincore-driver/compare/v4.0.6...v4.0.7) (2026-11-10)
 
 ### Bug Fixes
