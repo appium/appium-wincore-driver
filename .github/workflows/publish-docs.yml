@@ -30,6 +30,3 @@ jobs:
       run: npm run install-docs-deps
     - name: Build and deploy docs
       run: npm run publish:docs
-    # Makes the site root redirect to the latest version.
-    - name: Set default version
-      run: mike set-default --push --branch docs-site latest
