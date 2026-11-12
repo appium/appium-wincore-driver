@@ -30,6 +30,7 @@
     "native/win-x64/WincoreServer.exe",
     "scripts/postinstall.mjs",
     "LICENSE",
+    "THIRD_PARTY_NOTICES.md",
     "README.md",
     "CHANGELOG.md"
   ],

@@ -77,10 +77,33 @@ public class XPathEvaluatorTests
         Assert.Equal(expected, Eval(expr));
     }
 
+    [Theory]
+    [InlineData("//Button[matches(@Name, '^T')]", "n4,n5")]
+    [InlineData("//Button[ends-with(@AutomationId, 'Button') and lower-case(@Name) = 'one']", "n3")]
+    [InlineData("//Button[@Name = ('One', 'Three')]", "n3,n5")]
+    [InlineData("//Button[some $b in . satisfies $b/@IsEnabled = 'false']", "n5")]
+    [InlineData("//Button[if (@IsEnabled = 'true') then true() else false()]", "n3,n4")]
+    [InlineData("//Group[@AutomationId = 'NumberPad']/Button except //Button[@Name = 'Two']", "n3,n5")]
+    [InlineData("//Button intersect //*[@IsEnabled = 'true']", "n3,n4")]
+    [InlineData("for $b in //Button[@Name = 'Two'] return $b", "n4")]
+    [InlineData("//Button[string-length(@Name) = 3]", "n3,n4")]
+    // sequence constructed out of document order is returned in document order
+    [InlineData("(//Edit, //Button[@Name = 'One'])", "n3,n7")]
+    public void Supports_xpath_2_0_features(string expr, string expectedCsv)
+    {
+        Assert.Equal(expectedCsv.Split(','), Eval(expr));
+    }
+
     [Fact]
     public void Single_find_returns_only_the_first_match()
     {
         Assert.Equal(new[] { "n3" }, Eval("//Button", multiple: false));
+    }
+
+    [Fact]
+    public void Single_find_returns_the_document_order_first_match_of_an_out_of_order_sequence()
+    {
+        Assert.Equal(new[] { "n3" }, Eval("(//Edit, //Button)", multiple: false));
     }
 
     [Fact]
@@ -93,18 +116,32 @@ public class XPathEvaluatorTests
         Assert.Equal(new[] { "n7" }, Eval(doc, "//Edit", ctx: numberPad));
     }
 
-    [Fact]
-    public void A_non_node_set_result_is_not_a_locator()
+    [Theory]
+    [InlineData("count(//Button)")]
+    [InlineData("string(//Button/@Name)")]
+    [InlineData("true()")]
+    [InlineData("//Button/@Name/string(.)")]
+    public void A_non_node_result_throws_InvalidSelectorException(string expr)
     {
-        Assert.Empty(Eval("count(//Button)"));
-        Assert.Empty(Eval("string(//Button/@Name)"));
+        Assert.Throws<InvalidSelectorException>(() => Eval(expr));
     }
 
     [Fact]
-    public void Malformed_xpath_throws_InvalidSelectorException()
+    public void An_empty_node_set_is_not_an_error()
     {
-        Assert.Throws<InvalidSelectorException>(() => Eval("//Button["));
-        Assert.Throws<InvalidSelectorException>(() => Eval("//Button[bogus-fn()]"));
+        Assert.Empty(Eval("//NoSuchTag"));
+    }
+
+    [Theory]
+    [InlineData("")]                                        // empty
+    [InlineData("//Button[")]                               // syntax
+    [InlineData("//Button[bogus-fn()]")]                    // unknown function
+    [InlineData("//foo:Button")]                            // unbound prefix
+    [InlineData("//Button[xs:integer(@Name) = 1]")]         // runtime cast error
+    [InlineData("//Button[1 idiv 0]")]                      // runtime arithmetic error
+    public void Invalid_xpath_throws_InvalidSelectorException(string expr)
+    {
+        Assert.Throws<InvalidSelectorException>(() => Eval(expr));
     }
 
     [Fact]

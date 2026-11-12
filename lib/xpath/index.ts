@@ -3,8 +3,8 @@
  *
  * Evaluation happens in the process that owns the tree — `WincoreServer.exe`
  * for real UIA, or a server plugin's tree provider for the windows it owns — via the
- * `evaluateXPath` RPC. Each runtime runs the whole expression through a mature
- * XPath 1.0 engine bound to its native object model, and returns element-table ids in
+ * `evaluateXPath` RPC. Each runtime runs the whole expression through an XPath 2.0
+ * engine (XPath2.Net) bound to its native object model, and returns element-table ids in
  * document order. This module is just the thin client shim: forward the raw
  * expression, wrap the returned ids as W3C element references.
  *

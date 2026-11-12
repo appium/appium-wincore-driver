@@ -2,7 +2,7 @@
  * E2E coverage for XPath axes and functions, exercised end to end: driver ->
  * `evaluateXPath` RPC -> `WincoreServer.exe` materialises the live UIA
  * subtree into an `XmlDocument` and runs the whole expression through
- * `System.Xml.XPath` (`lib/xpath/` is just the client shim). The synthetic-tree
+ * XPath2.Net (`lib/xpath/` is just the client shim). The synthetic-tree
  * unit coverage is `csharp/WincoreServer.Tests/XPathEvaluatorTests.cs`;
  * this pins the same behaviour against a real UIA tree.
  *
