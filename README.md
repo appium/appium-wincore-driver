@@ -24,10 +24,7 @@ Key advantages over WinAppDriver:
 appium driver install --source=npm appium-wincore-driver
 ```
 
-Requires Appium 4 and Windows 10 or later.
-
-> [!NOTE]
-> Since v4, this driver is only compatible with Appium server v4. Use driver v3.x with Appium 3.
+Requires Appium 3 (3.1.0 or later) or Appium 4, Node.js `^22.22.2 || ^24.15.0 || >=26.0.0`, and Windows 10 or later.
 
 ## Related projects
 

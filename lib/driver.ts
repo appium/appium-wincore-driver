@@ -196,6 +196,8 @@ export class AppiumWincoreDriver extends BaseDriver<WincoreDriverConstraints, St
       : await locateElements(strategy, selector, false, context, this.sendCommand.bind(this));
   }
 
+  // Single-argument form works on both supported servers: Appium 4 passes only the W3C caps, and
+  // Appium 3 passes the same W3C caps in all three legacy positions (plus driverData, unused here).
   override async createSession(w3cCaps: W3CWincoreDriverCaps): Promise<DefaultWindowsCreateSessionResult> {
     if (!system.isWindows()) {
       this.log.errorWithException('Windows UI Automation tests only run on Windows.');
