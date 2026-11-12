@@ -30,8 +30,9 @@ protocol is plain W3C WebDriver, so your client library does not change.
 2. Set `AutomationName` to `Wincore`.
 3. Remove capabilities that no longer exist ([table](#capabilities)).
 4. Replace `remotePath` with `path` in `windows: deleteFile` /
-   `windows: deleteFolder`, and `fps` with `videoFps` in
-   `windows: startRecordingScreen` ([details](#extension-commands)).
+   `windows: deleteFolder` (and expand `%TEMP%`-style variables yourself),
+   and `fps` with `videoFps` in `windows: startRecordingScreen`
+   ([details](#extension-commands)).
 5. Write `windows: <command>` **with a space** (`windows:closeApp` is not
    recognised; see [.NET client notes](#net-client-notes)).
 6. Re-run your suite and look at XPath-heavy tests for speed
@@ -85,7 +86,7 @@ Capabilities not listed here (`platformName`, `app`, `appTopLevelWindow`,
 | Capability | Status | Notes |
 | --- | --- | --- |
 | `appium:automationName` | **Changed** | `Wincore` |
-| `appium:ms:waitForAppLaunch` | **Changed** | Seconds (<=120) or milliseconds (>120). The old limit was 50 s |
+| `appium:ms:waitForAppLaunch` | **Changed** | Seconds (<=120) or milliseconds (>120); the old limit was 50 s. It is now an upper limit while the driver polls for the app window, not a fixed wait, so it usually returns sooner. A default wait applies when unset |
 | `appium:systemPort` | **Ignored** | There is no HTTP listener; the driver talks to its server over stdin/stdout. A log line notes the capability is ignored |
 | `appium:createSessionTimeout` | **Removed** | A WinAppDriver start-up workaround |
 | `appium:wadUrl` | **Removed** | There is no WinAppDriver to point at |
@@ -165,10 +166,10 @@ names and arguments.
 
 | Command | Old | New |
 | --- | --- | --- |
-| `windows: deleteFile` | `remotePath` | `path` |
-| `windows: deleteFolder` | `remotePath` | `path` |
+| `windows: deleteFile` | `remotePath`; environment variables such as `%TEMP%` expanded | `path`; no variable expansion; throws `File not found` if the file is missing |
+| `windows: deleteFolder` | `remotePath`; environment variables such as `%TEMP%` expanded | `path`; no variable expansion |
 | `windows: startRecordingScreen` | `fps` | `videoFps` (also new: `outputPath`, `audioInput`) |
-| `windows: clickAndDrag` | `durationMs` defaulted to 5000 | defaults to 500; pass `durationMs` to keep the old pace |
+| `windows: clickAndDrag` | `durationMs` was the pause between pressing the button and starting the move (default 5000) | `durationMs` is how long the move itself takes (default 500); there is no pause before moving |
 
 ```csharp
 // Before
@@ -178,7 +179,11 @@ driver.ExecuteScript("windows: deleteFile", new Dictionary<string, object> { ["p
 ```
 
 `deleteFile` / `deleteFolder` still need the `modify_fs` insecure feature
-(`appium --allow-insecure=modify_fs`).
+(`appium --allow-insecure=wincore:modify_fs`).
+
+Expand variables yourself before the call (e.g. build the path from
+`Environment.GetEnvironmentVariable("TEMP")`). For a hold-then-drag, use W3C
+Actions with a pause between the button press and the move.
 
 ### PowerShell
 
@@ -195,9 +200,10 @@ Differences:
 - WinCore does **not** gate `powerShell` behind the `power_shell` insecure
   feature. Anyone who can reach the Appium server can run PowerShell, so
   keep the server off untrusted networks.
-- Each call starts a fresh `powershell.exe`; variables do not carry over
-  between calls.
-- Anything written to stderr fails the command with that text.
+- Any stderr output fails the command with that text, even when the exit
+  code is 0. The old driver failed only on a non-zero exit code. Scripts
+  using `Write-Error` with `-ErrorAction Continue`, or native tools that
+  write progress to stderr, now fail.
 
 ### New commands worth adopting
 
@@ -240,9 +246,8 @@ Full reference: [API.md](../API.md#extension-commands).
   class only sets `platformName`; `AutomationName` is yours to set.
 - **`windows:` needs a space.** WinCore matches execute-method names
   exactly. `WindowsDriver.CloseApp()` and `LaunchApp()` send the name
-  without a space (`windows:closeApp`), which the driver does not map
-  (confirmed by reading the driver's dispatch code, not by running a Windows
-  session). Call the commands yourself instead:
+  without a space (`windows:closeApp`), which the driver does not map.
+  Call the commands yourself instead:
 
   ```csharp
   driver.ExecuteScript("windows: closeApp");
@@ -294,6 +299,6 @@ finally
 | Session creation fails with an automation-name error | `AutomationName` is still `Windows` |
 | `Unsupported execute method 'windows:closeApp'` | Missing space; see [.NET client notes](#net-client-notes) |
 | `'path' must be provided.` | `deleteFile` / `deleteFolder` still pass `remotePath` |
-| `windows: deleteFile` rejected as insecure | Start Appium with `--allow-insecure=modify_fs` |
+| `windows: deleteFile` rejected as insecure | Start Appium with `--allow-insecure=wincore:modify_fs` |
 | XPath lookups much slower than before | Anchor with a native locator, then query relative to it |
 | `invalid element state` from `windows: select` / `expand` / `collapse` | The MSAA control did not change state; the old driver reported success regardless |
