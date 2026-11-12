@@ -2,136 +2,126 @@
 title: Locator Strategies
 ---
 
-| Strategy | WebdriverIO selector | Maps to UIA property |
-| --- | --- | --- |
-| `accessibility id` | `~AutomationId` | `AutomationId` |
-| `class name` | `.ClassName` | `ClassName` |
-| `id` | decimal `RuntimeId` string | `RuntimeId` |
-| `name` | element visible label | `Name` |
-| `tag name` | control type name | `ControlType` (PascalCase) or `LocalizedControlType` (lowercase) |
-| `css selector` | compound CSS rule | compiled to `-windows uiautomation` |
-| `xpath` | XPath 1.0 expression | any UIA attribute |
-| `-windows uiautomation` | raw UIA condition | C#/PowerShell condition |
+The WinCore driver supports several location strategies. The list below describes each strategy
+along with usage recommendations.
 
-```js
-await driver.$('~SubmitButton')                              // accessibility id
-await driver.$('//Button[@Name="OK"]')                       // xpath
-await driver.$('.TextBlock')                                 // class name
-await driver.$('//Button[1]')                                // nth button
-```
+Each strategy lists two speed grades, from **A+** (fastest) to **D** (slowest):
 
-## Locator performance
+* **Absolute**: a lookup from the driver (`driver.findElement` / `driver.findElements`), which
+  searches the whole subtree of the session window. In `Root` sessions, this walks across all open
+  desktop windows.
+* **Relative**: a lookup from an element (`element.findElement` / `element.findElements`), which
+  only searches that element's subtree.
 
-Element lookups take one of two paths in `WincoreServer`:
+All strategies except [XPath](#xpath) run as a native UI Automation (UIA) condition search, which
+is evaluated inside UIA's own tree traversal and stops at the first match for a single-element
+lookup. See [Absolute vs. Relative Lookup](#absolute-vs-relative-lookup) for how to keep slower
+lookups fast.
 
-1. **Native UIA condition search (`FindFirst` / `FindAll` with `TreeScope.Descendants`)** — used by `id`, `accessibility id`, `class name`, `tag name`, `name`, `-windows uiautomation`, and `css selector`. The condition is evaluated inside UIA3's native traversal without building an XML tree or reading unrelated properties. Single-element `findElement` (`FindFirst`) short-circuits on the first match.
-2. **Subtree XML materialization (`UiaXmlModel.Build` + `System.Xml.XPath`)** — used by `xpath`. Every node under the search root is walked (`FindAllBuildCache` with `TreeScope.Children`, reading ~25 UIA properties plus `Value`/`Legacy*` per node) to build an in-memory `XmlDocument` before the XPath expression runs. Even a single-element `findElement` pays the full subtree walk cost (~1.5 ms/node on native WPF providers, or ~4.5–6.0 s on a ~3,000-node window; see [Performance](../guides/performance.md)).
+## Id
 
-| Strategy | Absolute (`driver.$` / `driver.$$`) | Relative (`element.$` / `element.$$`) | Execution path and notes |
-| --- | --- | --- | --- |
-| `id` (`RuntimeId`) | **A+ (Fastest)** | **A+ (Fastest)** | Native `PropertyCondition(RuntimeId)`. Direct integer-tuple comparison; `FindFirst` stops at the first match. |
-| `accessibility id` (`AutomationId`) | **A+ (Fastest)** | **A+ (Fastest)** | Native `PropertyCondition(AutomationId)`. Stored directly on the provider peer without locale formatting. |
-| `-windows uiautomation` | **A (Fast)** | **A+ (Fastest)** | Native `PropertyCondition` / `AndCondition` / `OrCondition` / `NotCondition`. Narrowing with `ControlType` + `AutomationId`/`Name` lets UIA skip non-matching control types early. |
-| `css selector` | **A (Fast)** | **A+ (Fastest)** | Compiles in Node (`< 1 ms`) to a `-windows uiautomation` condition and runs the same native `FindFirst` / `FindAll` path. |
-| `class name` (`ClassName`) | **A (Fast)** | **A (Fast)** | Native `PropertyCondition(ClassName)`. Fast for `findElement`; `findElements` cost scales with the number of matched elements saved to the element table. |
-| `tag name` (PascalCase, e.g. `Button`) | **A (Fast)** | **A (Fast)** | Native `PropertyCondition(ControlType)` using the integer control-type ID (`UIA_*ControlTypeId`). Locale-independent and faster than string comparisons. |
-| `name` (`Name`) | **B (Good)** | **A (Fast)** | Native `PropertyCondition(Name)`. Avoids XML materialization, but computing accessible `Name` on complex or MSAA-bridged controls is slightly more expensive per visited node than `AutomationId`. |
-| `tag name` (lowercase, e.g. `button`) | **B (Moderate)** | **A (Fast)** | Native `PropertyCondition(LocalizedControlType)`. Compares the OS-localized control type string on each visited node; prefer PascalCase (`Button`) for both speed and locale independence. |
-| `xpath` | **D (Slow)** | **B–C (Moderate to Fast)** | Materializes the entire search-root subtree into an `XmlDocument` before evaluating XPath. Cost is `O(N_subtree)` (~1.5 ms/node on WPF, ~3–5 ms/node on WinForms/MSAA). |
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`id`|A+|A+|`42.1311890.4.12`|
 
-### Absolute vs. relative lookup
+This strategy matches the element's [`RuntimeId`](./element-attributes.md#runtimeid), as
+dot-separated numbers. Runtime IDs are assigned by UIA and change between application runs.
 
-- **Absolute lookup (`driver.findElement` / `driver.findElements`)** resolves the attached top-level window via `IUIAutomation.ElementFromHandle(hwnd)` (or the desktop root in `Root` sessions) and searches the entire window subtree. In `Root` sessions, an un-scoped lookup walks across all open desktop windows.
-- **Relative lookup (`element.findElement` / `element.findElements`)** looks up the parent `IUIAutomationElement` from the session element table in `O(1)` and scopes `TreeScope.Descendants` (or `UiaXmlModel.Build` for XPath) strictly to that element's subtree.
+!!! info "When to Use"
 
-When XPath features (`contains()`, `starts-with()`, positional predicates, upward axes, or `LegacyValue`) are required on a large window, anchor the container with a native condition locator first and run a relative XPath query inside it:
+    Use this strategy to find an element again after reading its `RuntimeId`, for example from the
+    page source.
 
-```js
-// Slow (~4.5s on a 3,000-node window): walks the entire window to build the XML model
-const rowSlow = await driver.$('//DataItem[starts-with(@LegacyValue, "db-01;")]');
+## Accessibility Id
 
-// Fast (~50-100ms): native AutomationId lookup for the grid, then XPath only over the grid's subtree
-const grid = await driver.$('~ServersGrid');
-const rowFast = await grid.$('.//DataItem[starts-with(@LegacyValue, "db-01;")]');
-```
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`accessibility id`|A+|A+|`SubmitButton`|
 
-## XPath node tests (tag names)
+This strategy matches the element's [`AutomationId`](./element-attributes.md#automationid)
+exactly. The value is stored directly on the element, without any locale formatting.
 
-A node test like `//Button` matches on the element's **programmatic**
-control-type name — `Button`, `Edit`, `CheckBox`, `DataGrid`, … — not the
-localized name the `tag name` strategy uses. These names are:
+!!! info "When to Use"
 
-- **PascalCase and case-sensitive.** `//Button` matches; `//button` and
-  `//BUTTON` match nothing. XPath 1.0 has no case-insensitive node test.
-- **Language-neutral.** `//Button` matches identically on an English,
-  Hebrew, or any other localized Windows.
+    Use this strategy whenever the element has an `AutomationId`. It is the fastest and most stable
+    strategy.
 
-An element whose control type has no standard name is tagged `Custom`. When
-unsure of the tag, match on an attribute instead: `//*[@Name="OK"]`.
+## Name
 
-## XPath substring matching
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`name`|B|A|`OK`|
 
-Use XPath `contains()` or `starts-with()` to match elements by partial name:
+This strategy matches the element's visible label, [`Name`](./element-attributes.md#name), exactly.
+Computing the name of complex or MSAA-bridged controls is slightly more expensive than reading an
+`AutomationId`.
 
-```js
-await driver.$('//*[contains(@Name, "Execute")]')
-await driver.$('//Button[starts-with(@Name, "OK")]')
-```
+!!! info "When to Use"
 
-`PropertyConditionFlags.MatchSubstring` is not supported in the `-windows uiautomation` strategy. Use XPath instead.
+    Use this strategy for elements without an `AutomationId`, if their label is stable. Labels are
+    usually localized, so they change with the language of the application.
 
-## Standard accessibility values
+## Class Name
 
-Many controls publish their real content through standard accessibility
-but not in UIA `Name`: DevExpress grids and trees, the .NET Framework
-`DataGridView`, and other MSAA-based controls (VB6, Delphi, older MFC,
-third-party grids). A grid cell's `Name` is a placeholder such as
-`Status row 2`, while the content (`Degraded`) is in the MSAA value.
-Every element in page source and XPath carries these attributes, with no
-plugin or capability needed:
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`class name`|A|A|`TextBlock`|
 
-| Attribute | Source |
-| --- | --- |
-| `Value` | `ValuePattern.Value` |
-| `LegacyValue` | `LegacyIAccessible.Value` (MSAA `accValue`) |
-| `LegacyName` | `LegacyIAccessible.Name` |
-| `LegacyDescription` | `LegacyIAccessible.Description` |
-| `LegacyRole` | `LegacyIAccessible.Role` (MSAA role number) |
-| `LegacyState` | `LegacyIAccessible.State` (MSAA state bits) |
+This strategy matches the element's [`ClassName`](./element-attributes.md#classname) exactly. Finding
+many elements costs more as the number of matches grows.
 
-```js
-await driver.$('//DataItem[@LegacyValue="Degraded"]')
-await driver.$('//*[starts-with(@LegacyValue, "db-01;")]')   // a whole grid row
-```
+!!! info "When to Use"
 
-`Value` and `LegacyValue` are usually equal on MSAA controls. Some
-elements, such as grid rows, only have `LegacyValue`. An attribute is
-empty when the element doesn't support it.
+    Use this strategy for elements that can be identified by the class of their underlying control.
 
-In page source and XPath, the `Legacy*` attributes are empty on WPF and
-UWP (XAML) elements. Those frameworks have their own UIA provider, so
-there is no MSAA object behind them: UIA would build the legacy values
-from `Name`/`Value` at a high cost for every element. `getAttribute`
-still returns them for any single element.
+## Tag Name
 
-In page source and XPath, `Value` and `LegacyValue` are always empty on
-password elements (`IsPassword`), even when the control itself would
-return its secret. If `IsPassword` can't be read, they are treated as a
-password. They are also cut to 4096 characters there, without splitting
-an emoji or other surrogate pair.
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`tag name` (PascalCase)|A|A|`Button`|
+|`tag name` (lowercase)|B|A|`button`|
 
-`getAttribute` is an explicit read of one element and is not filtered:
-`getAttribute('Value')` / `getAttribute('LegacyValue')` return the full
-value, and **on a password element that can be the secret itself** (as
-`windows: getValue` already does). Don't log those results.
+This strategy matches the element's control type:
 
-Page source text keeps every character XML allows, including emoji.
-Only characters XML 1.0 cannot carry (control characters, unpaired
-surrogates) are removed.
+* A PascalCase name, such as `Button` or `CheckBox`, matches the programmatic
+  [`ControlType`](./element-attributes.md#controltype). It is compared as a number, so it is fast and
+  works the same on any Windows display language.
+* A lowercase name, such as `button`, matches the [`LocalizedControlType`](./element-attributes.md#localizedcontroltype),
+  which is compared as text and depends on the Windows display language.
 
-## -windows uiautomation
+!!! info "When to Use"
 
-Accepts a C#/PowerShell-style UIA condition expression. Supports exact property matches and logical combinators:
+    Use the PascalCase form to find elements by their type. Prefer it over the lowercase form.
+
+## CSS Selector
+
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`css selector`|A|A+|`Button[name="OK"]`|
+
+This strategy converts a CSS selector to a [Windows UIAutomation](#windows-uiautomation) condition.
+The conversion takes less than a millisecond, and the condition then runs the same native search.
+
+The tag matches the programmatic control type (`Button`), `#value` matches the `AutomationId` and
+`.value` matches the `ClassName`. Supported attributes are `name`, `automation-id` (aliases `id`
+and `accessibility-id`), `class-name` (alias `class`), `control-type`, `localized-control-type`,
+`help-text`, `framework-id`, `item-status` and `item-type`. Boolean attributes such as `enabled`
+are not supported.
+
+!!! info "When to Use"
+
+    Use this strategy to combine several conditions in a compact form.
+
+## Windows UIAutomation
+
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`-windows uiautomation`|A|A+|`new PropertyCondition(AutomationElement.NameProperty, 'OK')`|
+
+This strategy accepts a UIA condition, written as in C# or PowerShell with
+[`System.Windows.Automation`](https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation).
+`PropertyCondition`, `AndCondition`, `OrCondition` and `NotCondition` are supported. The
+expression is parsed, not executed.
 
 ```js
 // exact match
@@ -141,4 +131,65 @@ await driver.findElement('-windows uiautomation', "new PropertyCondition(Automat
 await driver.findElement('-windows uiautomation', "new AndCondition(new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button), new PropertyCondition(AutomationElement.NameProperty, 'OK'))")
 ```
 
-**Limitation:** `PropertyConditionFlags` (e.g. `MatchSubstring`, `IgnoreCase`) are not parsed. Use XPath `contains()` for substring matching.
+Narrowing a condition by `ControlType` together with `AutomationId` or `Name` lets UIA skip
+elements of other types early.
+
+!!! warning
+
+    `PropertyConditionFlags` such as `MatchSubstring` and `IgnoreCase` are not supported. Use
+    [XPath](#xpath) `contains()` for substring matching.
+
+!!! info "When to Use"
+
+    Use this strategy for conditions that combine several properties, when no single property
+    identifies the element.
+
+## XPath
+
+|Name|Absolute|Relative|Example|
+|---|---|---|---|
+|`xpath`|D|B–C|`//Button[@Name="OK"]`|
+
+This strategy relies on the XML tree generated by the driver's page source API. XPath version 1.0
+is supported, over all [element attributes](./element-attributes.md) of the page source.
+
+Before the expression runs, every element in the searched subtree is read into an XML document,
+even for a single-element lookup. The cost grows with the size of the subtree: about 1.5 ms per
+element on WPF, and 3 to 5 ms per element on WinForms and MSAA controls. A lookup in a window of
+3,000 elements can take 4.5 to 6 seconds.
+
+Tag names in XPath are the programmatic control type names, such as `Button`, `Edit` or `DataGrid`.
+They are case-sensitive (`//Button` matches, `//button` does not) and the same on any Windows
+display language. Elements whose control type has no standard name are tagged `Custom`. When unsure
+of the tag, match on an attribute instead: `//*[@Name="OK"]`.
+
+Use `contains()` or `starts-with()` to match elements by part of an attribute:
+
+```js
+await driver.$('//*[contains(@Name, "Execute")]')
+await driver.$('//Button[starts-with(@Name, "OK")]')
+```
+
+!!! info "When to Use"
+
+    Use this strategy when no other strategy is applicable: for substring matching, positional
+    predicates, matching on [standard accessibility values](../guides/standard-accessibility-values.md),
+    or elements that can only be identified from their parent, sibling or descendant elements.
+    On large windows, use it as a [relative lookup](#absolute-vs-relative-lookup).
+
+## Absolute vs. Relative Lookup
+
+An absolute lookup searches the whole session window. A relative lookup starts from an element that
+was already found, and searches only that element's subtree.
+
+When XPath is needed on a large window, find the container with a fast strategy first, then run a
+relative XPath lookup inside it:
+
+```js
+// Slow (~4.5 s on a 3,000-element window): reads the whole window into XML
+const rowSlow = await driver.$('//DataItem[starts-with(@LegacyValue, "db-01;")]');
+
+// Fast (~50-100 ms): finds the grid by AutomationId, then reads only the grid into XML
+const grid = await driver.$('~ServersGrid');
+const rowFast = await grid.$('.//DataItem[starts-with(@LegacyValue, "db-01;")]');
+```
