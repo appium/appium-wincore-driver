@@ -136,6 +136,7 @@ public static class UIA
     public const int SizeOfSetPropertyId = 30166;
     public const int PositionInSetPropertyId = 30165;
     public const int HeadingLevelPropertyId = 30173;
+    public const int HeadingLevelNone = 80050;
     public const int IsDialogPropertyId = 30174;
     public const int ExpandCollapseStatePropertyId = 30070;
     public const int ValueValuePropertyId = 30045;
@@ -149,6 +150,9 @@ public static class UIA
     public const int LegacyIAccessibleStatePropertyId = 30096;
     public const int LegacyIAccessibleDefaultActionPropertyId = 30100;
     public const int ProviderDescriptionPropertyId = 30107;
+    public const int IsItemContainerPatternAvailablePropertyId = 30108;
+    public const int IsVirtualizedItemPatternAvailablePropertyId = 30109;
+    public const int IsSynchronizedInputPatternAvailablePropertyId = 30110;
 
     // MSAA state / selection flags (oleacc.h), read through LegacyIAccessible.State.
     public const int StateSystemSelected = 0x2;

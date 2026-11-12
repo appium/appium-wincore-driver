@@ -4,16 +4,15 @@ import {dirname, extname, join} from 'node:path';
 
 import type {Element} from '@appium/types';
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {PROTOCOLS, W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
+import {W3C_ELEMENT_KEY, errors} from 'appium/driver.js';
 
 import {MODIFY_FS_FEATURE} from '../constants.js';
 import type {AppiumWincoreDriver} from '../driver.js';
 import type {Enum} from '../enums.js';
 import {ClickType, Key} from '../enums.js';
-import {convertStringToCondition} from '../powershell/converter.js';
 import {orCondition, propertyCondition} from '../server/conditions.js';
-import {conditionToDto} from '../server/converter-bridge.js';
 import type {RectResult} from '../server/protocol.js';
+import {parseUiaSelector} from '../uia-selector/parser.js';
 import {sleep} from '../util.js';
 import type {VirtualKey} from '../winapi/types/index.js';
 import {KeyEventFlags} from '../winapi/types/index.js';
@@ -36,6 +35,7 @@ import type {UploadOptions} from './screen-recorder.js';
 import {DEFAULT_EXT, ScreenRecorder, uploadRecordedMedia} from './screen-recorder.js';
 
 const PLATFORM_COMMAND_PREFIX = 'windows:';
+const PLATFORM_COMMAND_PREFIX_RE = /^\s*windows:\s*/;
 
 const ContentType = Object.freeze({
   PLAINTEXT: 'plaintext',
@@ -100,11 +100,13 @@ function coerceExecuteMethodArgs(script: string, args: any[]): any[] | null {
  * @returns The result of the dispatched command.
  */
 export async function execute(this: AppiumWincoreDriver, script: string, args: any[]) {
-  if (script.startsWith(PLATFORM_COMMAND_PREFIX)) {
-    const executeMethodArgs = coerceExecuteMethodArgs(script, args);
+  // Clients differ on spacing (the .NET client sends `windows:closeApp`); the method map keys use `windows: `.
+  const normalizedScript = script.replace(PLATFORM_COMMAND_PREFIX_RE, `${PLATFORM_COMMAND_PREFIX} `);
+  if (normalizedScript.startsWith(PLATFORM_COMMAND_PREFIX)) {
+    const executeMethodArgs = coerceExecuteMethodArgs(normalizedScript, args);
     if (executeMethodArgs === null) {
       throw new errors.InvalidArgumentError(
-        `Did not get correct format of arguments for '${script}'. Expected zero or one arguments object.`,
+        `Did not get correct format of arguments for '${normalizedScript}'. Expected zero or one arguments object.`,
       );
     }
 
@@ -114,7 +116,7 @@ export async function execute(this: AppiumWincoreDriver, script: string, args: a
     // static property is this driver's own map only and has no visibility into commands a
     // plugin contributes, which made every plugin-provided
     // `windows: *` command unreachable via the classic execute/executeScript endpoint.
-    return await this.executeMethod(script, executeMethodArgs);
+    return await this.executeMethod(normalizedScript, executeMethodArgs);
   }
 
   if (script.replace(/\s/g, '') === 'mobile:getContexts') {
@@ -142,8 +144,7 @@ export async function execute(this: AppiumWincoreDriver, script: string, args: a
   }
 
   if (this.chromedriver && this.proxyActive()) {
-    const endpoint = this.chromedriver.jwproxy.downstreamProtocol === PROTOCOLS.MJSONWP ? '/execute' : '/execute/sync';
-    return await this.chromedriver.jwproxy.command(endpoint, 'POST', {script, args});
+    return await this.chromedriver.jwproxy.command('/execute/sync', 'POST', {script, args});
   }
 
   if (script === 'return window.name') {
@@ -172,8 +173,7 @@ export async function pushCacheRequest(this: AppiumWincoreDriver, cacheRequest: 
   }
 
   if (cacheRequest.treeFilter) {
-    const condition = convertStringToCondition(cacheRequest.treeFilter);
-    await this.sendCommand('setCacheRequestTreeFilter', {condition: conditionToDto(condition)});
+    await this.sendCommand('setCacheRequestTreeFilter', {condition: parseUiaSelector(cacheRequest.treeFilter)});
   }
 
   if (cacheRequest.treeScope) {
@@ -734,7 +734,7 @@ export async function getClipboardBase64(
   this: AppiumWincoreDriver,
   contentType?: ContentType | {contentType?: ContentType},
 ): Promise<string> {
-  if (!contentType || (contentType && typeof contentType === 'object')) {
+  if (!contentType || typeof contentType === 'object') {
     contentType = contentType?.contentType ?? ContentType.PLAINTEXT;
   }
 

@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {assertIntegerCap, assertSupportedEasingFunction, $} from '../lib/util.js';
+import {assertIntegerCap, assertSupportedEasingFunction} from '../lib/util.js';
 
 describe('assertIntegerCap', () => {
   it('accepts value equal to min', () => {
@@ -64,40 +64,5 @@ describe('assertSupportedEasingFunction', () => {
       () => assertSupportedEasingFunction('cubic-bezier(abc, 0, 0, 1)'),
       /Unsupported or invalid easing function/,
     );
-  });
-});
-
-describe('DeferredStringTemplate / $', () => {
-  it('formats a template with a single substitution', () => {
-    const tpl = $`Hello ${0}!`;
-    assert.equal(tpl.format('World'), 'Hello World!');
-  });
-
-  it('formats a template with multiple substitutions', () => {
-    const tpl = $`${0} + ${1} = ${2}`;
-    assert.equal(tpl.format('a', 'b', 'c'), 'a + b = c');
-  });
-
-  it('formats a template with repeated substitution index', () => {
-    const tpl = $`${0} and ${0} again`;
-    assert.equal(tpl.format('foo'), 'foo and foo again');
-  });
-
-  it('throws in constructor for non-integer substitution index', () => {
-    assert.throws(() => $`${1.5 as any}`, /Indices must be positive integers/);
-  });
-
-  it('throws in constructor for negative substitution index', () => {
-    assert.throws(() => $`${-1 as any}`, /Indices must be positive integers/);
-  });
-
-  it('DeferredStringTemplate.format converts args to string via toString()', () => {
-    const tpl = $`value: ${0}`;
-    assert.equal(tpl.format(42), 'value: 42');
-  });
-
-  it('handles template with no substitutions', () => {
-    const tpl = $`no substitutions`;
-    assert.equal(tpl.format(), 'no substitutions');
   });
 });

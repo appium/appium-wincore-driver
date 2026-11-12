@@ -52,6 +52,7 @@ jobs:
               session
               window
               find-element
+              uia-selector
           # Calculator + Notepad input
           - shard: input
             calculator: true

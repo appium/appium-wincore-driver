@@ -8,7 +8,7 @@ public static class ConditionBuilder
 {
     // UIA3 property IDs. Names here are the public API the TS client sends on
     // the wire ("AutomationId", "Name", "ControlType", …) — do not change them
-    // without updating lib/server/conditions.ts + lib/powershell/types.ts.
+    // without updating lib/server/conditions.ts + lib/uia-selector/types.ts.
     private static readonly Dictionary<string, int> PropertyMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["AcceleratorKey"] = UIA.AcceleratorKeyPropertyId,
@@ -62,6 +62,9 @@ public static class ConditionBuilder
         ["IsValuePatternAvailable"] = UIA.IsValuePatternAvailablePropertyId,
         ["IsWindowPatternAvailable"] = UIA.IsWindowPatternAvailablePropertyId,
         ["IsLegacyIAccessiblePatternAvailable"] = UIA.IsLegacyIAccessiblePatternAvailablePropertyId,
+        ["IsItemContainerPatternAvailable"] = UIA.IsItemContainerPatternAvailablePropertyId,
+        ["IsVirtualizedItemPatternAvailable"] = UIA.IsVirtualizedItemPatternAvailablePropertyId,
+        ["IsSynchronizedInputPatternAvailable"] = UIA.IsSynchronizedInputPatternAvailablePropertyId,
         // Standard accessibility values. Same spelling as the page source / XPath
         // attributes (StandardValues.Attributes).
         ["Value"] = UIA.ValueValuePropertyId,
@@ -189,8 +192,34 @@ public static class ConditionBuilder
         return automation.CreatePropertyCondition(propertyId, value);
     }
 
-    private static object ConvertValue(int propertyId, JsonElement value)
+    internal static object ConvertValue(int propertyId, JsonElement value)
     {
+        // UIA can fail to match BoundingRectangle on a scaled display, even with the value the
+        // element itself reports. An error beats a search that silently finds nothing.
+        if (propertyId == UIA.BoundingRectanglePropertyId)
+        {
+            throw new ArgumentException("BoundingRectangle cannot be used in a condition.");
+        }
+
+        // A Point arrives as {x, y}; UIA stores ClickablePoint as a double array [x, y].
+        if (propertyId == UIA.ClickablePointPropertyId && value.ValueKind == JsonValueKind.Object)
+        {
+            return new[] { RequireDouble(value, "x"), RequireDouble(value, "y") };
+        }
+
+        // UIA reports Culture as an LCID; accept a culture name ("en-US") too.
+        if (propertyId == UIA.CulturePropertyId && value.ValueKind == JsonValueKind.String)
+        {
+            try
+            {
+                return new System.Globalization.CultureInfo(value.GetString()!).LCID;
+            }
+            catch (System.Globalization.CultureNotFoundException)
+            {
+                throw new ArgumentException($"Unknown culture: '{value.GetString()}'");
+            }
+        }
+
         if (propertyId == UIA.ControlTypePropertyId)
         {
             var typeName = value.GetString() ?? throw new ArgumentException("ControlType value must be a string.");
@@ -215,9 +244,18 @@ public static class ConditionBuilder
 
         if (propertyId == UIA.OrientationPropertyId)
         {
+            if (value.ValueKind == JsonValueKind.Number)
+            {
+                return value.GetInt32();
+            }
             var orientationName = value.GetString() ?? "None";
             // UIA3 OrientationType is an int enum (None=0, Horizontal=1, Vertical=2)
             return (int)Enum.Parse<OrientationType>(orientationName, true);
+        }
+
+        if (propertyId == UIA.HeadingLevelPropertyId)
+        {
+            return ConvertHeadingLevel(value);
         }
 
         // NativeWindowHandle is an HWND. UIA property expects an int (not IntPtr)
@@ -236,6 +274,36 @@ public static class ConditionBuilder
             _ => value.GetString() ?? string.Empty
         };
     }
+
+    // UIA stores HeadingLevel as HeadingLevel_None (80050) .. HeadingLevel9 (80059); the
+    // selector parser sends the name ("None", "Level2") or the level itself (0..9).
+    private static int ConvertHeadingLevel(JsonElement value)
+    {
+        var level = value.ValueKind == JsonValueKind.Number ? value.GetInt32() : ParseHeadingLevelName(value.GetString());
+        if (level is < 0 or > 9)
+        {
+            throw new ArgumentException($"Unknown HeadingLevel: {value.GetRawText()}");
+        }
+        return UIA.HeadingLevelNone + level;
+    }
+
+    private static int ParseHeadingLevelName(string? name)
+    {
+        if ("None".Equals(name, StringComparison.OrdinalIgnoreCase))
+        {
+            return 0;
+        }
+        return name != null
+            && name.StartsWith("Level", StringComparison.OrdinalIgnoreCase)
+            && int.TryParse(name[5..], out var level)
+                ? level
+                : throw new ArgumentException($"Unknown HeadingLevel: '{name}'");
+    }
+
+    private static double RequireDouble(JsonElement obj, string name) =>
+        obj.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.Number
+            ? v.GetDouble()
+            : throw new ArgumentException($"Expected numeric '{name}' in {obj.GetRawText()}");
 
     private static IUIAutomationCondition BuildAndCondition(IUIAutomation automation, ConditionDto dto)
     {

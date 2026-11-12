@@ -1,3 +1,31 @@
+## [4.0.9](https://github.com/appium/appium-wincore-driver/compare/v4.0.8...v4.0.9) (2026-11-11)
+
+### Miscellaneous Chores
+
+* **deps:** bump appium-chromedriver to 10.0.1 ([#147](https://github.com/appium/appium-wincore-driver/issues/147)) ([f8ba814](https://github.com/appium/appium-wincore-driver/commit/f8ba81443bc79360d160ad540386231bdc6d310a))
+
+## [4.0.8](https://github.com/appium/appium-wincore-driver/compare/v4.0.7...v4.0.8) (2026-11-11)
+
+### Bug Fixes
+
+* **window:** re-issue minimize/restore until the window state applies ([#141](https://github.com/appium/appium-wincore-driver/issues/141)) ([a8b2b9f](https://github.com/appium/appium-wincore-driver/commit/a8b2b9f5622f2950203c83be8c9dbb9d69237c96))
+
+## [4.0.7](https://github.com/appium/appium-wincore-driver/compare/v4.0.6...v4.0.7) (2026-11-10)
+
+### Bug Fixes
+
+* **execute:** accept any spacing after the `windows:` prefix ([#145](https://github.com/appium/appium-wincore-driver/issues/145)) ([ff9976b](https://github.com/appium/appium-wincore-driver/commit/ff9976b9ff4bbd68ec75ad660ceb2ca6ecfda3ff))
+
+## [4.0.6](https://github.com/appium/appium-wincore-driver/compare/v4.0.5...v4.0.6) (2026-11-06)
+
+### Bug Fixes
+
+* **app:** wait for the window to close in closeApp ([#121](https://github.com/appium/appium-wincore-driver/issues/121)) ([ee31176](https://github.com/appium/appium-wincore-driver/commit/ee31176ce456b0620abf8c245f5b81708b27be31))
+
+### Code Refactoring
+
+* **selector:** remove the PowerShell layer from -windows uiautomation parsing ([#98](https://github.com/appium/appium-wincore-driver/issues/98)) ([aaed46a](https://github.com/appium/appium-wincore-driver/commit/aaed46afa7e6ea2f5a48a2cb3bbac64bcebbc001)), closes [#12](https://github.com/appium/appium-wincore-driver/issues/12)
+
 ## [4.0.5](https://github.com/appium/appium-wincore-driver/compare/v4.0.4...v4.0.5) (2026-11-05)
 
 ### Miscellaneous Chores
