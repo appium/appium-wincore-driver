@@ -1,3 +1,9 @@
+## [4.1.0](https://github.com/appium/appium-wincore-driver/compare/v4.0.9...v4.1.0) (2026-11-12)
+
+### Features
+
+* **xpath:** support XPath 2.0 via XPath2.Net ([#144](https://github.com/appium/appium-wincore-driver/issues/144)) ([cc80cca](https://github.com/appium/appium-wincore-driver/commit/cc80cca40b10f93d876737192c332d5484ca8210))
+
 ## [4.0.9](https://github.com/appium/appium-wincore-driver/compare/v4.0.8...v4.0.9) (2026-11-11)
 
 ### Miscellaneous Chores
