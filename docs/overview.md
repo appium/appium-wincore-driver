@@ -34,7 +34,7 @@ The driver can automate any application whose user interface is exposed through
 |Application type|What the driver reaches|
 |--|--|
 |UWP, Win32, WinForms, WPF|Every UIA-visible control, including raw-view elements hidden from the control view|
-|WebView2, Chrome, Edge|Embedded web content over the Chrome DevTools Protocol, from the same session. See the [Hybrid Mode guide](./guides/webview.md)|
+|WebView2, Chrome, Edge|Embedded web content over the Chrome DevTools Protocol, from the same session. See the [WebView guide](./guides/webview.md)|
 |Internet Explorer 11|HTML content through the built-in IE DOM bridge. See the [Internet Explorer guide](./guides/internet-explorer.md)|
 |Legacy MSAA grids and controls|Content hidden behind placeholder names, through [standard accessibility values](./guides/standard-accessibility-values.md)|
 

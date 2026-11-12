@@ -1,5 +1,5 @@
 ---
-title: Hybrid Mode
+title: WebView
 ---
 
 The WinCore driver supports automation of hybrid apps that use Chromium-based web views, such as

@@ -191,7 +191,7 @@ Time to wait after each click, in milliseconds.
 
 ## Webview
 
-See the [Hybrid Mode guide](../guides/webview.md) for more details about these capabilities.
+See the [WebView guide](../guides/webview.md) for more details about these capabilities.
 
 ### webviewEnabled
 
