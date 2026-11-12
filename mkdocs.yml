@@ -48,10 +48,12 @@ nav:
       - Session Configuration:
           - guides/webview.md
           - guides/internet-explorer.md
+          - guides/performance.md
+      - Element Management:
+          - guides/standard-accessibility-values.md
       - Driver Actions:
           - guides/actions.md
           - guides/examples.md
-      - Development:
-          - guides/server-plugins.md
-          - guides/performance.md
-  - contributing.md
+  - Contributing:
+      - contributing/index.md
+      - contributing/server-plugins.md

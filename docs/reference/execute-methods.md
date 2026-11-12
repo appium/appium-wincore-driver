@@ -201,7 +201,7 @@ Steps:
    `ItemContainerPattern`. This reaches entries a virtualized list (WPF)
    has not created yet; the entry is realized (`VirtualizedItemPattern`)
    so it can be selected. A container from a
-   [server plugin](../guides/server-plugins.md) is asked through its tree provider's
+   [server plugin](../contributing/server-plugins.md) is asked through its tree provider's
    `FindItemInContainer` instead, when the plugin implements it.
 1. Otherwise looks for a descendant whose `Name` equals `value`. List,
    data, tree and menu items win over other elements with the same text,
@@ -372,7 +372,7 @@ Returns the session's performance counters as
 `{ enabled, metrics: { totalCalls, totalMs, byLabel: { <label>: { count, totalMs } } } }`.
 Counters are only collected when the session was created with
 `appium:perfMetrics: true`; otherwise `enabled` is `false` and `metrics`
-is empty. No arguments. See [Performance](../guides/performance.md).
+is empty. No arguments. See the [Performance Metrics guide](../guides/performance.md).
 
 ### windows: resetPerfMetrics
 

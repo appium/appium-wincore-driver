@@ -1,6 +1,9 @@
 ---
-title: Server plugins
+title: Server Plugins
 ---
+
+This page is intended for developers who want to extend the driver. A server plugin can provide
+elements for applications whose user interface is not exposed through UI Automation.
 
 `WincoreServer.exe` loads external .NET plugins at startup. A plugin adds
 JSON-RPC command handlers and one tree provider: a source of elements that

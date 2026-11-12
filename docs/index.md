@@ -40,6 +40,6 @@ please visit [the Appium documentation](https://appium.io).
 -   Go through the [__Getting Started__](./getting-started/index.md) steps to get set up
 -   Browse the [__Reference__](./reference/capabilities.md) documentation for everything exposed by the driver
 -   Read the different [__Guides__](./guides/webview.md) for a variety of instructions, tips and tricks
--   For contributions to the driver, refer to the [__Contributing__](./contributing.md) page
+-   For contributions to the driver, refer to the [__Contributing__](./contributing/index.md) page
 
 </div>
