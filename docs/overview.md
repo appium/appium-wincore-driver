@@ -5,79 +5,112 @@ hide:
 title: Overview
 ---
 
-The WinCore driver is an Appium driver for automating Windows desktop applications through
-the standard WebDriver API.
+The WinCore driver is an Appium driver intended for black-box automated testing of Windows desktop
+applications through the standard WebDriver API.
 
-<video src="../assets/videos/driver-demo.mp4" controls muted playsinline style="max-width: 100%;"></video>
+## Demo
+
+<div style="text-align: center">
+  <video src="../assets/videos/driver-demo.mp4" controls muted playsinline style="width: 100%; max-width: 640px;"></video>
+</div>
 
 ## Target Platforms
 
-| Target | What the driver reaches |
-| --- | --- |
-| UWP, Win32, WinForms, WPF | Every UIA-visible control, including RawView elements hidden from ControlView |
-| WebView2, Chrome, Edge | Embedded web content over CDP, from the same session |
-| Internet Explorer 11 | Built-in IE DOM Bridge, with no IEDriverServer or extra capability |
-| Legacy MSAA grids and controls | Standard accessibility values expose content hidden behind placeholder names |
+The driver supports the following Windows platforms as automation targets:
 
-## Architecture
+|Platform|Supported|
+|--|--|
+|Windows 10|:white_check_mark:|
+|Windows 11|:white_check_mark:|
+|Windows Server|:white_check_mark: [^ci-server]|
+|Windows IoT|:question: [^untested]|
 
-The driver is a standard Appium driver written in TypeScript. Almost all
-UI Automation work happens in a persistent .NET process, `WincoreServer.exe`,
-that lives for the length of the session.
+## Target Applications
+
+The driver can automate any application whose user interface is exposed through
+[Microsoft UI Automation](https://learn.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32)
+(UIA):
+
+|Application type|What the driver reaches|
+|--|--|
+|UWP, Win32, WinForms, WPF|Every UIA-visible control, including raw-view elements hidden from the control view|
+|WebView2, Chrome, Edge|Embedded web content over the Chrome DevTools Protocol, from the same session. See the [Hybrid Mode guide](./guides/webview.md)|
+|Internet Explorer 11|HTML content through the built-in IE DOM bridge. See the [Internet Explorer guide](./guides/internet-explorer.md)|
+|Legacy MSAA grids and controls|Content hidden behind placeholder names, through [standard accessibility values](./guides/standard-accessibility-values.md)|
+
+The following application types are **not** supported out of the box:
+
+* Java applications (Swing, AWT, and other JVM UI toolkits). Their controls are not exposed to UIA,
+  so the driver only sees the top-level window.
+* Any other application that does not expose its user interface through UIA or MSAA, for example
+  applications that draw all of their controls themselves.
+* Internet Explorer versions older than 11.
+
+Support for such applications can be added with [server plugins](./contributing/server-plugins.md),
+which provide element trees from outside of UIA.
+
+## Technologies Used
+
+The WinCore driver uses the [W3C WebDriver protocol](https://www.w3.org/TR/webdriver/) for session
+management. Under the hood, the driver combines several different technologies to achieve its
+functionality:
+
+* Native testing
+    * Based on [Microsoft UI Automation](https://learn.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32)
+      (UIA3), the accessibility framework that exposes the user interface of Windows applications
+    * Provided by `WincoreServer.exe`, a .NET process bundled with the driver that lives for the
+      length of the session. It handles element finding, UIA patterns, XPath, page source, process
+      and window management, the clipboard, screenshots, file operations and PowerShell execution
+    * Legacy controls with no UIA children fall back to the
+      [Microsoft Active Accessibility](https://learn.microsoft.com/en-us/windows/win32/winauto/microsoft-active-accessibility)
+      (MSAA) tree
+* Input
+    * Mouse and keyboard input is sent directly through the Windows
+      [`SendInput`](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-sendinput)
+      API, called from Node.js through the [koffi](https://koffi.dev) library
+* Webview testing
+    * Based on [the ChromeDriver server](https://developer.chrome.com/docs/chromedriver) and
+      [Microsoft Edge WebDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/)
+    * Provided by the [`appium-chromedriver`](https://github.com/appium/appium-android/tree/main/packages/chromedriver) library
+* Internet Explorer testing
+    * Provided by `IEBridge.exe`, a 32-bit process bundled with the driver that reads the IE DOM
+      through COM
+* Additional tools
+    * Screen recording is handled by [FFmpeg](https://ffmpeg.org/)
+    * Element trees outside of UIA can be provided by [server plugins](./contributing/server-plugins.md)
+
+## End-to-End Architecture
+
+The diagram below is intentionally the simplest end-to-end example. Cloud service providers, device
+farms, network gateways, and sophisticated local setups may insert additional layers between the
+client library and the automation host.
 
 ```mermaid
-flowchart LR
-  client[Test client] -- WebDriver --> appium[Appium server]
-  appium --> driver[WinCore driver<br/>Node.js]
-  driver -- JSON over stdin/stdout --> server[WincoreServer.exe<br/>.NET]
-  driver -- SendInput via koffi --> user32[user32.dll]
-  server -- UIA3 --> apps[Windows applications]
-  server -. plugins .-> providers[External tree providers]
+flowchart TD
+  subgraph ClientSide["Test Client"]
+    T["Test Code"]
+    CL["Appium Client Library<br/>(Java / Python / JS / Ruby / C#)"]
+  end
+
+  subgraph ServerHost["Windows Automation Host"]
+    AS["Appium Server<br/>WebDriver HTTP API"]
+    WD["WinCore Driver<br/>(appium-wincore-driver, Node.js)"]
+    WS["WincoreServer.exe<br/>(.NET, UIA3)"]
+    U32["user32.dll<br/>(SendInput)"]
+    CDM["Chromedriver / Edge WebDriver<br/>(webview only)"]
+    AUT["Application Under Test"]
+  end
+
+  T --> CL
+  CL -->|"W3C WebDriver over HTTP"| AS
+  AS -->|"Forwards session commands to driver"| WD
+  WD -->|"JSON over stdin/stdout"| WS
+  WD -->|"Mouse and keyboard input"| U32
+  WD -->|"Context switch to WEBVIEW_*"| CDM
+  WS -->|"UI Automation APIs"| AUT
+  U32 -->|"Synthesized input"| AUT
+  CDM -->|"Chrome DevTools Protocol"| AUT
 ```
 
-### Driver (Node.js)
-
-`AppiumWincoreDriver` extends Appium's `BaseDriver`. Commands are grouped by
-area under `lib/commands/` — element finding, W3C Actions, app and window
-control, `windows:` execute methods, screen recording — and mixed into
-the driver class.
-
-### WincoreServer.exe
-
-On `createSession` the driver spawns `WincoreServer.exe`. Requests are
-newline-delimited JSON, matched to responses by id:
-
-```json
-{"id": 7, "method": "findElements", "params": {"...": "..."}}
-{"id": 7, "result": ["..."], "duration_ms": 3}
-```
-
-The server owns everything that touches the UI tree or the OS: element
-finding, patterns, XPath, page source, process lifecycle, window moves,
-clipboard, screenshots, file operations and PowerShell execution. Its
-source lives in `csharp/WincoreServer/`.
-
-### Element finding
-
-Appium locators are translated into condition objects that the server
-rebuilds as real UIA3 `Condition`s and runs with `FindFirst` / `FindAll`
-against the live tree.
-
-XPath is evaluated in the runtime that owns the tree: the server
-materialises the subtree into an `XmlDocument` and runs the whole
-expression through `System.Xml.XPath`, returning matches in document
-order. For legacy controls with no UIA children, the driver falls back to
-walking the raw MSAA (`IAccessible`) tree.
-
-### Input
-
-Mouse and keyboard input bypass the server: the driver calls `SendInput`,
-`SetCursorPos` and related APIs in `user32.dll` directly from Node through
-the [koffi](https://koffi.dev) FFI library. W3C action chains are
-translated into these calls, with optional easing curves.
-
-### Plugins
-
-`WincoreServer.exe` can be extended with external tree providers for
-content that is not exposed through UI Automation — see
-[Server plugins](./guides/server-plugins.md).
+[^ci-server]: Covered by the driver's CI, which runs on GitHub-hosted `windows-latest` runners
+[^untested]: Not tested
