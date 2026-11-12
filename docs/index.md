@@ -6,23 +6,31 @@ hide:
 title: Welcome
 ---
 <style>
-  .md-typeset h1 {
+  .md-typeset h1,
+  .verisoft-thanks {
     display: none;
   }
 </style>
 
 <div style="text-align: center">
-  <a href="https://www.verisoft.ai/en">
-    <img src="assets/images/verisoft-logo.png" alt="VeriSoft" style="max-width: 360px;" />
-  </a>
+  <img src="assets/images/appium-plus-wincore.png" style="max-width: 500px;" />
 </div>
 
 Welcome to the Appium WinCore driver documentation! The WinCore driver automates Windows desktop
 applications (UWP, WinForms, WPF, Win32, WebView2 and Internet Explorer) through real UI
-Automation. It is developed and supported by [VeriSoft](https://www.verisoft.ai/en).
+Automation.
 
 The WinCore driver is part of the Appium test automation tool. For information on Appium itself,
 please visit [the Appium documentation](https://appium.io).
+
+<div style="text-align: center; margin-top: 2rem; font-style: italic;">
+  Developed and supported by
+  <div>
+    <a href="https://www.verisoft.ai/en">
+      <img src="assets/images/verisoft-logo.png" alt="VeriSoft" style="width: 220px;" />
+    </a>
+  </div>
+</div>
 
 ## Explore the Documentation
 
