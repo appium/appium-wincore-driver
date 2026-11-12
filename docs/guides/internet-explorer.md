@@ -119,55 +119,12 @@ Supported on Windows 10/11 with IE 11 only.
 
 ## Walkthrough
 
-The driver includes a built-in IE DOM Bridge — a 32-bit C# process
-(`IEBridge.exe`) that attaches to a running IE 11 window via the
-`WM_HTML_GETOBJECT` message, retrieves `IHTMLDocument2` through COM, and
-routes all element commands over stdio JSON. No WebDriver protocol
-proxy is involved.
-
 IE mode activates automatically whenever a session window has the
 `IEFrame` window class. This happens when:
 
 - `appium:app` is set to the IE executable and the driver launches it, or
 - `appium:appTopLevelWindow` points to an existing IE window handle, or
 - `windows: switchToWindow` / `windows: switchToWindowByTitle` targets an IE window.
-
-**Prerequisites:**
-
-- Internet Explorer 11 at `C:\Program Files\Internet Explorer\iexplore.exe`
-- Internet Options → Security: Protected Mode **disabled** on all four zones
-- Internet Options → Advanced: Enhanced Protected Mode **disabled**
-- View → Zoom: set to exactly **100%**
-
-**Supported locator strategies:** `css selector`, `id`, `xpath`
-
-Supported XPath patterns: `//tag`, `//tag[@attr="val"]`,
-`//tag[contains(text(),"...")]`, `//tag[contains(@attr,"...")]`, `//tag[@attr]`
-
-**Command support:**
-
-| Command | Status | Notes |
-|---|---|---|
-| `findElement` / `findElements` | ✅ | css selector, id, xpath |
-| `getTitle` | ✅ | |
-| `getUrl` | ✅ | |
-| `getPageSource` | ✅ | |
-| `url()` | ✅ | navigate to URL |
-| `getWindowHandle` | ✅ | returns HWND hex string |
-| `getText(el)` | ✅ | |
-| `getAttribute(el, name)` | ✅ | |
-| `clear(el)` | ✅ | input / textarea only |
-| `setValue(el, value)` | ✅ | input / textarea only |
-| `click(el)` | ✅ / ⚠️ | works for buttons, links; broken for checkboxes and radios |
-| `isDisplayed(el)` | ✅ | |
-| `isEnabled(el)` | ⚠️ | unreliable for elements without an `id` attribute |
-| `isSelected(el)` | ❌ | always returns `false` |
-| `executeScript(script, args)` | ✅ | runs JS in the IE tab |
-| `switchToFrame(id)` | ✅ | by index, element, or `null` for default content |
-| `switchToParentFrame()` | ✅ | returns to default content (single-level only) |
-| `getElementRect(el)` | ❌ | not implemented |
-| `getElementScreenshot(el)` | ❌ | not implemented |
-| `windows:` execute methods | ❌ | target the UIA tree, not the HTML DOM |
 
 ### Launch IE and automate it
 
