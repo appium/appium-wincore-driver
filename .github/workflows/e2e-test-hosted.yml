@@ -125,7 +125,7 @@ jobs:
           restore-keys: nuget-${{ runner.os }}-
 
       - name: Install dependencies
-        run: npm install --no-package-lock --prefer-offline
+        run: npm install --no-package-lock --prefer-online
 
       - name: Cache native server build
         id: native-cache
@@ -154,7 +154,7 @@ jobs:
       - name: Install Appium
         shell: pwsh
         run: |
-          npm install -g "appium@$env:APPIUM_RANGE" --prefer-offline
+          npm install -g "appium@$env:APPIUM_RANGE" --prefer-online
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Write-Host "Installed Appium $(appium --version)"
 
