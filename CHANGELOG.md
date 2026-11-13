@@ -1,3 +1,9 @@
+## [4.1.1](https://github.com/appium/appium-wincore-driver/compare/v4.1.0...v4.1.1) (2026-11-13)
+
+### Miscellaneous Chores
+
+* **deps:** bump appium to 4.0.0-beta.8 ([#150](https://github.com/appium/appium-wincore-driver/issues/150)) ([5ee301b](https://github.com/appium/appium-wincore-driver/commit/5ee301b06716accd9667865aca57b41a90b62cd0))
+
 ## [4.1.0](https://github.com/appium/appium-wincore-driver/compare/v4.0.9...v4.1.0) (2026-11-12)
 
 ### Features
