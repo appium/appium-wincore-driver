@@ -371,6 +371,11 @@ Full reference for all locator strategies, `windows:` extension
 commands, WebView/CDP automation, and screen recording:
 [API.md](API.md).
 
+## Migrating from appium-windows-driver
+
+Coming from the deprecated WinAppDriver-based driver? See the
+[client migration guide](docs/migration-from-appium-windows-driver.md).
+
 ## Development
 
 ```bash
