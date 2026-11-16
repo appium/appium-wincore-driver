@@ -1,6 +1,6 @@
 {
   "name": "appium-wincore-driver",
-  "version": "4.0.9",
+  "version": "4.1.1",
   "description": "Appium driver for Windows",
   "keywords": [
     "appium",
@@ -73,15 +73,15 @@
   },
   "devDependencies": {
     "@appium/docutils": "^4.0.0-beta.5",
-    "@appium/oxc-config": "^2.0.0-beta.1",
+    "@appium/oxc-config": "^2.0.0-beta.3",
     "@appium/semantic-release-config": "^2.0.0-beta.1",
-    "@appium/tsconfig": "^2.0.0-beta.1",
-    "@appium/types": "^2.0.0-beta.2",
+    "@appium/tsconfig": "^2.0.0-beta.2",
+    "@appium/types": "^2.0.0-beta.6",
     "@types/node": "^26.6.6",
     "webdriverio": "^10.1.0"
   },
   "peerDependencies": {
-    "appium": "^4.0.0-beta.0"
+    "appium": "^4.0.0-beta.8"
   },
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0",
