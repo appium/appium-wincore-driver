@@ -40,7 +40,7 @@ Provided you have set up the above prerequisites, you can install the driver usi
 === "Appium 3"
 
     ```bash
-    appium driver install --source=npm appium-wincore-driver
+    appium driver install --source=npm appium-wincore-driver@3
     ```
 
 You can also specify an exact driver version:
@@ -54,7 +54,7 @@ You can also specify an exact driver version:
 === "Appium 3"
 
     ```bash
-    appium driver install --source=npm appium-wincore-driver@4.0.9
+    appium driver install --source=npm appium-wincore-driver@3.3.2
     ```
 
 Alternatively, if you are running a Node.js project, you can include `appium-wincore-driver` as one
