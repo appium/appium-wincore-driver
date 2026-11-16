@@ -26,30 +26,36 @@ and prerequisites of Appium itself can be found in [the Appium documentation](ht
 | >= 4.0.0 | Appium 4 |
 | < 4.0.0 | Appium 3 |
 
-!!! note
-
-    Appium 4 is currently published under the npm `beta` tag, so it must be requested explicitly.
-    A plain `npm install -g appium` installs Appium 3, which the latest driver version does not
-    support:
-
-    ```bash
-    npm install -g appium@beta
-    ```
-
 ## Installation
 
 Provided you have set up the above prerequisites, you can install the driver using Appium's
 [extension CLI](https://appium.io/docs/en/latest/cli/extensions/):
 
-```bash
-appium driver install --source=npm appium-wincore-driver
-```
+=== "Appium 4"
+
+    ```bash
+    appium driver install wincore
+    ```
+
+=== "Appium 3"
+
+    ```bash
+    appium driver install --source=npm appium-wincore-driver
+    ```
 
 You can also specify an exact driver version:
 
-```bash
-appium driver install --source=npm appium-wincore-driver@4.0.9
-```
+=== "Appium 4"
+
+    ```bash
+    appium driver install wincore@4.0.9
+    ```
+
+=== "Appium 3"
+
+    ```bash
+    appium driver install --source=npm appium-wincore-driver@4.0.9
+    ```
 
 Alternatively, if you are running a Node.js project, you can include `appium-wincore-driver` as one
 of your project dependencies. [Refer to the Appium documentation](https://appium.io/docs/en/latest/guides/managing-exts/#do-it-yourself-with-npm)
