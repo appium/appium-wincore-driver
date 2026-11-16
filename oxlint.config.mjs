@@ -27,11 +27,5 @@ export default defineConfig({
         'no-console': 'off',
       },
     },
-    {
-      files: ['docs/**/*.js'],
-      env: {
-        browser: true,
-      },
-    },
   ],
 });

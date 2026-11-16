@@ -79,5 +79,5 @@ The package is ESM (`"type": "module"`, NodeNext resolution). Relative imports i
 
 - `platformName`: `"Windows"`, `automationName`: `"Wincore"`
 - Supported locator strategies: `xpath`, `accessibility id`, `id`, `name`, `class name`, `tag name`, `-windows uiautomation`
-- Custom `executeScript()` commands listed in README.md
+- Custom `executeScript()` commands documented in `docs/reference/execute-methods.md` (docs site: `npm run dev:docs`)
 - Prerun/postrun PowerShell scripts via session capabilities

@@ -1,5 +1,8 @@
 # Performance benchmarks
 
+Maintainer reference for the perf suite in this folder. User-facing documentation of the
+`appium:perfMetrics` capability lives in the docs site (`docs/guides/performance.md`).
+
 Tracks the cost of the driver's expensive tree-walk paths so regressions are visible
 and improvements are documented with numbers.
 
@@ -117,4 +120,5 @@ path for A/B. 198 UIA e2e tests green (Calculator/Notepad page source, XPath, at
 
 ## Locator performance grading (absolute vs. relative)
 
-See [API.md — Locator performance](../API.md#locator-performance) for full usage examples.
+See the [Locator Strategies reference](../../docs/reference/locator-strategies.md) for the grades
+and usage examples.
