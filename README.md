@@ -43,7 +43,7 @@ Full documentation lives at **<https://appium.github.io/appium-wincore-driver/>*
 - [Capabilities](https://appium.github.io/appium-wincore-driver/latest/reference/capabilities/)
 - [Locator strategies](https://appium.github.io/appium-wincore-driver/latest/reference/locator-strategies/)
 - [`windows:` execute methods](https://appium.github.io/appium-wincore-driver/latest/reference/execute-methods/)
-- [Guides](https://appium.github.io/appium-wincore-driver/latest/guides/webview/) — W3C Actions, WebView/CDP, Internet Explorer, examples
+- [Guides](https://appium.github.io/appium-wincore-driver/latest/guides/hybrid/) — W3C Actions, hybrid mode (WebView/CDP), Internet Explorer, examples
 - [Overview](https://appium.github.io/appium-wincore-driver/latest/overview/)
 
 The site source is in [`docs/`](docs/); see

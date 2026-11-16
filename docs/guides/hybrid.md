@@ -1,5 +1,5 @@
 ---
-title: WebView
+title: Hybrid Mode
 ---
 
 The WinCore driver supports automation of hybrid apps that use Chromium-based web views, such as
@@ -13,7 +13,7 @@ inside the web view.
     supported through a separate bridge, described in the [Internet Explorer guide](./internet-explorer.md).
     Other web views are only available through the native UI Automation tree.
 
-## Enabling Web Views
+## Enabling Hybrid Mode
 
 Access to web views is not available by default, and must be explicitly enabled by setting the
 [`appium:webviewEnabled`](../reference/capabilities.md#webviewenabled) capability to `true`.

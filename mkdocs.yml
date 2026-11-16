@@ -46,7 +46,7 @@ nav:
           - reference/element-attributes.md
   - Guides:
       - Session Configuration:
-          - guides/webview.md
+          - guides/hybrid.md
           - guides/internet-explorer.md
           - guides/performance.md
       - Element Management:
