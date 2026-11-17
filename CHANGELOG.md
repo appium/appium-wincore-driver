@@ -1,3 +1,9 @@
+## [4.1.2](https://github.com/appium/appium-wincore-driver/compare/v4.1.1...v4.1.2) (2026-11-17)
+
+### Miscellaneous Chores
+
+* **deps:** bump asyncbox from 6.6.1 to 7.0.0 ([#151](https://github.com/appium/appium-wincore-driver/issues/151)) ([385a73b](https://github.com/appium/appium-wincore-driver/commit/385a73bb1cf35925e32368ea85edb3b1ead92baf))
+
 ## [4.1.1](https://github.com/appium/appium-wincore-driver/compare/v4.1.0...v4.1.1) (2026-11-13)
 
 ### Miscellaneous Chores
