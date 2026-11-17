@@ -54,6 +54,8 @@ nav:
       - Driver Actions:
           - guides/actions.md
           - guides/examples.md
+      - Migration:
+          - guides/migration-from-appium-windows-driver.md
   - Contributing:
       - contributing/index.md
       - contributing/server-plugins.md

@@ -1,4 +1,6 @@
-# Migrating from `appium-windows-driver`
+---
+title: Migrating from appium-windows-driver
+---
 
 Client-side migration guide for test suites written against the deprecated
 [`appium-windows-driver`](https://github.com/appium/appium-windows-driver)
@@ -35,8 +37,9 @@ protocol is plain W3C WebDriver, so your client library does not change.
    ([details](#extension-commands)).
 5. Write `windows: <command>` **with a space** (`windows:closeApp` is not
    recognised; see [.NET client notes](#net-client-notes)).
-6. Re-run your suite and look at XPath-heavy tests for speed
-   ([locators](#locators)).
+6. Re-run your suite. XPath is now 2.0, with stricter types, so a few
+   expressions may need a tweak, and XPath-heavy tests may need anchoring
+   for speed ([locators](#locators)).
 
 ## Session setup
 
@@ -80,13 +83,14 @@ var driver = new WindowsDriver(new Uri("http://127.0.0.1:4723/"), options);
 ### Capabilities
 
 Capabilities not listed here (`platformName`, `app`, `appTopLevelWindow`,
-`appArguments`, `appWorkingDir`, `ms:forcequit`, `ms:experimental-webdriver`,
-`prerun`, `postrun`, `newCommandTimeout`) work as before.
+`appArguments`, `appWorkingDir`, `ms:forcequit`, `prerun`, `postrun`,
+`newCommandTimeout`) work as before.
 
 | Capability | Status | Notes |
 | --- | --- | --- |
 | `appium:automationName` | **Changed** | `Wincore` |
 | `appium:ms:waitForAppLaunch` | **Changed** | Seconds (<=120) or milliseconds (>120); the old limit was 50 s. It is now an upper limit while the driver polls for the app window, not a fixed wait, so it usually returns sooner. A default wait applies when unset |
+| `appium:ms:experimental-webdriver`, `appium:deviceName` | **Ignored** | Accepted so existing suites keep working, but they have no effect |
 | `appium:systemPort` | **Ignored** | There is no HTTP listener; the driver talks to its server over stdin/stdout. A log line notes the capability is ignored |
 | `appium:createSessionTimeout` | **Removed** | A WinAppDriver start-up workaround |
 | `appium:wadUrl` | **Removed** | There is no WinAppDriver to point at |
@@ -96,18 +100,19 @@ Capabilities not listed here (`platformName`, `app`, `appTopLevelWindow`,
 | `appium:webviewEnabled` and related | New | WebView2 / Chrome / Edge via CDP |
 | `appium:perfMetrics` | New | Per-session performance counters |
 
-See the [README](../README.md#capabilities) for the full list.
+See the [Capabilities reference](../reference/capabilities.md) for the full list.
 
 ## Locators
 
-`accessibility id`, `name`, `class name`, `id` (decimal `RuntimeId`) and
-`xpath` (XPath 1.0) work as before. What differs:
+`accessibility id`, `name`, `class name` and `id` (decimal `RuntimeId`) work
+as before. What differs:
 
 | Strategy | .NET | Change |
 | --- | --- | --- |
 | `tag name` | `MobileBy.TagName("Button")` | PascalCase now matches `ControlType`; see below |
 | `-windows uiautomation` | `MobileBy.WindowsAutomation("new PropertyCondition(AutomationElement.NameProperty, 'OK')")` | New. Parsed natively, not executed |
 | `css selector` | `By.CssSelector("Button[name='OK']")` | New. Compiled to a native condition |
+| `xpath` | `By.XPath("//Button[@Name='OK']")` | XPath 2.0 instead of 1.0, and always evaluated over the whole searched subtree; see below |
 
 **`tag name`.** `Button` (PascalCase) matches the language-neutral
 `ControlType`; lowercase `button` matches the OS-localized control type, as
@@ -120,6 +125,17 @@ selectors (`#x`, `*[name ="x"]`, `.x`), which WinCore compiles to
 the **AutomationId**, while `MobileBy.Id` matches the **RuntimeId**. Prefer
 the `MobileBy.*` factories to be explicit.
 
+**XPath version.** WinCore supports XPath 2.0, so `matches()`, `ends-with()`,
+`lower-case()` and sequence comparisons are available. The price is stricter
+typing: every attribute value is a string and is no longer converted silently.
+`//Button[@Name = 7]` and `//*[@Value > 5]` fail on windows where some element
+has a non-numeric value, and `contains(.//Text/@Name, "x")` fails when the path
+matches several elements. Quote the number (`@Name = "7"`), convert explicitly
+(`number(@Value) > 5`), or move the condition into a predicate
+(`.//Text[contains(@Name, "x")]`). An expression must also return elements:
+`count(//Button)` is an invalid selector. See the
+[XPath section](../reference/locator-strategies.md#xpath) for details.
+
 **XPath speed.** WinCore evaluates XPath against an XML snapshot of the whole
 search-root subtree, so an absolute `//...` query on a very large window can
 be slow, while the other strategies are native UIA searches. Anchor with a
@@ -130,12 +146,13 @@ var grid = driver.FindElement(MobileBy.AccessibilityId("ServersGrid"));
 var row = grid.FindElement(By.XPath(".//DataItem[starts-with(@LegacyValue, 'db-01;')]"));
 ```
 
-Details and timings: [API.md](../API.md#locator-performance).
+Details and timings: [Absolute vs. relative lookup](../reference/locator-strategies.md#absolute-vs-relative-lookup).
 
 **New element attributes.** Every element exposes `Value`, `LegacyValue`,
 `LegacyName`, `LegacyDescription`, `LegacyRole` and `LegacyState`, which make
 content of MSAA grids (DevExpress, DataGridView, VB6, Delphi) locatable
-without extra setup. See [API.md](../API.md#standard-accessibility-values).
+without extra setup. See [Standard accessibility values](./standard-accessibility-values.md) and the
+[element attributes reference](../reference/element-attributes.md).
 
 ## Extension commands
 
@@ -217,7 +234,7 @@ Differences:
 | `windows: getMonitors`, `getDpiScale`, `getDeviceTime` | Environment info |
 | `windows: getNativeChildren` | Walk the MSAA tree for legacy controls |
 
-Full reference: [API.md](../API.md#extension-commands).
+Full reference: [Execute methods](../reference/execute-methods.md).
 
 ## Windows, input and the rest of the WebDriver surface
 
@@ -229,10 +246,10 @@ Full reference: [API.md](../API.md#extension-commands).
 - **Actions.** Selenium's `ActionBuilder` / `PerformActions` work against
   mouse, keyboard and wheel sources. Touch and pen pointers are not
   supported (the Sticky Notes pen sample from the old test suite will not
-  port as is). See [API.md](../API.md#w3c-actions).
+  port as is). See [W3C Actions](./actions.md).
 - **Element click vs. invoke.** `element.Click()` simulates a mouse click.
   For controls that ignore pointer events, `windows: invoke` calls the UIA
-  `InvokePattern` directly (the [Calculator sample](../examples/C%23/CalculatorTest)
+  `InvokePattern` directly (the [Calculator sample](https://github.com/appium/appium-wincore-driver/tree/main/examples/C%23/CalculatorTest)
   does this).
 - **Typing.** `element.SendKeys(...)` focuses the element and types
   independently of the keyboard layout.
@@ -240,7 +257,7 @@ Full reference: [API.md](../API.md#extension-commands).
 ## .NET client notes
 
 - **Package.** `Appium.WebDriver` (current major: 9.x). The bundled
-  [Calculator sample](../examples/C%23/CalculatorTest) uses 7.2.0. Both work;
+  [Calculator sample](https://github.com/appium/appium-wincore-driver/tree/main/examples/C%23/CalculatorTest) uses 7.2.0. Both work;
   use whichever your suite is already on.
 - **Driver class.** `WindowsDriver` and `AppiumOptions` are unchanged. The
   class only sets `platformName`; `AutomationName` is yours to set.
@@ -301,4 +318,5 @@ finally
 | `'path' must be provided.` | `deleteFile` / `deleteFolder` still pass `remotePath` |
 | `windows: deleteFile` rejected as insecure | Start Appium with `--allow-insecure=wincore:modify_fs` |
 | XPath lookups much slower than before | Anchor with a native locator, then query relative to it |
+| Invalid selector from an XPath that worked before | XPath 2.0 is stricter about types; see [XPath version](#locators) |
 | `invalid element state` from `windows: select` / `expand` / `collapse` | The MSAA control did not change state; the old driver reported success regardless |
