@@ -1,3 +1,9 @@
+## [4.1.3](https://github.com/appium/appium-wincore-driver/compare/v4.1.2...v4.1.3) (2026-11-19)
+
+### Miscellaneous Chores
+
+* **deps:** bump @appium/css-locator-to-native from 1.0.7 to 2.0.1 ([#154](https://github.com/appium/appium-wincore-driver/issues/154)) ([35fec4f](https://github.com/appium/appium-wincore-driver/commit/35fec4f5cdd94b1ad2b44c85635dbec019d09b92))
+
 ## [4.1.2](https://github.com/appium/appium-wincore-driver/compare/v4.1.1...v4.1.2) (2026-11-17)
 
 ### Miscellaneous Chores
