@@ -260,3 +260,6 @@ have no effect:
 * `appium:ms:experimental-webdriver`
 * `appium:deviceName`
 * `appium:systemPort` (the driver does not use a network port to talk to `WincoreServer.exe`)
+
+See the [migration guide](../guides/migration-from-appium-windows-driver.md#capabilities) for how
+these and the other capabilities differ from the deprecated `appium-windows-driver`.

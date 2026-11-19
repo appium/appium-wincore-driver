@@ -45,6 +45,8 @@ nav:
           - reference/locator-strategies.md
           - reference/element-attributes.md
   - Guides:
+      - Migration:
+          - guides/migration-from-appium-windows-driver.md
       - Session Configuration:
           - guides/hybrid.md
           - guides/internet-explorer.md

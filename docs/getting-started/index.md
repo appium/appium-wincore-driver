@@ -93,3 +93,8 @@ open instead, use [`appium:appTopLevelWindow`](../reference/capabilities.md#appt
 See [the Capabilities reference page](../reference/capabilities.md) for more information on the
 capabilities supported by the driver, and [the Examples guide](../guides/examples.md) for complete
 tests in several client languages.
+
+!!! tip "Coming from `appium-windows-driver`?"
+
+    The [migration guide](../guides/migration-from-appium-windows-driver.md) lists what to change in
+    existing test suites.
