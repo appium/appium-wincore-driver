@@ -21,15 +21,19 @@ Key advantages over WinAppDriver:
 
 ## Installation
 
+Requires Windows 10 or later.
+
+Install the latest version for Appium 4:
+
 ```bash
-appium driver install --source=npm appium-wincore-driver
+appium driver install wincore
 ```
 
-Requires Appium 4 and Windows 10 or later.
+Install `v3` for Appium 3:
 
-> [!NOTE]
-> Since v4, this driver is only compatible with Appium server v4. Use driver v3.x with Appium 3.
-> Appium 4 is published on the npm `beta` tag: `npm install -g appium@beta`.
+```bash
+appium driver install --source=npm appium-wincore-driver@3
+```
 
 ## Related projects
 
