@@ -1,39 +1,123 @@
 ﻿# Appium WinCore Driver
 
-Appium WinCore Driver is a Windows UI automation driver for
-[Appium](https://appium.io). It automates UWP, WinForms, WPF, Win32,
-and Internet Explorer applications via real UI Automation.
+[![npm version](https://img.shields.io/npm/v/appium-wincore-driver.svg)](https://www.npmjs.com/package/appium-wincore-driver)
+[![npm downloads](https://img.shields.io/npm/dm/appium-wincore-driver.svg)](https://www.npmjs.com/package/appium-wincore-driver)
+[![Appium 4](https://img.shields.io/badge/Appium-4-purple.svg)](https://appium.io)
+[![License](https://img.shields.io/npm/l/appium-wincore-driver.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/appium/appium-wincore-driver.svg?style=social)](https://github.com/appium/appium-wincore-driver/stargazers)
 
-Key advantages over WinAppDriver:
+The official [Appium](https://appium.io) driver for Windows desktop apps.
+Automate WPF, WinForms, UWP, Win32, and Internet Explorer applications
+through real UI Automation, from any WebDriver client: Python, Java, C#,
+JavaScript, or Ruby.
 
-- Faster XPath evaluation against the live UIA tree
-- RawView element support (elements hidden from ContentView/ControlView)
-- Standard accessibility values (`Value`, `LegacyValue`, …) on every
-  element, so content that MSAA-based grids (DevExpress, DataGridView,
-  VB6, Delphi) hide behind placeholder names is locatable without a
-  plugin. `windows: select` / `expand` / `collapse` check they took
-  effect. See
-  [Locator strategies](https://appium.github.io/appium-wincore-driver/latest/reference/locator-strategies/#standard-accessibility-values)
-- Reliable text input independent of the active keyboard layout
-- WebView2, Chrome, and Edge embedded content via CDP
-- Internet Explorer 11 automation via built-in IE DOM Bridge
-- Built-in screen recording and clipboard API
+> [!TIP]
+> **Coming from appium-windows-driver or WinAppDriver?**
+> appium-windows-driver is deprecated and does not work with Appium 4.
+> WinCore is its official replacement and needs no WinAppDriver install.
+> The
+> [migration guide](https://appium.github.io/appium-wincore-driver/latest/guides/migration-from-appium-windows-driver/)
+> covers the client-side changes for existing suites.
 
-## Installation
+## Quick start
 
-Requires Windows 10 or later.
+Requires Windows 10 or later and [Node.js](https://nodejs.org).
 
-Install the latest version for Appium 4:
+1. Install Appium 4 and the driver:
 
-```bash
-appium driver install wincore
+   ```bash
+   npm install -g appium
+   appium driver install wincore
+   ```
+
+   On Appium 3, install the `v3` line instead:
+   `appium driver install --source=npm appium-wincore-driver@3`.
+
+1. Start the server:
+
+   ```bash
+   appium
+   ```
+
+1. Run a first test. This one adds 5 + 3 in Windows Calculator
+   (`pip install Appium-Python-Client`):
+
+   ```python
+   from appium import webdriver
+   from appium.options.common import AppiumOptions
+   from appium.webdriver.common.appiumby import AppiumBy
+
+   options = AppiumOptions()
+   options.load_capabilities({
+       "platformName": "Windows",
+       "appium:automationName": "Wincore",
+       "appium:app": "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App",
+   })
+   driver = webdriver.Remote("http://127.0.0.1:4723", options=options)
+
+   for key in ("num5Button", "plusButton", "num3Button", "equalButton"):
+       driver.find_element(AppiumBy.ACCESSIBILITY_ID, key).click()
+
+   print(driver.find_element(AppiumBy.ACCESSIBILITY_ID, "CalculatorResults").text)
+   driver.quit()
+   ```
+
+   It prints `Display is 8`. The same test in Java, C#, JavaScript, and
+   Ruby is in the
+   [Examples guide](https://appium.github.io/appium-wincore-driver/latest/guides/examples/).
+
+## Supported applications
+
+| Application type | What the driver reaches |
+| --- | --- |
+| UWP, Win32, WinForms, WPF | Every UIA control, including RawView elements |
+| Legacy grids (DevExpress, VB6) | Cells hidden behind MSAA placeholder names |
+| WebView2, Chrome, Edge | Embedded web content over CDP, in the same session |
+| Internet Explorer 11 | HTML content through the built-in IE DOM bridge |
+
+Runs on Windows 10, Windows 11, and Windows Server.
+
+## Why WinCore
+
+| | WinCore | WinAppDriver |
+| --- | :---: | :---: |
+| Actively maintained | ✅ | ❌ |
+| Appium 4 (and Appium 3 via `v3`) | ✅ | ❌ |
+| XPath 2.0, evaluated in-process against the UIA tree | ✅ | ❌ |
+| RawView elements (hidden from Control/Content view) | ✅ | ❌ |
+| MSAA grid content (DevExpress, DataGridView, VB6, Delphi) | ✅ | ❌ |
+| Text input independent of keyboard layout | ✅ | ❌ |
+| WebView2, Chrome, and Edge content via CDP | ✅ | ❌ |
+| Internet Explorer 11 via built-in IE DOM Bridge | ✅ | ❌ |
+
+Standard accessibility values (`Value`, `LegacyValue`, …) are exposed on
+every element, so content that MSAA-based grids hide behind placeholder
+names is locatable without a plugin, and `windows: select` / `expand` /
+`collapse` check that they took effect. See
+[Locator strategies](https://appium.github.io/appium-wincore-driver/latest/reference/locator-strategies/#standard-accessibility-values).
+Screen recording and a clipboard API are built in.
+
+## How it works
+
+```mermaid
+flowchart LR
+    test["Your test<br/>(any client)"] -->|WebDriver| appium["Appium server"]
+    appium --> driver["WinCore driver<br/>(Node.js)"]
+    driver -->|JSON over stdio| server["WincoreServer.exe<br/>(.NET)"]
+    server --> uia["UI Automation<br/>+ MSAA fallback"]
+    driver -->|SendInput| input["Native mouse<br/>and keyboard"]
+    driver -->|chromedriver / CDP| web["WebView2, Chrome, Edge"]
+    driver --> ie["IE DOM bridge"]
+    uia --> app["Your Windows app"]
+    input --> app
+    web --> app
+    ie --> app
 ```
 
-Install `v3` for Appium 3:
-
-```bash
-appium driver install --source=npm appium-wincore-driver@3
-```
+The driver starts one native `WincoreServer.exe` per session and talks to it
+over stdio, so there is no WinAppDriver and no PowerShell process in the
+loop. Locators, XPath, and tree reads run inside
+that server, next to the UI Automation tree.
 
 ## Related projects
 
@@ -54,14 +138,14 @@ Full documentation lives at **<https://appium.github.io/appium-wincore-driver/>*
 The site source is in [`docs/`](docs/); see
 [Contributing](https://appium.github.io/appium-wincore-driver/latest/contributing/) to preview it locally.
 
-## Development
+## Community and support
 
-```bash
-npm install
-npm run lint
-npm run build
-npm run test
-```
+- **Questions, ideas, and show-and-tell:**
+  [GitHub Discussions](https://github.com/appium/appium-wincore-driver/discussions)
+- **Bugs and feature requests:**
+  [GitHub Issues](https://github.com/appium/appium-wincore-driver/issues)
+- **Contributing:** see [CONTRIBUTING.md](CONTRIBUTING.md)
 
-Uses [Comment Tagged Templates](https://marketplace.visualstudio.com/items?itemName=bierner.comment-tagged-templates)
-for PowerShell/C syntax highlighting in VS Code.
+If WinCore saves you time, please ⭐
+[star the repository](https://github.com/appium/appium-wincore-driver/stargazers).
+It is the simplest way to help other Windows testers find it.
