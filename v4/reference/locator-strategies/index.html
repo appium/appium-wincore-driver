@@ -16,14 +16,14 @@
         <link rel="prev" href="../execute-methods/">
       
       
-        <link rel="next" href="../element-attributes/">
+        <link rel="next" href="../windows-uiautomation/">
       
       
         
       
       
       <link rel="icon" href="../../assets/images/appium-logo.png">
-      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-material-9.8.0">
+      <meta name="generator" content="mkdocs-ProperDocs 1.6.7, mkdocs-material-9.8.2">
     
     
       
@@ -871,6 +871,8 @@
       
         
       
+        
+      
     
     
     
@@ -1300,6 +1302,34 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../windows-uiautomation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UIAutomation Locator Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -2626,12 +2656,13 @@ are not supported.</p>
 <p>This strategy accepts a UIA condition, written as in C# or PowerShell with
 <a href="https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation"><code>System.Windows.Automation</code></a>.
 <code>PropertyCondition</code>, <code>AndCondition</code>, <code>OrCondition</code> and <code>NotCondition</code> are supported. The
-expression is parsed, not executed.</p>
+expression is parsed, not executed. See the <a href="../windows-uiautomation/">UIAutomation locator reference</a>
+for the full syntax, the supported properties and more examples.</p>
 <div class="language-js highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// exact match</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">await</span><span class="w"> </span><span class="nx">driver</span><span class="p">.</span><span class="nx">findElement</span><span class="p">(</span><span class="s1">'-windows uiautomation'</span><span class="p">,</span><span class="w"> </span><span class="s2">"new PropertyCondition(AutomationElement.NameProperty, 'OK')"</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1">// logical AND</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">await</span><span class="w"> </span><span class="nx">driver</span><span class="p">.</span><span class="nx">findElement</span><span class="p">(</span><span class="s1">'-windows uiautomation'</span><span class="p">,</span><span class="w"> </span><span class="s2">"new AndCondition(new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button), new PropertyCondition(AutomationElement.NameProperty, 'OK'))"</span><span class="p">)</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">await</span><span class="w"> </span><span class="nx">driver</span><span class="p">.</span><span class="nx">findElement</span><span class="p">(</span><span class="s1">'-windows uiautomation'</span><span class="p">,</span><span class="w"> </span><span class="s2">"new AndCondition(new PropertyCondition(AutomationElement.ControlTypeProperty, [ControlType]::Button), new PropertyCondition(AutomationElement.NameProperty, 'OK'))"</span><span class="p">)</span>
 </span></code></pre></div>
 <p>Narrowing a condition by <code>ControlType</code> together with <code>AutomationId</code> or <code>Name</code> lets UIA skip
 elements of other types early.</p>
@@ -2744,7 +2775,7 @@ relative XPath lookup inside it:</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 16, 2026 15:12:03 UTC"><span class="timeago" datetime="2026-11-16T15:12:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 16, 2026 15:12:03 UTC">2026-11-16</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="November 26, 2026 18:55:50 UTC"><span class="timeago" datetime="2026-11-26T18:55:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="November 26, 2026 18:55:50 UTC">2026-11-26</span>
   </span>
 
     
@@ -2908,7 +2939,7 @@ relative XPath lookup inside it:</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["content.action.edit", "content.code.annotate", "content.code.copy", "content.footnote.tooltips", "content.tabs.link", "content.tooltips", "navigation.indexes", "navigation.path", "navigation.sections", "navigation.tabs", "navigation.top", "toc.follow"], "search": "../../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c21346df.min.js"></script>
+      <script src="../../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="../../js/timeago.min.js"></script>
       
