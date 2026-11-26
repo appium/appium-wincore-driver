@@ -1,13 +1,14 @@
+import {createReadStream} from 'node:fs';
 import path from 'node:path';
 
 import type {ChromedriverOpts} from 'appium-chromedriver';
 import {Chromedriver, installDriverFromArchive} from 'appium-chromedriver';
 import {errors} from 'appium/driver.js';
-import {fs, node, system} from 'appium/support.js';
+import {fs, net, node, system, tempDir} from 'appium/support.js';
 
 import {CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE} from '../constants.js';
 import type {AppiumWincoreDriver} from '../driver.js';
-import {cdpRequest, currentFilename, fetchArchive, sleep, MODULE_NAME} from '../util.js';
+import {cdpRequest, currentFilename, sleep, MODULE_NAME} from '../util.js';
 
 const NATIVE_APP = 'NATIVE_APP';
 const WEBVIEW = 'WEBVIEW';
@@ -315,11 +316,22 @@ async function getDriverExecutable(
   );
 
   this.log.debug(`Downloading ${browserType} driver version ${browserVersion} from ${url.toString()}...`);
-  const archive = fetchArchive(url.toString());
+  const tmpRoot = await tempDir.openDir();
   try {
+    const archivePath = path.join(tmpRoot, 'driver.zip');
+    await net.downloadFile(url.toString(), archivePath);
     // Verifies the archive content and registers its checksum as trusted for chromedriver
-    return await installDriverFromArchive({archive, executableName: fileName, destination});
+    return await installDriverFromArchive({
+      archive: readFileChunks(archivePath),
+      executableName: fileName,
+      destination,
+    });
   } finally {
-    await archive.return(undefined);
+    await fs.rimraf(tmpRoot);
   }
+}
+
+// Lazy: the file is only opened once the installer starts reading
+async function* readFileChunks(filePath: string): AsyncGenerator<Uint8Array> {
+  yield* createReadStream(filePath);
 }
