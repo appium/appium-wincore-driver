@@ -216,7 +216,10 @@ port is selected and injected automatically.
 | -- | -- | -- |
 | `appium:chromedriverExecutablePath` | `string` | Not specified |
 
-Path to a local Chromedriver binary to use instead of downloading one.
+Path to a local Chromedriver binary to use instead of downloading one. Unless its checksum is
+known to `appium-chromedriver`, it is only started if the
+[`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
+insecure feature is enabled.
 
 ### edgedriverExecutablePath
 
@@ -225,14 +228,9 @@ Path to a local Chromedriver binary to use instead of downloading one.
 | `appium:edgedriverExecutablePath` | `string` | Not specified |
 
 Path to a local Microsoft Edge WebDriver (`msedgedriver`) binary to use instead of downloading one.
-
-### chromedriverCdnUrl
-
-| Name | Type | Default |
-| -- | -- | -- |
-| `appium:chromedriverCdnUrl` | `string` | Not specified |
-
-Custom CDN URL to download Chromedriver from.
+Unless its checksum is known to `appium-chromedriver`, it is only started if the
+[`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
+insecure feature is enabled.
 
 ### edgedriverCdnUrl
 
@@ -240,7 +238,9 @@ Custom CDN URL to download Chromedriver from.
 | -- | -- | -- |
 | `appium:edgedriverCdnUrl` | `string` | Not specified |
 
-Custom CDN URL to download Microsoft Edge WebDriver from.
+Custom CDN URL to download Microsoft Edge WebDriver from. Requires the
+[`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
+insecure feature, as the downloaded binary is trusted without being checked against known builds.
 
 ## Screen Recording
 

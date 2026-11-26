@@ -1,12 +1,13 @@
 import path from 'node:path';
 
 import type {ChromedriverOpts} from 'appium-chromedriver';
-import {Chromedriver} from 'appium-chromedriver';
+import {Chromedriver, installDriverFromArchive} from 'appium-chromedriver';
 import {errors} from 'appium/driver.js';
-import {fs, node, system, tempDir, zip} from 'appium/support.js';
+import {fs, node, system} from 'appium/support.js';
 
+import {CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE} from '../constants.js';
 import type {AppiumWincoreDriver} from '../driver.js';
-import {cdpRequest, currentFilename, downloadFile, sleep, MODULE_NAME} from '../util.js';
+import {cdpRequest, currentFilename, fetchArchive, sleep, MODULE_NAME} from '../util.js';
 
 const NATIVE_APP = 'NATIVE_APP';
 const WEBVIEW = 'WEBVIEW';
@@ -23,7 +24,7 @@ export async function getCurrentContext(this: AppiumWincoreDriver): Promise<stri
 /**
  * Switches the active context. Switching to `NATIVE_APP` (or omitting the name) stops any
  * running Chromedriver/proxy; switching to a `WEBVIEW_<id>` handle resolves the matching
- * Chromium/Edge webview via CDP, downloads (or reuses) a matching chromedriver/edgedriver
+ * Chromium/Edge webview via CDP, resolves (downloads or reuses) a matching chromedriver/edgedriver
  * executable, and starts proxying WebDriver commands to it.
  * @param name - The context name to switch to, or `null`/omitted for `NATIVE_APP`.
  * @returns Resolves once the context switch (and, for webviews, chromedriver startup) completes.
@@ -62,10 +63,17 @@ export async function setContext(this: AppiumWincoreDriver, name?: string | null
 
   this.log.debug(`Type: ${browserType}, Version: ${browserVersion}`);
 
-  const executable: string = await getDriverExecutable.call(this, browserType, browserVersion);
+  const driverDir = await getDriverDir.call(this, browserType);
+  // Chrome: chromedriver downloads and trusts the matching build itself (checksum-verified);
+  // Edge is not supported by its downloader, so we fetch msedgedriver ourselves
+  const executable = await getDriverExecutable.call(this, browserType, browserVersion, driverDir);
 
   const chromedriverOpts: ChromedriverOpts & {details?: WebViewDetails} = {
     executable,
+    executableDir: driverDir,
+    isAutodownloadEnabled: browserType === 'Chrome',
+    // chromedriver >= 11 rejects executables missing from its checksum allowlist
+    allowUnverifiedExecutable: this.isFeatureEnabled(CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE),
     details: webViewDetails,
   };
 
@@ -222,43 +230,34 @@ export async function getWebViewDetails(this: AppiumWincoreDriver, waitForWebvie
   return webViewDetails;
 }
 
-async function getDriverExecutable(
-  this: AppiumWincoreDriver,
-  browserType: 'Edge' | 'Chrome',
-  browserVersion: `${number}.${number}.${number}.${number}`,
-): Promise<string> {
-  let driverType: string;
-
-  if (browserType === 'Chrome') {
-    driverType = 'chromedriver';
-  } else {
-    driverType = 'edgedriver';
-  }
-
+async function getDriverDir(this: AppiumWincoreDriver, browserType: 'Edge' | 'Chrome'): Promise<string> {
   const root = node.getModuleRootSync(MODULE_NAME, currentFilename);
   if (!root) {
     throw new errors.InvalidArgumentError(`Cannot find the root folder of the ${MODULE_NAME} Node.js module`);
   }
 
-  const driverDir = path.join(root, driverType);
-
+  const driverDir = path.join(root, browserType === 'Edge' ? 'msedgedriver' : 'chromedriver');
   if (!(await fs.exists(driverDir))) {
     await fs.mkdir(driverDir);
   }
+  return driverDir;
+}
 
-  const fileName = browserType === 'Edge' ? 'msedgedriver.exe' : 'chromedriver.exe';
-  const finalPath = path.join(driverDir, browserVersion, fileName);
-
-  if (await fs.exists(finalPath)) {
-    return finalPath;
-  }
-
+/**
+ * Resolves the driver executable to use, or `undefined` if chromedriver should
+ * pick/download a matching Chrome build on its own.
+ */
+async function getDriverExecutable(
+  this: AppiumWincoreDriver,
+  browserType: 'Edge' | 'Chrome',
+  browserVersion: `${number}.${number}.${number}.${number}`,
+  driverDir: string,
+): Promise<string | undefined> {
   const executablePath =
     browserType === 'Edge' ? this.caps.edgedriverExecutablePath : this.caps.chromedriverExecutablePath;
 
   if (executablePath) {
-    const exists = await fs.exists(executablePath);
-    if (!exists) {
+    if (!(await fs.exists(executablePath))) {
       throw new errors.InvalidArgumentError(`Driver executable not found at path: ${executablePath}`);
     }
 
@@ -271,48 +270,35 @@ async function getDriverExecutable(
     return executablePath;
   }
 
-  const arch = await system.arch();
-  const zipFilename = `${driverType}${browserType === 'Edge' ? '_' : '-'}win${arch}.zip`;
-
-  const CHROME_BASE_URL = this.caps.chromedriverCdnUrl || 'https://storage.googleapis.com/chrome-for-testing-public';
-  const EDGE_BASE_URL = this.caps.edgedriverCdnUrl || 'https://msedgedriver.microsoft.com';
-
-  let downloadUrl: string;
-
   if (browserType === 'Chrome') {
-    const url = new URL(CHROME_BASE_URL);
-    url.pathname = path.posix.join(url.pathname, browserVersion, `win${arch}`, zipFilename);
-    downloadUrl = url.toString();
-  } else {
-    const url = new URL(EDGE_BASE_URL);
-    url.pathname = path.posix.join(url.pathname, browserVersion, zipFilename);
-    downloadUrl = url.toString();
+    return undefined;
   }
 
-  this.log.debug(`Downloading ${browserType} driver version ${browserVersion}...`);
-  const tmpRoot = await tempDir.openDir();
-  await downloadFile(downloadUrl, tmpRoot);
+  const fileName = 'msedgedriver.exe';
+  const destination = path.join(driverDir, browserVersion, fileName);
 
-  try {
-    await zip.extractAllTo(path.join(tmpRoot, zipFilename), tmpRoot);
+  if (await fs.exists(destination)) {
+    return destination;
+  }
 
-    const driverPath = await fs.walkDir(
-      tmpRoot,
-      true,
-      (itemPath, isDirectory) => !isDirectory && path.parse(itemPath).base.toLowerCase() === fileName,
+  const customCdnUrl = this.caps.edgedriverCdnUrl;
+  if (customCdnUrl && !this.isFeatureEnabled(CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE)) {
+    // The downloaded binary gets trusted, so an arbitrary client-provided source needs opt-in
+    throw new errors.InvalidArgumentError(
+      `Capability "appium:edgedriverCdnUrl" requires the "${CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE}" insecure feature`,
     );
-
-    if (!driverPath) {
-      throw new errors.UnknownError(
-        `The archive was unzipped properly, but did not find any ${driverType} executable.`,
-      );
-    }
-
-    this.log.debug(`Moving the extracted '${fileName}' to '${finalPath}'`);
-    await fs.mv(driverPath, finalPath, {mkdirp: true});
-  } finally {
-    await fs.rimraf(tmpRoot);
   }
 
-  return finalPath;
+  const arch = await system.arch();
+  const url = new URL(customCdnUrl || 'https://msedgedriver.microsoft.com');
+  url.pathname = path.posix.join(url.pathname, browserVersion, `edgedriver_win${arch}.zip`);
+
+  this.log.debug(`Downloading Edge driver version ${browserVersion} from ${url.toString()}...`);
+  const archive = fetchArchive(url.toString());
+  try {
+    // Verifies the archive content and registers its checksum as trusted for chromedriver
+    return await installDriverFromArchive({archive, executableName: fileName, destination});
+  } finally {
+    await archive.return(undefined);
+  }
 }

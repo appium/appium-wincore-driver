@@ -24,3 +24,18 @@ Allows changing the file system of the machine running Appium. Required by
 [`windows: deleteFile`](./execute-methods.md#windows-deletefile),
 [`windows: deleteFolder`](./execute-methods.md#windows-deletefolder), and the standard Push File
 and Pull File commands.
+
+## `chromedriver_allow_any_executable`
+
+Disables the SHA-256 verification of ChromeDriver and Edge WebDriver executables started when
+switching to a web view context. By default, only the following executables are started:
+
+* Builds known to [`appium-chromedriver`](https://github.com/appium/appium-android/tree/main/packages/chromedriver)
+* ChromeDriver builds downloaded automatically by the driver, and Edge WebDriver builds downloaded
+  from the official Microsoft CDN. Their checksums are recorded upon download.
+
+Enable it to use custom builds set via
+[`appium:chromedriverExecutablePath`](./capabilities.md#chromedriverexecutablepath) or
+[`appium:edgedriverExecutablePath`](./capabilities.md#edgedriverexecutablepath), or a custom
+[`appium:edgedriverCdnUrl`](./capabilities.md#edgedrivercdnurl). Only enable it if you trust
+everyone who is able to create sessions.
