@@ -51,11 +51,6 @@ lists the client-side changes for existing suites.
 | WebView2, Chrome, and Edge content via CDP | ✅ | ❌ |
 | Internet Explorer 11 via built-in IE DOM Bridge | ✅ | ❌ |
 
-## Documentation
-
-You can access the documentation here:
-[**https://appium.github.io/appium-wincore-driver**](https://appium.github.io/appium-wincore-driver)
-
 ## Related Projects
 
 - [wincore-mcp](https://github.com/verisoft-ai/wincore-mcp): MCP server for AI-agent use, driving
