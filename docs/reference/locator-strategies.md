@@ -121,14 +121,15 @@ are not supported.
 This strategy accepts a UIA condition, written as in C# or PowerShell with
 [`System.Windows.Automation`](https://learn.microsoft.com/en-us/dotnet/api/system.windows.automation).
 `PropertyCondition`, `AndCondition`, `OrCondition` and `NotCondition` are supported. The
-expression is parsed, not executed.
+expression is parsed, not executed. See the [UIAutomation locator reference](./windows-uiautomation.md)
+for the full syntax, the supported properties and more examples.
 
 ```js
 // exact match
 await driver.findElement('-windows uiautomation', "new PropertyCondition(AutomationElement.NameProperty, 'OK')")
 
 // logical AND
-await driver.findElement('-windows uiautomation', "new AndCondition(new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button), new PropertyCondition(AutomationElement.NameProperty, 'OK'))")
+await driver.findElement('-windows uiautomation', "new AndCondition(new PropertyCondition(AutomationElement.ControlTypeProperty, [ControlType]::Button), new PropertyCondition(AutomationElement.NameProperty, 'OK'))")
 ```
 
 Narrowing a condition by `ControlType` together with `AutomationId` or `Name` lets UIA skip
