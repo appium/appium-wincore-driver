@@ -166,6 +166,48 @@ describe('parseUiaSelector', () => {
       });
     }
 
+    for (const selector of [
+      `[PropertyCondition]::TrueCondition`,
+      `PropertyCondition.TrueCondition`,
+      `Condition.TrueCondition`,
+      `[Condition]::TrueCondition`,
+      `[System.Windows.Automation.Condition]::TrueCondition`,
+      `[Automation]::RawViewCondition`,
+      `Automation.RawViewCondition`,
+      `System.Windows.Automation.Automation.RawViewCondition`,
+    ]) {
+      it(`parses ${selector} as TrueCondition`, () => {
+        assert.deepEqual(parseUiaSelector(selector), {type: 'true'});
+      });
+    }
+
+    for (const [property, value, expected] of [
+      ['ControlTypeProperty', 'ControlType.CheckBox', 'CheckBox'],
+      ['ControlTypeProperty', 'System.Windows.Automation.ControlType.CheckBox', 'CheckBox'],
+      ['ControlTypeProperty', 'controltype.checkbox', 'checkbox'],
+      ['OrientationProperty', 'OrientationType.Vertical', 'Vertical'],
+      ['HeadingLevelProperty', 'AutomationHeadingLevel.Level2', 'Level2'],
+    ]) {
+      it(`parses the dotted enum value ${value}`, () => {
+        assert.deepEqual(parseUiaSelector(P(property, value)), {
+          type: 'property',
+          property: property.replace(/Property$/, ''),
+          value: expected,
+        });
+      });
+    }
+
+    for (const selector of [`  ${NAME(`'a'`)}`, `${NAME(`'a'`)}  `, `\n${NAME(`'a'`)}\n`, `\t${NAME(`'a'`)}\r\n`]) {
+      it(`ignores the whitespace around ${JSON.stringify(selector)}`, () => {
+        assert.deepEqual(parseUiaSelector(selector), name('a'));
+      });
+    }
+
+    it('keeps the whitespace inside a string literal', () => {
+      assert.deepEqual(parseUiaSelector(NAME(`' a '`)), name(' a '));
+      assert.deepEqual(parseUiaSelector(` ${NAME(`' a '`)} `), name(' a '));
+    });
+
     for (const runtimeId of [
       '@(42, 1)',
       '[int[]] @(42, 1)',
@@ -335,6 +377,12 @@ describe('parseUiaSelector', () => {
     ]) {
       it(`throws InvalidSelectorError for ${selector.trim() || 'blank input'}`, () => {
         assert.throws(() => parseUiaSelector(selector), errors.InvalidSelectorError);
+      });
+    }
+
+    for (const value of ['Foo.Button', 'xControlType.Button', 'ControlType..Button', 'ControlType.Foo.Button']) {
+      it(`throws InvalidSelectorError for the enum value ${value}`, () => {
+        assert.throws(() => parseUiaSelector(P('ControlTypeProperty', value)), errors.InvalidSelectorError);
       });
     }
 

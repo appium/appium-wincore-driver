@@ -43,6 +43,7 @@ nav:
           - reference/execute-methods.md
       - Element Management:
           - reference/locator-strategies.md
+          - reference/windows-uiautomation.md
           - reference/element-attributes.md
   - Guides:
       - Migration:
