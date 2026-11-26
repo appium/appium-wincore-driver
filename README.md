@@ -1,67 +1,74 @@
 ﻿# Appium WinCore Driver
 
-Appium WinCore Driver is a Windows UI automation driver for
-[Appium](https://appium.io). It automates UWP, WinForms, WPF, Win32,
-and Internet Explorer applications via real UI Automation.
+<p align="center">
+   <a href="https://appium.github.io/appium-wincore-driver/">
+      <img alt="Appium WinCore Driver" src="./docs/assets/images/appium-plus-wincore.png" width="400">
+   </a>
+</p>
 
-Key advantages over WinAppDriver:
+<div align="center">
 
-- Faster XPath evaluation against the live UIA tree
-- RawView element support (elements hidden from ContentView/ControlView)
-- Standard accessibility values (`Value`, `LegacyValue`, …) on every
-  element, so content that MSAA-based grids (DevExpress, DataGridView,
-  VB6, Delphi) hide behind placeholder names is locatable without a
-  plugin. `windows: select` / `expand` / `collapse` check they took
-  effect. See
-  [Locator strategies](https://appium.github.io/appium-wincore-driver/latest/reference/locator-strategies/#standard-accessibility-values)
-- Reliable text input independent of the active keyboard layout
-- WebView2, Chrome, and Edge embedded content via CDP
-- Internet Explorer 11 automation via built-in IE DOM Bridge
-- Built-in screen recording and clipboard API
+[![NPM version](https://img.shields.io/npm/v/appium-wincore-driver.svg)](https://npmjs.org/package/appium-wincore-driver)
+[![Downloads](https://img.shields.io/npm/dm/appium-wincore-driver.svg)](https://npmjs.org/package/appium-wincore-driver)
+[![Release](https://github.com/appium/appium-wincore-driver/actions/workflows/release.yml/badge.svg)](https://github.com/appium/appium-wincore-driver/actions/workflows/release.yml)
+[![GitHub stars](https://img.shields.io/github/stars/appium/appium-wincore-driver.svg?style=social)](https://github.com/appium/appium-wincore-driver/stargazers)
 
-## Installation
+</div>
 
-Requires Windows 10 or later.
+---
 
-Install the latest version for Appium 4:
+<p align="center"><b>
+   <a href="https://appium.github.io/appium-wincore-driver/">Documentation</a> |
+   <a href="https://appium.github.io/appium-wincore-driver/latest/getting-started/">Get Started</a> |
+   <a href="https://appium.github.io/appium-wincore-driver/latest/guides/migration-from-appium-windows-driver/">Migration Guide</a> |
+   <a href="https://github.com/appium/appium-wincore-driver/blob/main/CHANGELOG.md">Changelog</a>
+</b></p>
 
-```bash
-appium driver install wincore
-```
+---
 
-Install `v3` for Appium 3:
+This is an Appium driver for automating Windows desktop applications (UWP, WinForms, WPF, Win32,
+and Internet Explorer) through Microsoft UI Automation.
 
-```bash
-appium driver install --source=npm appium-wincore-driver@3
-```
+> [!IMPORTANT]
+> Since major version *4.0.0*, this driver is only compatible with Appium 4. Use the `3.x` line
+> (`appium driver install --source=npm appium-wincore-driver@3`) with Appium 3.
 
-## Related projects
+## Coming from appium-windows-driver?
 
-- [wincore-mcp](https://github.com/verisoft-ai/wincore-mcp) — MCP server for AI-agent use, driving `wincore` sessions purely over the WebDriver protocol (a separate package)
+`appium-windows-driver` is deprecated and does not work with Appium 4. WinCore is its official
+replacement and does not need WinAppDriver. The
+[migration guide](https://appium.github.io/appium-wincore-driver/latest/guides/migration-from-appium-windows-driver/)
+lists the client-side changes for existing suites.
 
-## Documentation
+| | WinCore | WinAppDriver |
+| --- | :---: | :---: |
+| Actively maintained | ✅ | ❌ |
+| Appium 4 (and Appium 3 via `3.x`) | ✅ | ❌ |
+| XPath 2.0, evaluated in-process against the UIA tree | ✅ | ❌ |
+| RawView elements (hidden from Control/Content view) | ✅ | ❌ |
+| MSAA grid content (DevExpress, DataGridView, VB6, Delphi) | ✅ | ❌ |
+| Text input independent of keyboard layout | ✅ | ❌ |
+| WebView2, Chrome, and Edge content via CDP | ✅ | ❌ |
+| Internet Explorer 11 via built-in IE DOM Bridge | ✅ | ❌ |
 
-Full documentation lives at **<https://appium.github.io/appium-wincore-driver/>**:
+## Related Projects
 
-- [Getting Started](https://appium.github.io/appium-wincore-driver/latest/getting-started/) — install and run a first test
-- [Capabilities](https://appium.github.io/appium-wincore-driver/latest/reference/capabilities/)
-- [Locator strategies](https://appium.github.io/appium-wincore-driver/latest/reference/locator-strategies/)
-- [`windows:` execute methods](https://appium.github.io/appium-wincore-driver/latest/reference/execute-methods/)
-- [Guides](https://appium.github.io/appium-wincore-driver/latest/guides/hybrid/) — W3C Actions, hybrid mode (WebView/CDP), Internet Explorer, examples
-- [Migrating from appium-windows-driver](https://appium.github.io/appium-wincore-driver/latest/guides/migration-from-appium-windows-driver/) — client-side changes for suites moving off the WinAppDriver-based driver
-- [Overview](https://appium.github.io/appium-wincore-driver/latest/overview/)
+- [wincore-mcp](https://github.com/verisoft-ai/wincore-mcp): MCP server for AI-agent use, driving
+  `wincore` sessions purely over the WebDriver protocol (a separate package)
 
-The site source is in [`docs/`](docs/); see
-[Contributing](https://appium.github.io/appium-wincore-driver/latest/contributing/) to preview it locally.
+## Community
 
-## Development
+Questions and ideas go to
+[GitHub Discussions](https://github.com/appium/appium-wincore-driver/discussions), bugs to
+[GitHub Issues](https://github.com/appium/appium-wincore-driver/issues). If the driver saves you
+time, a ⭐ helps other Windows testers find it.
 
-```bash
-npm install
-npm run lint
-npm run build
-npm run test
-```
+---
 
-Uses [Comment Tagged Templates](https://marketplace.visualstudio.com/items?itemName=bierner.comment-tagged-templates)
-for PowerShell/C syntax highlighting in VS Code.
+<p align="center">
+   <i>Developed and supported by</i>
+   <br>
+   <a href="https://www.verisoft.ai/en">
+      <img alt="VeriSoft" src="./docs/assets/images/verisoft-logo.png" width="180">
+   </a>
+</p>
