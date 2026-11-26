@@ -148,15 +148,21 @@ download page.
 
 ### Downloading
 
-In case of issues when downloading ChromeDriver, make sure `https://googlechromelabs.github.io` and
-`https://storage.googleapis.com` are accessible from the Appium server host. The locations can be
-changed with the `CHROMELABS_URL` and `CHROMEDRIVER_CDNURL` environment variables of the Appium
-process.
-
-The Edge WebDriver download location can be changed with the
-[`appium:edgedriverCdnUrl`](../reference/capabilities.md#edgedrivercdnurl) capability, which requires the
+The download locations can be changed with the
+[`appium:chromedriverCdnUrl`](../reference/capabilities.md#chromedrivercdnurl) and
+[`appium:edgedriverCdnUrl`](../reference/capabilities.md#edgedrivercdnurl) capabilities. Since the
+downloaded binaries become trusted, the capabilities require the
 [`chromedriver_allow_any_executable`](../reference/insecure-features.md#chromedriver_allow_any_executable)
 insecure feature.
+
+The server administrator can also set the `WINCORE_CHROMEDRIVER_CDN_URL` and
+`WINCORE_EDGEDRIVER_CDN_URL` environment variables of the Appium process. They are used for all
+sessions without enabling any insecure feature, unless overridden by the capabilities above
+(which do require the feature).
+
+Without a custom location, ChromeDriver is downloaded by `appium-chromedriver`, so make sure
+`https://googlechromelabs.github.io` and `https://storage.googleapis.com` are accessible from the
+Appium server host.
 
 It may also be necessary to adjust network proxy and firewall settings for the above to work.
 

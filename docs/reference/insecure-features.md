@@ -27,7 +27,7 @@ and Pull File commands.
 
 ## `chromedriver_allow_any_executable`
 
-Disables the SHA-256 verification of ChromeDriver and Edge WebDriver executables started when
+Allows using ChromeDriver and Edge WebDriver executables from sources that are not verified when
 switching to a web view context. By default, only the following executables are started:
 
 * Builds known to [`appium-chromedriver`](https://github.com/appium/appium-android/tree/main/packages/chromedriver)
@@ -37,5 +37,7 @@ switching to a web view context. By default, only the following executables are 
 Enable it to use custom builds set via
 [`appium:chromedriverExecutablePath`](./capabilities.md#chromedriverexecutablepath) or
 [`appium:edgedriverExecutablePath`](./capabilities.md#edgedriverexecutablepath), or a custom
-[`appium:edgedriverCdnUrl`](./capabilities.md#edgedrivercdnurl). Only enable it if you trust
+[`appium:chromedriverCdnUrl`](./capabilities.md#chromedrivercdnurl) or
+[`appium:edgedriverCdnUrl`](./capabilities.md#edgedrivercdnurl) (downloads from the latter two are
+trusted without being checked against known builds). Only enable it if you trust
 everyone who is able to create sessions.

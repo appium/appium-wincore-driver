@@ -422,4 +422,76 @@ describe('getDriverExecutable', () => {
     await contexts.setContext.call(driver, 'WEBVIEW_page1');
     assert.equal(calls(mockedFetchArchive)[0][0], 'https://mirror.example.com/edge/120.0.0.0/edgedriver_win64.zip');
   });
+
+  describe('custom CDN', () => {
+    const CHROME_ENV = 'WINCORE_CHROMEDRIVER_CDN_URL';
+    const EDGE_ENV = 'WINCORE_EDGEDRIVER_CDN_URL';
+    const enabled = (driver: any) => {
+      driver.isFeatureEnabled = mock.fn((name: string) => name === FEATURE);
+      return driver;
+    };
+
+    beforeEach(() => {
+      delete process.env[CHROME_ENV];
+      delete process.env[EDGE_ENV];
+    });
+
+    it('rejects chromedriverCdnUrl cap unless the insecure feature is enabled', async () => {
+      queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+      const driver = createMockDriver({chromedriverCdnUrl: 'https://mirror.example.com/chrome'});
+      await assert.rejects(contexts.setContext.call(driver, 'WEBVIEW_page1'), /chromedriverCdnUrl.*insecure feature/);
+      assertNotCalled(mockedInstall);
+    });
+
+    it('downloads Chrome via installDriverFromArchive from the chromedriverCdnUrl cap', async () => {
+      queueResolved(fs.exists, true, false);
+      queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+      const driver = enabled(createMockDriver({chromedriverCdnUrl: 'https://mirror.example.com/chrome'}));
+      await contexts.setContext.call(driver, 'WEBVIEW_page1');
+
+      assert.equal(
+        calls(mockedFetchArchive)[0][0],
+        'https://mirror.example.com/chrome/120.0.0.0/win64/chromedriver-win64.zip',
+      );
+      const installOpts = calls(mockedInstall)[0][0];
+      assert.equal(installOpts.executableName, 'chromedriver.exe');
+      assert.equal(calls(Chromedriver)[0][0].executable, installOpts.destination);
+    });
+
+    it('uses the Chrome CDN env var without requiring the insecure feature', async () => {
+      process.env[CHROME_ENV] = 'https://env.example.com/chrome';
+      queueResolved(fs.exists, true, false);
+      queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+      await contexts.setContext.call(createMockDriver(), 'WEBVIEW_page1');
+      assert.equal(
+        calls(mockedFetchArchive)[0][0],
+        'https://env.example.com/chrome/120.0.0.0/win64/chromedriver-win64.zip',
+      );
+    });
+
+    it('uses the Edge CDN env var without requiring the insecure feature', async () => {
+      process.env[EDGE_ENV] = 'https://env.example.com/edge';
+      queueResolved(fs.exists, true, false);
+      queueResolved(mockedCdpRequest, EDGE_RESPONSE, MOCK_PAGES);
+      await contexts.setContext.call(createMockDriver(), 'WEBVIEW_page1');
+      assert.equal(calls(mockedFetchArchive)[0][0], 'https://env.example.com/edge/120.0.0.0/edgedriver_win64.zip');
+    });
+
+    it('lets the cap override the env var when the insecure feature is enabled', async () => {
+      process.env[CHROME_ENV] = 'https://env.example.com/chrome';
+      queueResolved(fs.exists, true, false);
+      queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+      const driver = enabled(createMockDriver({chromedriverCdnUrl: 'https://cap.example.com/chrome'}));
+      await contexts.setContext.call(driver, 'WEBVIEW_page1');
+      assert.match(calls(mockedFetchArchive)[0][0], /^https:\/\/cap\.example\.com\/chrome\//);
+    });
+
+    it('does not let the cap override the env var when the insecure feature is disabled', async () => {
+      process.env[CHROME_ENV] = 'https://env.example.com/chrome';
+      queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+      const driver = createMockDriver({chromedriverCdnUrl: 'https://cap.example.com/chrome'});
+      await assert.rejects(contexts.setContext.call(driver, 'WEBVIEW_page1'), /insecure feature/);
+      assertNotCalled(mockedFetchArchive);
+    });
+  });
 });

@@ -58,6 +58,9 @@ export const UI_AUTOMATION_DRIVER_CONSTRAINTS = {
   webviewDevtoolsPort: {
     isNumber: true,
   },
+  chromedriverCdnUrl: {
+    isString: true,
+  },
   edgedriverCdnUrl: {
     isString: true,
   },

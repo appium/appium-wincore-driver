@@ -243,6 +243,30 @@ async function getDriverDir(this: AppiumWincoreDriver, browserType: 'Edge' | 'Ch
   return driverDir;
 }
 
+const CDN_ENV_VARS = {
+  Chrome: 'WINCORE_CHROMEDRIVER_CDN_URL',
+  Edge: 'WINCORE_EDGEDRIVER_CDN_URL',
+} as const;
+const DEFAULT_EDGE_CDN_URL = 'https://msedgedriver.microsoft.com';
+
+/**
+ * Returns the custom CDN URL: the capability (requires the insecure feature, as the downloaded
+ * binary becomes trusted), or else the server-side environment variable.
+ */
+function getCustomCdnUrl(this: AppiumWincoreDriver, browserType: 'Edge' | 'Chrome'): string | undefined {
+  const capName = browserType === 'Edge' ? 'edgedriverCdnUrl' : 'chromedriverCdnUrl';
+  const capValue = this.caps[capName];
+  if (capValue) {
+    if (!this.isFeatureEnabled(CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE)) {
+      throw new errors.InvalidArgumentError(
+        `Capability "appium:${capName}" requires the "${CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE}" insecure feature`,
+      );
+    }
+    return capValue;
+  }
+  return process.env[CDN_ENV_VARS[browserType]] || undefined;
+}
+
 /**
  * Resolves the driver executable to use, or `undefined` if chromedriver should
  * pick/download a matching Chrome build on its own.
@@ -270,30 +294,27 @@ async function getDriverExecutable(
     return executablePath;
   }
 
-  if (browserType === 'Chrome') {
+  const customCdnUrl = getCustomCdnUrl.call(this, browserType);
+  if (browserType === 'Chrome' && !customCdnUrl) {
     return undefined;
   }
 
-  const fileName = 'msedgedriver.exe';
+  const fileName = browserType === 'Edge' ? 'msedgedriver.exe' : 'chromedriver.exe';
   const destination = path.join(driverDir, browserVersion, fileName);
 
   if (await fs.exists(destination)) {
     return destination;
   }
 
-  const customCdnUrl = this.caps.edgedriverCdnUrl;
-  if (customCdnUrl && !this.isFeatureEnabled(CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE)) {
-    // The downloaded binary gets trusted, so an arbitrary client-provided source needs opt-in
-    throw new errors.InvalidArgumentError(
-      `Capability "appium:edgedriverCdnUrl" requires the "${CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE}" insecure feature`,
-    );
-  }
-
   const arch = await system.arch();
-  const url = new URL(customCdnUrl || 'https://msedgedriver.microsoft.com');
-  url.pathname = path.posix.join(url.pathname, browserVersion, `edgedriver_win${arch}.zip`);
+  const url = new URL(customCdnUrl || DEFAULT_EDGE_CDN_URL);
+  url.pathname = path.posix.join(
+    url.pathname,
+    browserVersion,
+    ...(browserType === 'Edge' ? [`edgedriver_win${arch}.zip`] : [`win${arch}`, `chromedriver-win${arch}.zip`]),
+  );
 
-  this.log.debug(`Downloading Edge driver version ${browserVersion} from ${url.toString()}...`);
+  this.log.debug(`Downloading ${browserType} driver version ${browserVersion} from ${url.toString()}...`);
   const archive = fetchArchive(url.toString());
   try {
     // Verifies the archive content and registers its checksum as trusted for chromedriver
