@@ -17,14 +17,6 @@ A condition is built from the following parts:
   which combine other conditions
 - the constant and [view conditions](#constant-and-view-conditions), such as `TrueCondition`
 
-!!! tip
-
-    Use the [`css selector`](./locator-strategies.md#css-selector) strategy for simple combinations
-    of properties, as it is shorter and compiles to the same condition. Use `-windows uiautomation`
-    for conditions CSS cannot express, such as `OrCondition`, `NotCondition`, a process ID or a
-    pattern availability. Use [XPath](./locator-strategies.md#xpath) when the element can be found
-    only in relation to other elements, like its parent or siblings.
-
 ## Quick Examples
 
 === "UIAutomation"
