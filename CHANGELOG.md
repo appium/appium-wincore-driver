@@ -1,3 +1,9 @@
+## [4.1.4](https://github.com/appium/appium-wincore-driver/compare/v4.1.3...v4.1.4) (2026-11-26)
+
+### Miscellaneous Chores
+
+* add -windows uiautomation locator reference, fix enum parsing ([#158](https://github.com/appium/appium-wincore-driver/issues/158)) ([6b32b53](https://github.com/appium/appium-wincore-driver/commit/6b32b532425625108dd6b82295e93556c5716642))
+
 ## [4.1.3](https://github.com/appium/appium-wincore-driver/compare/v4.1.2...v4.1.3) (2026-11-19)
 
 ### Miscellaneous Chores
