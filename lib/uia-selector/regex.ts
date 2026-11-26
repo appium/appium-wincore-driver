@@ -75,8 +75,11 @@ export class PropertyRegexMatcher extends RegexItem {
         )),
     );
 
+    // a '.' before the value is allowed only right after the class name (`ControlType.Button`)
+    const notPartOfIdentifier = `(?<![a-z-]|(?<!${mainClass})\\.)`;
+
     super(
-      `${regexString.replaceAll(MAGIC_UNICODE_REPLACEMENT_CHAR, '')}(${properties.length > 0 ? `(?<![a-z-.])(?:(?:${properties.join(')|(?:')}))(?![a-z-.])` : '(?:\\b[a-z]+)'}(?![.-]))`.toLowerCase(),
+      `${regexString.replaceAll(MAGIC_UNICODE_REPLACEMENT_CHAR, '')}(${properties.length > 0 ? `${notPartOfIdentifier}(?:(?:${properties.join(')|(?:')}))(?![a-z-.])` : '(?:\\b[a-z]+)'}(?![.-]))`.toLowerCase(),
     );
   }
 }

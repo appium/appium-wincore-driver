@@ -109,11 +109,11 @@ const NOT_CONDITION_REGEX = new ConstructorRegexMatcher(
 ).toRegex('gi');
 
 const TRUE_CONDITION_REGEX = new PropertyRegexMatcher(
-  'System.Windows.Automation.(?:Property)Condition',
+  'System.Windows.Automation.(?:Property)?Condition',
   `True(?:Condition)?`,
 ).toRegex('gi');
 const FALSE_CONDITION_REGEX = new PropertyRegexMatcher(
-  'System.Windows.Automation.(?:Property)Condition',
+  'System.Windows.Automation.(?:Property)?Condition',
   `False(?:Condition)?`,
 ).toRegex('gi');
 
@@ -241,7 +241,7 @@ export function parseUiaSelector(selector: string): ConditionDto {
     items[placeholder.trim().charCodeAt(0) - MAGIC_PLACEHOLDER_UNICODE_BEGIN];
 
   // it's important to process the strings first as they can contain other tokens that may be matched later
-  let processedSelector = replaceStringLiterals(selector, (value) => push({kind: 'string', value}));
+  let processedSelector = replaceStringLiterals(selector, (value) => push({kind: 'string', value})).trim();
 
   if (BOUNDING_RECTANGLE_PROPERTY_REGEX.test(processedSelector)) {
     throw new errors.InvalidSelectorError(
