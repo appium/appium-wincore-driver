@@ -1,3 +1,9 @@
+## [4.1.5](https://github.com/appium/appium-wincore-driver/compare/v4.1.4...v4.1.5) (2026-11-27)
+
+### Miscellaneous Chores
+
+* bump @appium/types to v3 ([#161](https://github.com/appium/appium-wincore-driver/issues/161)) ([80a4126](https://github.com/appium/appium-wincore-driver/commit/80a4126dbe425c03f7f32f129e9413e6abfb3b21))
+
 ## [4.1.4](https://github.com/appium/appium-wincore-driver/compare/v4.1.3...v4.1.4) (2026-11-26)
 
 ### Miscellaneous Chores
