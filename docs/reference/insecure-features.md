@@ -18,13 +18,6 @@ appium --relaxed-security
 For other insecure feature names recognized by the Appium server, see
 [their Appium docs reference page](https://appium.io/docs/en/latest/reference/cli/insecure-features/).
 
-## `modify_fs`
-
-Allows changing the file system of the machine running Appium. Required by
-[`windows: deleteFile`](./execute-methods.md#windows-deletefile),
-[`windows: deleteFolder`](./execute-methods.md#windows-deletefolder), and the standard Push File
-and Pull File commands.
-
 ## `chromedriver_allow_any_executable`
 
 Allows using ChromeDriver and Edge WebDriver executables that are not known to
@@ -43,3 +36,10 @@ Enable it to use unknown builds set via
 the location set via [`appium:chromedriverCdnUrl`](./capabilities.md#chromedrivercdnurl) or
 [`appium:edgedriverCdnUrl`](./capabilities.md#edgedrivercdnurl). Only enable it if you trust
 everyone who is able to create sessions.
+
+## `modify_fs`
+
+Allows changing the file system of the machine running Appium. Required by
+[`windows: deleteFile`](./execute-methods.md#windows-deletefile),
+[`windows: deleteFolder`](./execute-methods.md#windows-deletefolder), and the standard Push File
+and Pull File commands.
