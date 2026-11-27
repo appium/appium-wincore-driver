@@ -240,9 +240,10 @@ insecure feature is enabled.
 
 Custom CDN URL to download Chromedriver from. The archive is expected at
 `<url>/<version>/win64/chromedriver-win64.zip`, as in
-[Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). Requires the
+[Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). Unless the
 [`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
-insecure feature, as the downloaded binary is trusted without being checked against known builds.
+insecure feature is enabled, the downloaded binary must be a known Chromedriver build, so this is
+meant for mirrors of the official builds.
 
 ### edgedriverCdnUrl
 
@@ -251,9 +252,10 @@ insecure feature, as the downloaded binary is trusted without being checked agai
 | `appium:edgedriverCdnUrl` | `string` | `WINCORE_EDGEDRIVER_CDN_URL` environment variable, if set |
 
 Custom CDN URL to download Microsoft Edge WebDriver from. The archive is expected at
-`<url>/<version>/edgedriver_win64.zip`. Requires the
+`<url>/<version>/edgedriver_win64.zip`. Unless the
 [`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
-insecure feature, as the downloaded binary is trusted without being checked against known builds.
+insecure feature is enabled, the downloaded binary must be a known Edge WebDriver build, so this is
+meant for mirrors of the official builds.
 
 ## Screen Recording
 

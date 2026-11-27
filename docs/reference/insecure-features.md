@@ -27,17 +27,19 @@ and Pull File commands.
 
 ## `chromedriver_allow_any_executable`
 
-Allows using ChromeDriver and Edge WebDriver executables from sources that are not verified when
-switching to a web view context. By default, only the following executables are started:
+Allows using ChromeDriver and Edge WebDriver executables that are not known to
+[`appium-chromedriver`](https://github.com/appium/appium-android/tree/main/packages/chromedriver)
+when switching to a web view context. By default, only the following executables are started:
 
-* Builds known to [`appium-chromedriver`](https://github.com/appium/appium-android/tree/main/packages/chromedriver)
-* ChromeDriver builds downloaded automatically by the driver, and Edge WebDriver builds downloaded
-  from the official Microsoft CDN. Their checksums are recorded upon download.
+* Builds known to `appium-chromedriver`
+* Builds downloaded by the driver from the official Chrome for Testing and Microsoft CDNs, or from
+  the location set by the `WINCORE_CHROMEDRIVER_CDN_URL` / `WINCORE_EDGEDRIVER_CDN_URL`
+  [environment variables](../guides/hybrid.md#troubleshooting) of the Appium server. Their
+  checksums are recorded upon download.
 
-Enable it to use custom builds set via
+Enable it to use unknown builds set via
 [`appium:chromedriverExecutablePath`](./capabilities.md#chromedriverexecutablepath) or
-[`appium:edgedriverExecutablePath`](./capabilities.md#edgedriverexecutablepath), or a custom
-[`appium:chromedriverCdnUrl`](./capabilities.md#chromedrivercdnurl) or
-[`appium:edgedriverCdnUrl`](./capabilities.md#edgedrivercdnurl) (downloads from the latter two are
-trusted without being checked against known builds). Only enable it if you trust
+[`appium:edgedriverExecutablePath`](./capabilities.md#edgedriverexecutablepath), or downloaded from
+the location set via [`appium:chromedriverCdnUrl`](./capabilities.md#chromedrivercdnurl) or
+[`appium:edgedriverCdnUrl`](./capabilities.md#edgedrivercdnurl). Only enable it if you trust
 everyone who is able to create sessions.

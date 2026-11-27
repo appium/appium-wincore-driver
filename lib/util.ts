@@ -186,30 +186,6 @@ export async function cdpRequest<T = unknown>(
   });
 }
 
-const ARCHIVE_IDLE_TIMEOUT_MS = 4 * 60 * 1000;
-
-/** Streams the response body of `url`; aborts if no data arrives within the idle timeout. */
-export async function* fetchArchive(url: string): AsyncGenerator<Uint8Array> {
-  const controller = new AbortController();
-  const timer = setTimeout(
-    () => controller.abort(new Error(`Download from ${url} timed out`)),
-    ARCHIVE_IDLE_TIMEOUT_MS,
-  );
-  try {
-    const response = await fetch(url, {signal: controller.signal});
-    if (!response.ok || !response.body) {
-      throw new Error(`Download failed from ${url}: ${response.status} ${response.statusText}`);
-    }
-    for await (const chunk of response.body) {
-      timer.refresh();
-      yield chunk;
-    }
-  } finally {
-    clearTimeout(timer);
-    controller.abort();
-  }
-}
-
 export async function downloadFile(url: string, destPath: string, timeout = 30000): Promise<void> {
   const protocol = url.startsWith('https') ? https : http;
   const fileName = path.basename(new URL(url).pathname);
