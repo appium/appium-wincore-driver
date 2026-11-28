@@ -32,10 +32,9 @@ when switching to a web view context. By default, only the following executables
 
 Enable it to use unknown builds set via
 [`appium:chromedriverExecutablePath`](./capabilities.md#chromedriverexecutablepath) or
-[`appium:edgedriverExecutablePath`](./capabilities.md#edgedriverexecutablepath), or downloaded from
-the location set via [`appium:chromedriverCdnUrl`](./capabilities.md#chromedrivercdnurl) or
-[`appium:edgedriverCdnUrl`](./capabilities.md#edgedrivercdnurl). Only enable it if you trust
-everyone who is able to create sessions.
+[`appium:edgedriverExecutablePath`](./capabilities.md#edgedriverexecutablepath). Nothing is
+recorded as trusted, so disabling the feature restores the verification. Only enable it if you
+trust everyone who is able to create sessions.
 
 ## `modify_fs`
 

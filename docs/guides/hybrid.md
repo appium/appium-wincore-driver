@@ -124,8 +124,10 @@ and requires internet access from the Appium server host. Downloaded executables
 later sessions.
 
 The checksum of each executable downloaded from the official location is recorded, so it is trusted
-in later sessions even if it is newer than the builds known to `appium-chromedriver`. Other
-executables (see below) must be known to `appium-chromedriver`, unless the
+in later sessions even if it is newer than the builds known to `appium-chromedriver`. For Chrome,
+the latest published driver of the web view's `MAJOR.MINOR.BUILD` is used, as its exact patch version
+may have no driver of its own. Executables set by path (see below) must be known to
+`appium-chromedriver`, unless the
 [`chromedriver_allow_any_executable`](../reference/insecure-features.md#chromedriver_allow_any_executable)
 insecure feature is enabled.
 
@@ -151,9 +153,10 @@ download page.
 The download locations can be changed with the
 [`appium:chromedriverCdnUrl`](../reference/capabilities.md#chromedrivercdnurl) and
 [`appium:edgedriverCdnUrl`](../reference/capabilities.md#edgedrivercdnurl) capabilities. They are
-meant for mirrors of the official builds: unless the
+meant for mirrors of the official builds: a downloaded binary that is not a known build is rejected.
+To use other builds, set the executable path capabilities and enable the
 [`chromedriver_allow_any_executable`](../reference/insecure-features.md#chromedriver_allow_any_executable)
-insecure feature is enabled, a downloaded binary that is not a known build is rejected.
+insecure feature.
 
 The server administrator can also set the `WINCORE_CHROMEDRIVER_CDN_URL` and
 `WINCORE_EDGEDRIVER_CDN_URL` environment variables of the Appium process. They are used for all

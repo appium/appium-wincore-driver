@@ -2,9 +2,9 @@
  * Unit tests for lib/util.ts
  */
 import assert from 'node:assert/strict';
-import {describe, it} from 'node:test';
+import {afterEach, describe, it, mock} from 'node:test';
 
-import {assertIntegerCap, assertSupportedEasingFunction} from '../lib/util.js';
+import {assertIntegerCap, assertSupportedEasingFunction, resolveChromeDriverVersion} from '../lib/util.js';
 
 describe('assertIntegerCap', () => {
   it('accepts value equal to min', () => {
@@ -64,5 +64,31 @@ describe('assertSupportedEasingFunction', () => {
       () => assertSupportedEasingFunction('cubic-bezier(abc, 0, 0, 1)'),
       /Unsupported or invalid easing function/,
     );
+  });
+});
+
+describe('resolveChromeDriverVersion', () => {
+  afterEach(() => mock.restoreAll());
+
+  const stubFetch = (impl: () => Promise<unknown>) => mock.method(globalThis, 'fetch', impl as typeof fetch);
+
+  it('returns the latest published patch of the same MAJOR.MINOR.BUILD', async () => {
+    stubFetch(async () => Response.json({builds: {'120.0.6099': {version: '120.0.6099.109'}}}));
+    assert.equal(await resolveChromeDriverVersion('120.0.6099.5'), '120.0.6099.109');
+  });
+
+  it('falls back to the browser version if the build is unknown', async () => {
+    stubFetch(async () => Response.json({builds: {}}));
+    assert.equal(await resolveChromeDriverVersion('120.0.6099.5'), '120.0.6099.5');
+  });
+
+  it('falls back to the browser version on a failed response or request', async () => {
+    stubFetch(async () => new Response(null, {status: 500}));
+    assert.equal(await resolveChromeDriverVersion('120.0.6099.5'), '120.0.6099.5');
+    mock.restoreAll();
+    stubFetch(async () => {
+      throw new Error('offline');
+    });
+    assert.equal(await resolveChromeDriverVersion('120.0.6099.5'), '120.0.6099.5');
   });
 });

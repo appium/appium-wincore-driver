@@ -7,7 +7,7 @@ import {fs, node} from 'appium/support.js';
 
 import {CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE} from '../constants.js';
 import type {AppiumWincoreDriver} from '../driver.js';
-import {cdpRequest, currentFilename, sleep, MODULE_NAME} from '../util.js';
+import {cdpRequest, currentFilename, resolveChromeDriverVersion, sleep, MODULE_NAME} from '../util.js';
 
 const NATIVE_APP = 'NATIVE_APP';
 const WEBVIEW = 'WEBVIEW';
@@ -231,14 +231,14 @@ const CDN_ENV_VARS = {
 } as const;
 
 /**
- * Resolves the custom CDN and whether its downloads are trusted. A capability is only trusted if
- * the insecure feature is enabled, otherwise the binary must be known to chromedriver.
+ * Resolves the custom CDN and whether its downloads are trusted. A capability is never trusted:
+ * the binary must be known to chromedriver, so it is meant for mirrors of official builds.
  * The server-side environment variable is set by the administrator, so it is trusted.
  */
 function getCdnOptions(this: AppiumWincoreDriver, browserType: 'Edge' | 'Chrome'): {cdnUrl?: string; trust?: boolean} {
   const capValue = this.caps[browserType === 'Edge' ? 'edgedriverCdnUrl' : 'chromedriverCdnUrl'];
   if (capValue) {
-    return {cdnUrl: capValue, trust: this.isFeatureEnabled(CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE)};
+    return {cdnUrl: capValue, trust: false};
   }
   const envValue = process.env[CDN_ENV_VARS[browserType]];
   return envValue ? {cdnUrl: envValue, trust: true} : {};
@@ -273,10 +273,23 @@ async function getDriverExecutable(
   }
 
   const isEdge = browserType === 'Edge';
+  const cdnOptions = getCdnOptions.call(this, browserType);
+
+  // The browser patch may have no published driver; only the official Chrome source can be queried
+  let driverVersion: string = browserVersion;
+  if (!isEdge && !cdnOptions.cdnUrl) {
+    driverVersion = await resolveChromeDriverVersion(browserVersion);
+    if (driverVersion !== browserVersion) {
+      this.log.debug(`Using Chrome driver version ${driverVersion} for browser version ${browserVersion}`);
+    }
+  }
+
+  // Dedicated cache folders: drivers cached by older versions have no registered checksum
   const destination = path.join(
     root,
+    'drivers',
     isEdge ? 'msedgedriver' : 'chromedriver',
-    browserVersion,
+    driverVersion,
     isEdge ? 'msedgedriver.exe' : 'chromedriver.exe',
   );
 
@@ -284,11 +297,11 @@ async function getDriverExecutable(
     return destination;
   }
 
-  this.log.debug(`Downloading ${browserType} driver version ${browserVersion}...`);
+  this.log.debug(`Downloading ${browserType} driver version ${driverVersion}...`);
   return await installDriverFromCdn({
     browser: isEdge ? 'edge' : 'chrome',
-    version: browserVersion,
+    version: driverVersion,
     destination,
-    ...getCdnOptions.call(this, browserType),
+    ...cdnOptions,
   });
 }

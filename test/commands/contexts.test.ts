@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import {beforeEach, describe, it, mock} from 'node:test';
 
 import * as support from 'appium/support.js';
@@ -16,9 +17,11 @@ import {
 const utilUrl = new URL('../../lib/util.js', import.meta.url).href;
 const actualUtil = await import(utilUrl);
 const cdpRequest = mock.fn(async (..._args: any[]): Promise<any> => undefined);
+const resolveChromeDriverVersion = mock.fn(async (version: string) => version);
 mockModule(utilUrl, {
   ...actualUtil,
   cdpRequest,
+  resolveChromeDriverVersion,
   sleep: mock.fn(async () => undefined),
   MODULE_NAME: 'appium-wincore-driver',
   currentFilename: '/mock/root/build/lib/util.js',
@@ -55,7 +58,7 @@ const mockedCdpRequest = cdpRequest;
 const mockedInstall = installDriverFromCdn;
 
 function clearAll() {
-  clearCalls(cdpRequest, installDriverFromCdn, Chromedriver, fs.exists);
+  clearCalls(cdpRequest, resolveChromeDriverVersion, installDriverFromCdn, Chromedriver, fs.exists);
 }
 
 /** Makes the next `new Chromedriver()` return `instance`. */
@@ -351,7 +354,7 @@ describe('getDriverExecutable', () => {
   it('passes the resolved executable and the feature state to chromedriver', async () => {
     await switchToWebview(createMockDriver());
     const opts = calls(Chromedriver)[0][0];
-    assert.match(opts.executable, /chromedriver.*120\.0\.0\.0.*chromedriver\.exe$/);
+    assert.match(opts.executable, /drivers.*chromedriver.*120\.0\.0\.0.*chromedriver\.exe$/);
     assert.equal(opts.allowUnverifiedExecutable, false);
 
     clearAll();
@@ -364,7 +367,7 @@ describe('getDriverExecutable', () => {
     const opts = calls(mockedInstall)[0][0];
     assert.equal(opts.browser, 'chrome');
     assert.equal(opts.version, '120.0.0.0');
-    assert.match(opts.destination, /chromedriver.*120\.0\.0\.0.*chromedriver\.exe$/);
+    assert.match(opts.destination, /drivers.*chromedriver.*120\.0\.0\.0.*chromedriver\.exe$/);
     assert.equal(opts.cdnUrl, undefined);
     assert.equal(opts.trust, undefined);
     assert.equal(calls(Chromedriver)[0][0].executable, opts.destination);
@@ -401,6 +404,38 @@ describe('getDriverExecutable', () => {
     await assert.rejects(contexts.setContext.call(driver, 'WEBVIEW_page1'), /Driver executable not found at/);
   });
 
+  it('ignores drivers cached by older versions, which have no registered checksum', async () => {
+    const oldPath = path.join('/mock/root', 'chromedriver', '120.0.0.0', 'chromedriver.exe');
+    fs.exists.mock.mockImplementation(async (p: string) => p === oldPath);
+    queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+    await contexts.setContext.call(createMockDriver(), 'WEBVIEW_page1');
+
+    const opts = calls(mockedInstall)[0][0];
+    assert.notEqual(opts.destination, oldPath);
+    assert.equal(calls(Chromedriver)[0][0].executable, opts.destination);
+    fs.exists.mock.mockImplementation(async () => true);
+  });
+
+  it('resolves the published Chrome driver version when the browser patch differs', async () => {
+    resolveChromeDriverVersion.mock.mockImplementationOnce(async () => '120.0.0.9');
+    await switchToWebview(createMockDriver());
+
+    assertCalledWith(resolveChromeDriverVersion, '120.0.0.0');
+    const opts = calls(mockedInstall)[0][0];
+    assert.equal(opts.version, '120.0.0.9');
+    assert.match(opts.destination, /120\.0\.0\.9/);
+    assert.doesNotMatch(opts.destination, /120\.0\.0\.0/);
+  });
+
+  it('does not resolve the driver version for Edge or a custom Chrome CDN', async () => {
+    await switchToWebview(createMockDriver(), EDGE_RESPONSE);
+    assertNotCalled(resolveChromeDriverVersion);
+
+    clearAll();
+    await switchToWebview(createMockDriver({chromedriverCdnUrl: 'https://mirror.example.com/chrome'}));
+    assertNotCalled(resolveChromeDriverVersion);
+  });
+
   describe('custom CDN', () => {
     it('does not trust a CDN capability by default', async () => {
       await switchToWebview(createMockDriver({chromedriverCdnUrl: 'https://mirror.example.com/chrome'}));
@@ -409,14 +444,14 @@ describe('getDriverExecutable', () => {
       assert.equal(opts.trust, false);
     });
 
-    it('trusts a CDN capability if the insecure feature is enabled', async () => {
+    it('never trusts a CDN capability, even if the insecure feature is enabled', async () => {
       await switchToWebview(
         enabled(createMockDriver({edgedriverCdnUrl: 'https://mirror.example.com/edge'})),
         EDGE_RESPONSE,
       );
       const opts = calls(mockedInstall)[0][0];
       assert.equal(opts.cdnUrl, 'https://mirror.example.com/edge');
-      assert.equal(opts.trust, true);
+      assert.equal(opts.trust, false);
     });
 
     it('trusts the server-side env vars', async () => {

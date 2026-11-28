@@ -240,10 +240,11 @@ insecure feature is enabled.
 
 Custom CDN URL to download Chromedriver from. The archive is expected at
 `<url>/<version>/win64/chromedriver-win64.zip`, as in
-[Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). Unless the
+[Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). The downloaded binary
+must be a known Chromedriver build, so this is meant for mirrors of the official builds. To use
+other builds, set [`appium:chromedriverExecutablePath`](#chromedriverexecutablepath) and enable the
 [`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
-insecure feature is enabled, the downloaded binary must be a known Chromedriver build, so this is
-meant for mirrors of the official builds.
+insecure feature.
 
 ### edgedriverCdnUrl
 
@@ -252,10 +253,11 @@ meant for mirrors of the official builds.
 | `appium:edgedriverCdnUrl` | `string` | `WINCORE_EDGEDRIVER_CDN_URL` environment variable, if set |
 
 Custom CDN URL to download Microsoft Edge WebDriver from. The archive is expected at
-`<url>/<version>/edgedriver_win64.zip`. Unless the
+`<url>/<version>/edgedriver_win64.zip`. The downloaded binary must be a known Edge WebDriver
+build, so this is meant for mirrors of the official builds. To use other builds, set
+[`appium:edgedriverExecutablePath`](#edgedriverexecutablepath) and enable the
 [`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
-insecure feature is enabled, the downloaded binary must be a known Edge WebDriver build, so this is
-meant for mirrors of the official builds.
+insecure feature.
 
 ## Screen Recording
 
