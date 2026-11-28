@@ -121,7 +121,17 @@ There are several approaches to obtaining a matching driver version:
 By default, the driver automatically downloads the version of ChromeDriver or Edge WebDriver that
 matches the web view under test. The download is initiated upon switching to the web view context,
 and requires internet access from the Appium server host. Downloaded executables are reused by
-later sessions.
+later sessions. They are stored in the per-user `appium-wincore-driver` application data folder
+(`%LOCALAPPDATA%\appium-wincore-driver\Data\chromedrivers` and `...\msedgedrivers`),
+so they survive driver updates.
+
+The checksum of each executable downloaded from the official location is recorded, so it is trusted
+in later sessions even if it is newer than the builds known to `appium-chromedriver`. For Chrome,
+the latest published driver of the web view's `MAJOR.MINOR.BUILD` is used, as its exact patch version
+may have no driver of its own. Executables set by path (see below) must be known to
+`appium-chromedriver`, unless the
+[`chromedriver_allow_any_executable`](../reference/insecure-features.md#chromedriver_allow_any_executable)
+insecure feature is enabled.
 
 ### Using Capabilities
 
@@ -129,7 +139,9 @@ If the target driver executable already exists on the host machine, it is possib
 path to it using the [`appium:chromedriverExecutablePath`](../reference/capabilities.md#chromedriverexecutablepath)
 or [`appium:edgedriverExecutablePath`](../reference/capabilities.md#edgedriverexecutablepath)
 capability. In this case, nothing is downloaded, and the executable must match the version of the
-web view.
+web view. It must also be known to `appium-chromedriver`, unless the
+[`chromedriver_allow_any_executable`](../reference/insecure-features.md#chromedriver_allow_any_executable)
+insecure feature is enabled.
 
 In order to manually download the correct executable, refer to the ChromeDriver
 [Version Selection](https://developer.chrome.com/docs/chromedriver/downloads/version-selection)
@@ -140,8 +152,23 @@ download page.
 
 ### Downloading
 
-In case of issues when downloading the driver executables, the download location can be changed
-with the [`appium:chromedriverCdnUrl`](../reference/capabilities.md#chromedrivercdnurl) and
-[`appium:edgedriverCdnUrl`](../reference/capabilities.md#edgedrivercdnurl) capabilities.
+The download locations can be changed with the
+[`appium:chromedriverCdnUrl`](../reference/capabilities.md#chromedrivercdnurl) and
+[`appium:edgedriverCdnUrl`](../reference/capabilities.md#edgedrivercdnurl) capabilities. They are
+meant for mirrors of the official builds: a downloaded binary that is not a known build is rejected.
+To use other builds, set the executable path capabilities and enable the
+[`chromedriver_allow_any_executable`](../reference/insecure-features.md#chromedriver_allow_any_executable)
+insecure feature.
+
+The server administrator can also set the `WINCORE_CHROMEDRIVER_CDN_URL` and
+`WINCORE_EDGEDRIVER_CDN_URL` environment variables of the Appium process. They are used for all
+sessions, unless overridden by the capabilities above, and their downloads are trusted.
 
 It may also be necessary to adjust network proxy and firewall settings for the above to work.
+
+### Checksum mismatch
+
+The `does not match any known Chromedriver or Edge WebDriver build` error means that the executable
+is not trusted. Either let the driver download it, or enable the
+[`chromedriver_allow_any_executable`](../reference/insecure-features.md#chromedriver_allow_any_executable)
+insecure feature.

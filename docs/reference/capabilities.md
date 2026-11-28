@@ -216,7 +216,10 @@ port is selected and injected automatically.
 | -- | -- | -- |
 | `appium:chromedriverExecutablePath` | `string` | Not specified |
 
-Path to a local Chromedriver binary to use instead of downloading one.
+Path to a local Chromedriver binary to use instead of downloading one. Unless its checksum is
+known to `appium-chromedriver`, it is only started if the
+[`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
+insecure feature is enabled.
 
 ### edgedriverExecutablePath
 
@@ -225,22 +228,36 @@ Path to a local Chromedriver binary to use instead of downloading one.
 | `appium:edgedriverExecutablePath` | `string` | Not specified |
 
 Path to a local Microsoft Edge WebDriver (`msedgedriver`) binary to use instead of downloading one.
+Unless its checksum is known to `appium-chromedriver`, it is only started if the
+[`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
+insecure feature is enabled.
 
 ### chromedriverCdnUrl
 
 | Name | Type | Default |
 | -- | -- | -- |
-| `appium:chromedriverCdnUrl` | `string` | Not specified |
+| `appium:chromedriverCdnUrl` | `string` | `WINCORE_CHROMEDRIVER_CDN_URL` environment variable, if set |
 
-Custom CDN URL to download Chromedriver from.
+Custom CDN URL to download Chromedriver from. The archive is expected at
+`<url>/<version>/win64/chromedriver-win64.zip`, as in
+[Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/). The downloaded binary
+must be a known Chromedriver build, so this is meant for mirrors of the official builds. To use
+other builds, set [`appium:chromedriverExecutablePath`](#chromedriverexecutablepath) and enable the
+[`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
+insecure feature.
 
 ### edgedriverCdnUrl
 
 | Name | Type | Default |
 | -- | -- | -- |
-| `appium:edgedriverCdnUrl` | `string` | Not specified |
+| `appium:edgedriverCdnUrl` | `string` | `WINCORE_EDGEDRIVER_CDN_URL` environment variable, if set |
 
-Custom CDN URL to download Microsoft Edge WebDriver from.
+Custom CDN URL to download Microsoft Edge WebDriver from. The archive is expected at
+`<url>/<version>/edgedriver_win64.zip`. The downloaded binary must be a known Edge WebDriver
+build, so this is meant for mirrors of the official builds. To use other builds, set
+[`appium:edgedriverExecutablePath`](#edgedriverexecutablepath) and enable the
+[`chromedriver_allow_any_executable`](./insecure-features.md#chromedriver_allow_any_executable)
+insecure feature.
 
 ## Screen Recording
 

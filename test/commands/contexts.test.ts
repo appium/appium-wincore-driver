@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import {beforeEach, describe, it, mock} from 'node:test';
 
 import * as support from 'appium/support.js';
@@ -16,11 +17,11 @@ import {
 const utilUrl = new URL('../../lib/util.js', import.meta.url).href;
 const actualUtil = await import(utilUrl);
 const cdpRequest = mock.fn(async (..._args: any[]): Promise<any> => undefined);
-const downloadFile = mock.fn(async (..._args: any[]) => undefined);
+const resolveChromeDriverVersion = mock.fn(async (version: string) => version);
 mockModule(utilUrl, {
   ...actualUtil,
   cdpRequest,
-  downloadFile,
+  resolveChromeDriverVersion,
   sleep: mock.fn(async () => undefined),
   MODULE_NAME: 'appium-wincore-driver',
   currentFilename: '/mock/root/build/lib/util.js',
@@ -35,44 +36,25 @@ const Chromedriver = mock.fn(function () {
     sessionId: mock.fn(() => 'mock-session-id'),
   };
 });
-mockModule('appium-chromedriver', {Chromedriver});
+const installDriverFromCdn = mock.fn(async (opts: any) => opts.destination as string);
+mockModule('appium-chromedriver', {Chromedriver, installDriverFromCdn});
 
 mockModule('appium/support.js', {
   ...support,
   fs: {
     ...support.fs,
     exists: mock.fn(async (..._args: any[]) => true),
-    mkdir: mock.fn(async () => undefined),
-    mv: mock.fn(async () => undefined),
-    rimraf: mock.fn(async () => undefined),
-    walkDir: mock.fn(async () => '/tmp/chromedriver.exe'),
-  },
-  node: {
-    ...support.node,
-    getModuleRootSync: mock.fn(() => '/mock/root'),
-  },
-  system: {
-    ...support.system,
-    arch: mock.fn(async () => '64'),
-  },
-  zip: {
-    ...support.zip,
-    extractAllTo: mock.fn(async () => undefined),
-  },
-  tempDir: {
-    ...support.tempDir,
-    openDir: mock.fn(async () => '/tmp/mock-dir'),
   },
 });
 
 const contexts = await import('../../lib/commands/contexts.js');
-const {fs, system} = (await import('appium/support.js')) as any;
+const {fs} = (await import('appium/support.js')) as any;
 
 const mockedCdpRequest = cdpRequest;
-const mockedDownloadFile = downloadFile;
+const mockedInstall = installDriverFromCdn;
 
 function clearAll() {
-  clearCalls(cdpRequest, downloadFile, Chromedriver, fs.exists, fs.mkdir, fs.mv, fs.rimraf, fs.walkDir);
+  clearCalls(cdpRequest, resolveChromeDriverVersion, installDriverFromCdn, Chromedriver, fs.exists);
 }
 
 /** Makes the next `new Chromedriver()` return `instance`. */
@@ -80,14 +62,6 @@ function nextChromedriver(instance: any) {
   Chromedriver.mock.mockImplementationOnce(function () {
     return instance;
   }, Chromedriver.mock.callCount());
-}
-
-/** Asserts some call's first arg contains `part` and its second arg is a string. */
-function assertCalledWithUrlPart(fn: (...args: any[]) => any, part: string) {
-  assert.ok(
-    calls(fn).some(([url, dest]) => typeof url === 'string' && url.includes(part) && typeof dest === 'string'),
-    `expected a call with url containing ${part}, got ${JSON.stringify(calls(fn))}`,
-  );
 }
 
 function createMockDriver(capsOverrides: Record<string, unknown> = {}): any {
@@ -105,6 +79,7 @@ function createMockDriver(capsOverrides: Record<string, unknown> = {}): any {
     currentContext: null,
     webviewDevtoolsPort: 10900,
     log: {debug: mock.fn(), info: mock.fn(), warn: mock.fn()},
+    isFeatureEnabled: mock.fn((_name: string) => false),
     getCurrentContext: contexts.getCurrentContext,
     getContexts: contexts.getContexts,
     setContext: contexts.setContext,
@@ -348,64 +323,156 @@ describe('setContext', () => {
 });
 
 describe('getDriverExecutable', () => {
-  beforeEach(() => {
-    clearAll();
-    system.arch = mock.fn(async () => '64');
-  });
+  beforeEach(clearAll);
 
-  it('returns cached path when driver binary already exists', async () => {
-    queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
-    const driver = createMockDriver();
+  const FEATURE = 'chromedriver_allow_any_executable';
+  const CHROME_ENV = 'WINCORE_CHROMEDRIVER_CDN_URL';
+  const EDGE_ENV = 'WINCORE_EDGEDRIVER_CDN_URL';
+  const EDGE_RESPONSE = {...MOCK_VERSION_RESPONSE, Browser: 'Edg/120.0.0.0'};
+
+  const enabled = (driver: any) => {
+    driver.isFeatureEnabled = mock.fn((name: string) => name === FEATURE);
+    return driver;
+  };
+
+  /** Switches to the first page, with no cached driver and the given browser response. */
+  async function switchToWebview(driver: any, response = MOCK_VERSION_RESPONSE) {
+    queueResolved(fs.exists, false);
+    queueResolved(mockedCdpRequest, response, MOCK_PAGES);
     await contexts.setContext.call(driver, 'WEBVIEW_page1');
-    assert.ok(calls(fs.exists).some(([p]) => String(p).includes('chromedriver')));
-    assert.equal(driver.jwpProxyActive, true);
+  }
+
+  beforeEach(() => {
+    delete process.env[CHROME_ENV];
+    delete process.env[EDGE_ENV];
   });
 
-  it('returns chromedriverExecutablePath cap when set and file exists', async () => {
-    // driverDir exists, cached path does NOT exist, cap path exists
-    queueResolved(fs.exists, true, false, true);
+  it('passes the resolved executable and the feature state to chromedriver', async () => {
+    await switchToWebview(createMockDriver());
+    const opts = calls(Chromedriver)[0][0];
+    assert.match(opts.executable, /chromedrivers.*120\.0\.0\.0.*chromedriver\.exe$/);
+    assert.equal(opts.allowUnverifiedExecutable, false);
 
+    clearAll();
+    await switchToWebview(enabled(createMockDriver()));
+    assert.equal(calls(Chromedriver)[0][0].allowUnverifiedExecutable, true);
+  });
+
+  it('installs Chrome from the default CDN, trusting it by default', async () => {
+    await switchToWebview(createMockDriver());
+    const opts = calls(mockedInstall)[0][0];
+    assert.equal(opts.browser, 'chrome');
+    assert.equal(opts.version, '120.0.0.0');
+    assert.match(opts.destination, /chromedrivers.*120\.0\.0\.0.*chromedriver\.exe$/);
+    assert.equal(opts.cdnUrl, undefined);
+    assert.equal(opts.trust, undefined);
+    assert.equal(calls(Chromedriver)[0][0].executable, opts.destination);
+  });
+
+  it('installs Edge from the default CDN, trusting it by default', async () => {
+    await switchToWebview(createMockDriver(), EDGE_RESPONSE);
+    const opts = calls(mockedInstall)[0][0];
+    assert.equal(opts.browser, 'edge');
+    assert.match(opts.destination, /msedgedrivers.*120\.0\.0\.0.*msedgedriver\.exe$/);
+    assert.equal(opts.cdnUrl, undefined);
+    assert.equal(opts.trust, undefined);
+  });
+
+  it('reuses a cached driver without downloading', async () => {
     queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+    await contexts.setContext.call(createMockDriver(), 'WEBVIEW_page1');
+    assertNotCalled(mockedInstall);
+    assert.match(calls(Chromedriver)[0][0].executable, /chromedriver\.exe$/);
+  });
 
+  it('uses chromedriverExecutablePath cap when set and file exists', async () => {
+    queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
     const driver = createMockDriver({chromedriverExecutablePath: 'C:\\drivers\\chromedriver.exe'});
     await contexts.setContext.call(driver, 'WEBVIEW_page1');
-    assert.equal(driver.jwpProxyActive, true);
+    assert.equal(calls(Chromedriver)[0][0].executable, 'C:\\drivers\\chromedriver.exe');
+    assertNotCalled(mockedInstall);
   });
 
   it('throws when chromedriverExecutablePath cap set but file missing', async () => {
-    // driverDir exists, cached path does NOT exist, cap path also missing
-    queueResolved(fs.exists, true, false, false);
-
+    queueResolved(fs.exists, false);
     queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
-
     const driver = createMockDriver({chromedriverExecutablePath: 'C:\\drivers\\chromedriver.exe'});
     await assert.rejects(contexts.setContext.call(driver, 'WEBVIEW_page1'), /Driver executable not found at/);
   });
 
-  it('builds correct Chrome CDN download URL for win64', async () => {
-    // driverDir exists, no cached binary - trigger download
-    queueResolved(fs.exists, true, false);
-
+  it('ignores drivers cached by older versions, which have no registered checksum', async () => {
+    const oldPath = path.join('/mock/root', 'chromedriver', '120.0.0.0', 'chromedriver.exe');
+    fs.exists.mock.mockImplementation(async (p: string) => p === oldPath);
     queueResolved(mockedCdpRequest, MOCK_VERSION_RESPONSE, MOCK_PAGES);
+    await contexts.setContext.call(createMockDriver(), 'WEBVIEW_page1');
 
-    const driver = createMockDriver();
-    await contexts.setContext.call(driver, 'WEBVIEW_page1');
-
-    assertCalledWithUrlPart(mockedDownloadFile, 'storage.googleapis.com');
-    assertCalledWithUrlPart(mockedDownloadFile, '120.0.0.0');
+    const opts = calls(mockedInstall)[0][0];
+    assert.notEqual(opts.destination, oldPath);
+    assert.equal(calls(Chromedriver)[0][0].executable, opts.destination);
+    fs.exists.mock.mockImplementation(async () => true);
   });
 
-  it('builds correct Edge CDN download URL', async () => {
-    const edgeVersionResponse = {...MOCK_VERSION_RESPONSE, Browser: 'Edg/120.0.0.0'};
+  it('resolves the published Chrome driver version when the browser patch differs', async () => {
+    resolveChromeDriverVersion.mock.mockImplementationOnce(async () => '120.0.0.9');
+    await switchToWebview(createMockDriver());
 
-    // driverDir exists, no cached binary
-    queueResolved(fs.exists, true, false);
+    assertCalledWith(resolveChromeDriverVersion, '120.0.0.0');
+    const opts = calls(mockedInstall)[0][0];
+    assert.equal(opts.version, '120.0.0.9');
+    assert.match(opts.destination, /120\.0\.0\.9/);
+    assert.doesNotMatch(opts.destination, /120\.0\.0\.0/);
+  });
 
-    queueResolved(mockedCdpRequest, edgeVersionResponse, MOCK_PAGES);
+  it('does not resolve the driver version for Edge or a custom Chrome CDN', async () => {
+    await switchToWebview(createMockDriver(), EDGE_RESPONSE);
+    assertNotCalled(resolveChromeDriverVersion);
 
-    const driver = createMockDriver();
-    await contexts.setContext.call(driver, 'WEBVIEW_page1');
+    clearAll();
+    await switchToWebview(createMockDriver({chromedriverCdnUrl: 'https://mirror.example.com/chrome'}));
+    assertNotCalled(resolveChromeDriverVersion);
+  });
 
-    assertCalledWithUrlPart(mockedDownloadFile, 'msedgedriver.microsoft.com');
+  describe('custom CDN', () => {
+    it('does not trust a CDN capability by default', async () => {
+      await switchToWebview(createMockDriver({chromedriverCdnUrl: 'https://mirror.example.com/chrome'}));
+      const opts = calls(mockedInstall)[0][0];
+      assert.equal(opts.cdnUrl, 'https://mirror.example.com/chrome');
+      assert.equal(opts.trust, false);
+    });
+
+    it('never trusts a CDN capability, even if the insecure feature is enabled', async () => {
+      await switchToWebview(
+        enabled(createMockDriver({edgedriverCdnUrl: 'https://mirror.example.com/edge'})),
+        EDGE_RESPONSE,
+      );
+      const opts = calls(mockedInstall)[0][0];
+      assert.equal(opts.cdnUrl, 'https://mirror.example.com/edge');
+      assert.equal(opts.trust, false);
+    });
+
+    it('trusts the server-side env vars', async () => {
+      process.env[CHROME_ENV] = 'https://env.example.com/chrome';
+      await switchToWebview(createMockDriver());
+      assert.deepEqual(
+        [calls(mockedInstall)[0][0].cdnUrl, calls(mockedInstall)[0][0].trust],
+        ['https://env.example.com/chrome', true],
+      );
+
+      clearAll();
+      process.env[EDGE_ENV] = 'https://env.example.com/edge';
+      await switchToWebview(createMockDriver(), EDGE_RESPONSE);
+      assert.deepEqual(
+        [calls(mockedInstall)[0][0].cdnUrl, calls(mockedInstall)[0][0].trust],
+        ['https://env.example.com/edge', true],
+      );
+    });
+
+    it('lets the capability override the env var', async () => {
+      process.env[CHROME_ENV] = 'https://env.example.com/chrome';
+      await switchToWebview(createMockDriver({chromedriverCdnUrl: 'https://cap.example.com/chrome'}));
+      const opts = calls(mockedInstall)[0][0];
+      assert.equal(opts.cdnUrl, 'https://cap.example.com/chrome');
+      assert.equal(opts.trust, false);
+    });
   });
 });

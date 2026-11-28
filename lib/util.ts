@@ -186,6 +186,28 @@ export async function cdpRequest<T = unknown>(
   });
 }
 
+const CHROME_PATCH_VERSIONS_URL =
+  'https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-per-build.json';
+
+/**
+ * Resolves the latest published ChromeDriver version for the same `MAJOR.MINOR.BUILD` as the
+ * browser, as the exact browser patch may have no driver of its own.
+ * Falls back to the browser version if the lookup fails or has no match.
+ */
+export async function resolveChromeDriverVersion(browserVersion: string): Promise<string> {
+  const build = browserVersion.split('.').slice(0, 3).join('.');
+  try {
+    const response = await fetch(CHROME_PATCH_VERSIONS_URL, {signal: AbortSignal.timeout(10_000)});
+    if (!response.ok) {
+      return browserVersion;
+    }
+    const {builds} = (await response.json()) as {builds?: Record<string, {version?: string}>};
+    return builds?.[build]?.version ?? browserVersion;
+  } catch {
+    return browserVersion;
+  }
+}
+
 export async function downloadFile(url: string, destPath: string, timeout = 30000): Promise<void> {
   const protocol = url.startsWith('https') ? https : http;
   const fileName = path.basename(new URL(url).pathname);
