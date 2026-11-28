@@ -164,7 +164,6 @@ test/fixtures/**/obj/
 # Ignore downloaded chromedriver/edgedriver/ffmpeg binaries
 chromedriver/
 edgedriver/
-/drivers/
 ffmpeg/
 
 .claude/

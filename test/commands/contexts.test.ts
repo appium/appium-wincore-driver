@@ -45,10 +45,6 @@ mockModule('appium/support.js', {
     ...support.fs,
     exists: mock.fn(async (..._args: any[]) => true),
   },
-  node: {
-    ...support.node,
-    getModuleRootSync: mock.fn(() => '/mock/root'),
-  },
 });
 
 const contexts = await import('../../lib/commands/contexts.js');
@@ -354,7 +350,7 @@ describe('getDriverExecutable', () => {
   it('passes the resolved executable and the feature state to chromedriver', async () => {
     await switchToWebview(createMockDriver());
     const opts = calls(Chromedriver)[0][0];
-    assert.match(opts.executable, /drivers.*chromedriver.*120\.0\.0\.0.*chromedriver\.exe$/);
+    assert.match(opts.executable, /chromedrivers.*120\.0\.0\.0.*chromedriver\.exe$/);
     assert.equal(opts.allowUnverifiedExecutable, false);
 
     clearAll();
@@ -367,7 +363,7 @@ describe('getDriverExecutable', () => {
     const opts = calls(mockedInstall)[0][0];
     assert.equal(opts.browser, 'chrome');
     assert.equal(opts.version, '120.0.0.0');
-    assert.match(opts.destination, /drivers.*chromedriver.*120\.0\.0\.0.*chromedriver\.exe$/);
+    assert.match(opts.destination, /chromedrivers.*120\.0\.0\.0.*chromedriver\.exe$/);
     assert.equal(opts.cdnUrl, undefined);
     assert.equal(opts.trust, undefined);
     assert.equal(calls(Chromedriver)[0][0].executable, opts.destination);
@@ -377,7 +373,7 @@ describe('getDriverExecutable', () => {
     await switchToWebview(createMockDriver(), EDGE_RESPONSE);
     const opts = calls(mockedInstall)[0][0];
     assert.equal(opts.browser, 'edge');
-    assert.match(opts.destination, /msedgedriver.*120\.0\.0\.0.*msedgedriver\.exe$/);
+    assert.match(opts.destination, /msedgedrivers.*120\.0\.0\.0.*msedgedriver\.exe$/);
     assert.equal(opts.cdnUrl, undefined);
     assert.equal(opts.trust, undefined);
   });

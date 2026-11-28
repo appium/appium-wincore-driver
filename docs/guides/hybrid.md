@@ -121,7 +121,9 @@ There are several approaches to obtaining a matching driver version:
 By default, the driver automatically downloads the version of ChromeDriver or Edge WebDriver that
 matches the web view under test. The download is initiated upon switching to the web view context,
 and requires internet access from the Appium server host. Downloaded executables are reused by
-later sessions.
+later sessions. They are stored in the per-user `appium-wincore-driver` application data folder
+(`%LOCALAPPDATA%\appium-wincore-driver\Data\chromedrivers` and `...\msedgedrivers`),
+so they survive driver updates.
 
 The checksum of each executable downloaded from the official location is recorded, so it is trusted
 in later sessions even if it is newer than the builds known to `appium-chromedriver`. For Chrome,

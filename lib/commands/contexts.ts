@@ -1,13 +1,14 @@
 import path from 'node:path';
 
+import {strongbox} from '@appium/strongbox';
 import type {ChromedriverOpts} from 'appium-chromedriver';
 import {Chromedriver, installDriverFromCdn} from 'appium-chromedriver';
 import {errors} from 'appium/driver.js';
-import {fs, node} from 'appium/support.js';
+import {fs} from 'appium/support.js';
 
 import {CHROMEDRIVER_ALLOW_ANY_EXECUTABLE_FEATURE} from '../constants.js';
 import type {AppiumWincoreDriver} from '../driver.js';
-import {cdpRequest, currentFilename, resolveChromeDriverVersion, sleep, MODULE_NAME} from '../util.js';
+import {cdpRequest, resolveChromeDriverVersion, sleep, MODULE_NAME} from '../util.js';
 
 const NATIVE_APP = 'NATIVE_APP';
 const WEBVIEW = 'WEBVIEW';
@@ -267,11 +268,6 @@ async function getDriverExecutable(
     return executablePath;
   }
 
-  const root = node.getModuleRootSync(MODULE_NAME, currentFilename);
-  if (!root) {
-    throw new errors.InvalidArgumentError(`Cannot find the root folder of the ${MODULE_NAME} Node.js module`);
-  }
-
   const isEdge = browserType === 'Edge';
   const cdnOptions = getCdnOptions.call(this, browserType);
 
@@ -284,11 +280,10 @@ async function getDriverExecutable(
     }
   }
 
-  // Dedicated cache folders: drivers cached by older versions have no registered checksum
+  // Per-user storage that survives driver upgrades, next to the checksum trust store of chromedriver.
+  // It is new, so drivers cached by older versions (without a registered checksum) are not reused.
   const destination = path.join(
-    root,
-    'drivers',
-    isEdge ? 'msedgedriver' : 'chromedriver',
+    strongbox(MODULE_NAME, {suffix: isEdge ? 'msedgedrivers' : 'chromedrivers'}).container,
     driverVersion,
     isEdge ? 'msedgedriver.exe' : 'chromedriver.exe',
   );
